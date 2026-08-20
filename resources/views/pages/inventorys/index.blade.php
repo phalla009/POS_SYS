@@ -108,6 +108,12 @@
                         <td data-label="Updated Date">{{ $item->updated_at->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') }}</td>
                         <td data-label="Actions">
                             <div class="action-buttons">
+                                <a href="{{ route('inventory-items.show', $item->id) }}"
+                                   class="action-btn show-btn page-link-loading"
+                                   data-loading-text="Loading details..."
+                                   title="View Details">
+                                    <i class="fas fa-info-circle"></i>
+                                </a>
                                 <a href="{{ route('inventory-items.edit', $item->id) }}"
                                    class="action-btn edit-btn page-link-loading"
                                    data-loading-text="Opening editor..."
