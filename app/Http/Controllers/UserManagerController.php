@@ -1,0 +1,86 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\UserManager;
+use App\Models\Role;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+
+class UserManagerController extends Controller
+{
+    public function index()
+    {
+        $users = UserManager::with('role')->get();
+       return view('pages/usermanagers.index', compact('users'));
+
+    }
+
+    public function create()
+    {
+        $roles = Role::all();
+        return view('pages/usermanagers.create', compact('roles'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'login' => 'required|string|max:50|unique:users,login',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'role_id' => 'required|exists:roles,id',
+            'description' => 'nullable|string|max:500',
+        ]);
+
+        UserManager::create([
+            'name' => $request->name,
+            'login' => $request->login,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role_id' => $request->role_id,
+            'description' => $request->description,
+        ]);
+
+        return redirect()->route('usermanagers.index')->with('success', 'User created successfully!');
+}
+
+    public function edit(UserManager $usermanager)
+    {
+        $roles = Role::all();
+        return view('pages/usermanagers.edit', compact('usermanager','roles'));
+    }
+    public function show(UserManager $usermanager)
+    {
+        return view('pages/usermanagers.show', compact('usermanager'));
+    }
+
+    public function update(Request $request, UserManager $usermanager)
+    {
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'login' => 'required|string|max:50|unique:users,login,' . $usermanager->id,
+            'email' => 'required|email|unique:users,email,' . $usermanager->id,
+            'password' => 'nullable|string|min:8|confirmed',
+            'role_id' => 'required|exists:roles,id',
+            'description' => 'nullable|string|max:500',
+        ]);
+
+        $usermanager->update([
+            'name' => $request->name,
+            'login' => $request->login,
+            'email' => $request->email,
+            'password' => $request->password ? Hash::make($request->password) : $usermanager->password,
+            'role_id' => $request->role_id,
+            'description' => $request->description,
+        ]);
+
+        return redirect()->route('usermanagers.index')->with('success', 'User updated successfully!');
+    }
+
+    public function destroy(UserManager $usermanager)
+    {
+        $usermanager->delete();
+        return redirect()->route('usermanagers.index')->with('success', 'User deleted successfully!');
+    }
+}

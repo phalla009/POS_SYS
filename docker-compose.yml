@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+    app:
+        build: .
+        container_name: laravel_app
+        ports:
+            - "8000:8000"
+        volumes:
+            - .:/var/www/html
+        depends_on:
+            db:
+                condition: service_healthy
+        environment:
+            - DB_CONNECTION=mysql
+            - DB_HOST=db
+            - DB_PORT=3306
+            - DB_DATABASE=dbphonestore
+            - DB_USERNAME=root
+            - DB_PASSWORD=
+            - SESSION_DRIVER=file
+
+    db:
+        image: mysql:8.0
+        container_name: laravel_db
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD:
+            MYSQL_DATABASE: dbphonestore
+        ports:
+            - "3306:3306"
+        volumes:
+            - db_data:/var/lib/mysql
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+volumes:
+    db_data:

@@ -1,0 +1,211 @@
+@extends('layouts.master')
+
+@section('pageTitle')
+    Edited Product
+@endsection
+
+@section('headerBlock')
+    <link rel="stylesheet" href="{{ URL::asset('css/main.css') }}">
+    <script src="{{ URL::asset('js/form.js') }}"></script>
+    <style>
+        .image-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-right: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .image-wrapper img {
+            border-radius: 8px;
+            object-fit: cover;
+            width: 120px;
+            height: 100px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .image-wrapper label {
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #d9534f;
+            user-select: none;
+        }
+        .image-wrapper input[type="checkbox"] {
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 99999;
+        }
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #3498db;
+            border-radius: 50%;
+            width: 60px; height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #loading-text { margin-top: 15px; font-size: 16px; color: #333; }
+    </style>
+@endsection
+
+@section('content')
+
+    {{-- Loading Overlay --}}
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <div id="loading-text">Loading...</div>
+    </div>
+
+    <div class="modal-content">
+
+        <a href="{{ route('products.index') }}" id="backBtn" class="btn btn-back">
+            <i class="fas fa-chevron-left"></i> Back
+        </a>
+
+        <h2><i class="fas fa-box-open"></i> Edit Product</h2>
+
+        <form id="productForm" action="{{ route('products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+
+            <!-- Product Name & Brand -->
+            <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1; min-width: 250px;">
+                    <label>Product Name:</label>
+                    <input type="text" name="name" value="{{ old('name', $product->name) }}">
+                    @error('name')
+                        <p class="text-danger mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="form-group" style="flex: 1; min-width: 250px;">
+                    <label>Brand:</label>
+                    <select name="category_id">
+                        <option value="">Select Brand</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->id }}" {{ $product->category_id == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('category_id')
+                        <p class="text-danger mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            <!-- Price & Stock -->
+            <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1; min-width: 250px;">
+                    <label>Price:</label>
+                    <input type="number" name="price" step="0.01" value="{{ old('price', $product->price) }}">
+                    @error('price')
+                        <p class="text-danger mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="form-group" style="flex: 1; min-width: 250px;">
+                    <label>Stock:</label>
+                    <input type="number" name="stock" value="{{ old('stock', $product->stock) }}">
+                    @error('stock')
+                        <p class="text-danger mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            <!-- Current Images -->
+            <div class="form-group">
+                <label>Current Images:</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    @foreach($product->images as $image)
+                        <div class="image-wrapper">
+                            <img src="{{ asset('images/products/' . $image->image) }}" alt="Product Image">
+                            <label>
+                                <input type="checkbox" name="delete_images[]" value="{{ $image->id }}">
+                                Remove
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Add More Images & Status -->
+            <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1; min-width: 250px;">
+                    <label>Add More Images:</label>
+                    <input type="file" name="images[]" multiple accept="image/*">
+                    @error('images')
+                        <p class="text-danger mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="form-group" style="flex: 1; min-width: 250px;">
+                    <label>Status:</label>
+                    <select name="status">
+                        <option value="">Select Status</option>
+                        <option value="active"   {{ $product->status == 'active'   ? 'selected' : '' }}>Active</option>
+                        <option value="inactive" {{ $product->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                    @error('status')
+                        <p class="text-danger mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            <!-- Add to POS -->
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 10px;">
+                    <input id="add_to_pos" type="checkbox" name="add_to_pos" value="1"
+                        {{ old('add_to_pos', $product->add_to_pos) ? 'checked' : '' }}
+                        style="width: 18px; height: 18px; cursor: pointer; accent-color: #3498db;">
+                    <span>Add to POS</span>
+                </label>
+                @error('add_to_pos')
+                    <p class="text-danger mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label>Description:</label>
+                <textarea name="description"
+                        style="height: 180px; resize: none;">{{ old('description', $product->description) }}</textarea>
+            </div>
+
+            <div>
+                <button class="btn btn-update" type="submit">
+                    <i class="fas fa-save"></i> Update Product
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const overlay     = document.getElementById('loading-overlay');
+        const loadingText = document.getElementById('loading-text');
+
+        // Back button → show loading then navigate
+        document.getElementById('backBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            loadingText.textContent = 'Going back...';
+            overlay.style.display = 'flex';
+            window.location.href = this.getAttribute('href');
+        });
+
+        // Submit form → show loading
+        document.getElementById('productForm').addEventListener('submit', function() {
+            loadingText.textContent = 'Updating...';
+            overlay.style.display = 'flex';
+        });
+    </script>
+
+@endsection

@@ -1,0 +1,239 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\ProductImage;
+use Illuminate\Http\Request;
+use App\Imports\ProductsImport;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ProductsExport;
+
+class ProductController extends Controller
+{
+    public function index(Request $request)
+    {
+        $categories = Category::all();
+        $query = Product::with(['category', 'images']);
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                ->orWhere('sku', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->has('category_id') && $request->category_id != '') {
+            $query->where('category_id', $request->category_id);
+        }
+
+        $products = $query->paginate(10)->withQueryString();
+
+        return view('pages/products.index', compact('products', 'categories'));
+    }
+
+    public function create()
+    {
+        $categories = Category::all();
+        return view('pages/products.create', compact('categories'));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name'        => 'required|string',
+            'price'       => 'required|numeric',
+            'stock'       => 'required|integer',
+            'status'      => 'required|in:active,inactive',
+            'description' => 'nullable|string',
+            'category_id' => 'required|exists:categories,id',
+            'images.*'    => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        // Handle checkbox — unchecked sends nothing, so default to 0
+        $validated['add_to_pos'] = $request->has('add_to_pos') ? 1 : 0;
+
+        $product = Product::create($validated);
+
+        // Auto-generate SKU: kr + date + padded id
+        $product->update([
+            'sku' => 'kr' . $product->created_at->format('Ymd') . str_pad($product->id, 2, '0', STR_PAD_LEFT)
+        ]);
+
+        // Save images
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $filename = $file->getClientOriginalName();
+                $file->move(public_path('images/products'), $filename);
+
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image'      => $filename,
+                ]);
+            }
+        }
+
+        return redirect()->route('products.create')->with('success', 'Product added successfully.');
+    }
+
+    public function show(string $id)
+    {
+        $product = Product::with('images')->findOrFail($id);
+        return view('pages/products.show', compact('product'));
+    }
+
+    public function edit(string $id)
+    {
+        $product = Product::with('images')->findOrFail($id);
+        $categories = Category::all();
+        return view('pages/products.edit', compact('product', 'categories'));
+    }
+
+    public function update(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'name'            => 'required|string|max:255',
+            'category_id'     => 'required|exists:categories,id',
+            'price'           => 'required|numeric',
+            'stock'           => 'required|integer',
+            'status'          => 'required|in:active,inactive',
+            'description'     => 'nullable|string|max:1000',
+            'images.*'        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'delete_images'   => 'nullable|array',
+            'delete_images.*' => 'integer|exists:product_images,id',
+        ]);
+
+        // Handle checkbox — unchecked sends nothing, so default to 0
+        $validated['add_to_pos'] = $request->has('add_to_pos') ? 1 : 0;
+
+        $product = Product::findOrFail($id);
+        $product->update($validated);
+
+        // Delete selected images
+        if ($request->has('delete_images')) {
+            foreach ($request->delete_images as $imageId) {
+                $image = ProductImage::find($imageId);
+                if ($image && $image->product_id == $product->id) {
+                    $imagePath = public_path('images/products/' . $image->image);
+                    if (file_exists($imagePath)) {
+                        unlink($imagePath);
+                    }
+                    $image->delete();
+                }
+            }
+        }
+
+        // Add new images
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $filename = $file->getClientOriginalName();
+                $file->move(public_path('images/products'), $filename);
+
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image'      => $filename,
+                ]);
+            }
+        }
+
+        return redirect()->route('products.index')->with('success', 'Product updated successfully!');
+    }
+
+    public function destroy(string $id)
+    {
+        $product = Product::with('images')->findOrFail($id);
+
+        foreach ($product->images as $image) {
+            $imagePath = public_path('images/products/' . $image->image);
+            if (file_exists($imagePath)) {
+                unlink($imagePath);
+            }
+            $image->delete();
+        }
+
+        $product->delete();
+
+        return redirect()->route('products.index')->with('success', 'The product and its images deleted successfully.');
+    }
+
+    public function inventory()
+    {
+        $products = Product::all();
+
+        $totalItems = $products->count();
+        $lowStockItems = $products->where('stock', '<=', function ($query) {
+            $query->select('min_stock')
+                  ->from('products')
+                  ->whereColumn('id', 'products.id');
+        })->count();
+
+        $outOfStockItems = $products->where('stock', '<=', 0)->count();
+
+        $inventoryValue = $products->sum(function ($product) {
+            return $product->stock * $product->price;
+        });
+
+        return view('inventorys.index', compact(
+            'products',
+            'totalItems',
+            'lowStockItems',
+            'outOfStockItems',
+            'inventoryValue'
+        ));
+    }
+
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+        ]);
+
+        $import = new ProductsImport();
+        Excel::import($import, $request->file('file'));
+
+        if ($import->failures()->isNotEmpty()) {
+            $errors = $import->failures()->map(function ($failure) {
+                return 'Row ' . $failure->row() . ': ' . implode(', ', $failure->errors());
+            });
+
+            return redirect()->route('products.index')
+                ->with('error', 'Some rows failed to import.')
+                ->with('import_errors', $errors);
+        }
+
+        return redirect()->route('products.index')->with('success', 'Products imported successfully.');
+    }
+    public function export(Request $request)
+    {
+        $filename = 'products_' . now()->format('Ymd_His') . '.xlsx';
+
+        return Excel::download(new ProductsExport($request), $filename);
+    }
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids'   => 'required|array|min:1',
+            'ids.*' => 'integer|exists:products,id',
+        ]);
+
+        $products = Product::with('images')->whereIn('id', $request->ids)->get();
+
+        foreach ($products as $product) {
+            foreach ($product->images as $image) {
+                $imagePath = public_path('images/products/' . $image->image);
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+                $image->delete();
+            }
+            $product->delete();
+        }
+
+        $count = $products->count();
+
+        return redirect()->route('products.index')
+            ->with('success', $count . ' product' . ($count === 1 ? '' : 's') . ' deleted successfully.');
+    }
+}
