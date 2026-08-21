@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\LoginController; 
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
@@ -16,16 +16,18 @@ use App\Http\Controllers\UserManagerController;
 use App\Http\Controllers\BakongKhqrController;
 use App\Http\Controllers\InventoryItemController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UnitController;
+use App\Http\Controllers\TypeController;
 
 // Public auth routes
 Route::get('/', [LoginController::class, 'showLoginForm']);
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login'); 
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Protected routes — require login
-Route::middleware('auth')->group(function () { 
+Route::middleware('auth')->group(function () {
 
     // Dashboard home
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -40,6 +42,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders/invoice_combined/pdf', [OrderController::class, 'invoiceCombinedPdf'])->name('orders.invoiceCombinedPdf');
     Route::get('/barcodes', [BarcodeController::class, 'index'])->name('barcodes.index');
 
+
+    Route::resource('types', TypeController::class);
+    Route::resource('units', UnitController::class)
+        ->parameters(['units' => 'id'])
+        ->names('units');
+
+    Route::delete('units-bulk-destroy', [UnitController::class, 'bulkDestroy'])
+        ->name('units.bulk-destroy');
     // Product import/export — MUST be registered before the products resource route,
     // otherwise GET /products/export gets swallowed by GET /products/{product} (show),
     // since "export" would be treated as the {product} route parameter and 404 via findOrFail().
@@ -68,7 +78,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('inventorys', InventoryController::class)->names('inventorys');
     Route::delete('/inventory-items/bulk-destroy', [InventoryItemController::class, 'bulkDestroy'])
     ->name('inventory-items.bulkDestroy');
- 
+
     Route::resource('inventory-items', InventoryItemController::class);
     Route::resource('inventory', InventoryController::class);
     Route::resource('payments', PaymentController::class)->names('payments');

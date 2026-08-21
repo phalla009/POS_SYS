@@ -81,7 +81,7 @@
                     <th>#</th>
                     <th>Role Name</th>
                     <th>Description</th>
-                    <th>Created At</th>
+{{--                    <th>Created At</th>--}}
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -107,7 +107,7 @@
                             {{ $role->role_name }}
                         </td>
                         <td data-label="Description">{{ $role->description ?? 'N/A' }}</td>
-                        <td data-label="Created At">{{ $role->created_at ? $role->created_at->format('d M, Y h:i A') :'N/A' }}</td>
+{{--                        <td data-label="Created At">{{ $role->created_at ? $role->created_at->format('d M, Y h:i A') :'N/A' }}</td>--}}
                         <td data-label="Actions">
                             <div class="action-buttons">
                                 <a href="{{ route('userroles.show', $role->id) }}"
@@ -171,7 +171,7 @@
         document.getElementById('noResultsRow').style.display = (visibleCount === 0) ? '' : 'none';
     });
 
-   
+
 </script>
 
 @endsection

@@ -16,7 +16,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="name">Name</label>
-                    <input type="text" name="name" id="name" value="{{ old('name') }}" >
+                    <input type="text" name="name" id="name" value="{{ old('name') }}">
                     @error('name')
                     <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
@@ -26,14 +26,28 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="type">Type</label>
-                    <input type="text" name="type" id="type" value="{{ old('type') }}" placeholder="e.g. raw material, finished good">
+                    <select name="type" id="type">
+                        <option value="">Select type</option>
+                        @foreach($types as $type)
+                            <option value="{{ $type->name }}" {{ old('type') == $type->name ? 'selected' : '' }}>
+                                {{ $type->name }}
+                            </option>
+                        @endforeach
+                    </select>
                     @error('type')
                     <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
                 <div class="form-group">
                     <label for="unit">Unit</label>
-                    <input type="text" name="unit" id="unit" value="{{ old('unit') }}" placeholder="e.g. pcs, kg, box">
+                    <select name="unit" id="unit">
+                        <option value="">Select unit</option>
+                        @foreach($units as $unit)
+                            <option value="{{ $unit->name }}" {{ old('unit') == $unit->name ? 'selected' : '' }}>
+                                {{ $unit->name }} @if($unit->abbreviation) ({{ $unit->abbreviation }}) @endif
+                            </option>
+                        @endforeach
+                    </select>
                     @error('unit')
                     <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
@@ -43,7 +57,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="price">Price</label>
-                    <input type="number" step="0.01" min="0" name="price" id="price" value="{{ old('price') }}" >
+                    <input type="number" step="0.01" min="0" name="price" id="price" value="{{ old('price') }}">
                     @error('price')
                     <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
@@ -51,25 +65,12 @@
 
                 <div class="form-group">
                     <label for="qty">Quantity</label>
-                    <input type="number" min="0" name="qty" id="qty" value="{{ old('qty') }}" >
+                    <input type="number" min="0" name="qty" id="qty" value="{{ old('qty') }}">
                     @error('qty')
                     <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
-
-{{--            <div class="form-row">--}}
-{{--                <div class="form-group">--}}
-{{--                    <label for="status">Status</label>--}}
-{{--                    <select name="status" id="status">--}}
-{{--                        <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>--}}
-{{--                        <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>--}}
-{{--                    </select>--}}
-{{--                    @error('status')--}}
-{{--                    <p class="text-danger mt-1">{{ $message }}</p>--}}
-{{--                    @enderror--}}
-{{--                </div>--}}
-{{--            </div>--}}
 
             <div>
                 <button type="submit" class="btn btn-success">
@@ -84,7 +85,7 @@
     <script>
         const overlay     = document.getElementById('loading-overlay');
         const loadingText = document.getElementById('loading-text');
-        const form         = document.getElementById('inventoryItemForm');
+        const form        = document.getElementById('inventoryItemForm');
 
         document.getElementById('backBtn').addEventListener('click', function(e) {
             e.preventDefault();
@@ -102,5 +103,4 @@
             form.reset();
         });
     </script>
-
 @endsection

@@ -115,12 +115,12 @@
       @if(Auth::user()->hasPermission('customers'))
       <li><a href="{{ route('customers.index') }}"><span class="icon"><i class="fas fa-users"></i></span> Customers</a></li>
       @endif
-      
+
       @if(Auth::user()->hasPermission('orders'))
       <li><a href="{{ route('orders.index') }}"><span class="icon"><i class="fas fa-shopping-cart"></i></span> Orders</a></li>
       @endif
 
-{{-- 
+{{--
       @if(Auth::user()->hasPermission('payments'))
       <li><a href="{{ route('payments.index') }}"><span class="icon"><i class="fas fa-credit-card"></i></span> All Payments</a></li>
       @endif --}}
@@ -160,11 +160,18 @@
           <span class="icon"><i class="fas fa-cog"></i></span> Settings
           <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>
         </a>
-        <div class="submenu">
-          @if(Auth::user()->hasPermission('barcodes'))
-          <a href="{{ route('barcodes.index') }}"><span class="icon"><i class="fas fa-barcode"></i></span> Barcode Generator</a>
-          @endif
-        </div>
+
+          <div class="submenu">
+              @if(Auth::user()->hasPermission('types'))
+                  <a href="{{ route('types.index') }}"><span class="icon"><i class="fas fa-layer-group"></i></span> Types</a>
+              @endif
+              @if(Auth::user()->hasPermission('units'))
+                  <a href="{{ route('units.index') }}"><span class="icon"><i class="fas fa-ruler"></i></span> Units</a>
+              @endif
+              @if(Auth::user()->hasPermission('barcodes'))
+                  <a href="{{ route('barcodes.index') }}"><span class="icon"><i class="fas fa-barcode"></i></span> Barcode</a>
+              @endif
+          </div>
       </li>
       @endif
 
@@ -188,7 +195,7 @@
         border: 1px solid rgba(255,255,255,0.15);
       ">V2.0.0</span>
     </div>
-  
+
   </div>
 
   <div class="main-content">
