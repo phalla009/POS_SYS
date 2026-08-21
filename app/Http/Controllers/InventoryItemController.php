@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\InventoryItem;
+use App\Models\Unit;
+use App\Models\Type; // Import the Type model
 use Illuminate\Http\Request;
 
 class InventoryItemController extends Controller
@@ -39,7 +41,10 @@ class InventoryItemController extends Controller
      */
     public function create()
     {
-        return view('pages.inventorys.create');
+        $units = Unit::orderBy('name')->get();
+        $types = Type::orderBy('name')->get(); // Fetch types for the dropdown
+
+        return view('pages.inventorys.create', compact('units', 'types'));
     }
 
     /**
@@ -77,9 +82,11 @@ class InventoryItemController extends Controller
      */
     public function edit(string $id)
     {
-        $item = InventoryItem::findOrFail($id);
+        $item  = InventoryItem::findOrFail($id);
+        $units = Unit::orderBy('name')->get();
+        $types = Type::orderBy('name')->get(); // Fetch types for the edit dropdown
 
-        return view('pages.inventorys.edit', compact('item'));
+        return view('pages.inventorys.edit', compact('item', 'units', 'types'));
     }
 
     /**

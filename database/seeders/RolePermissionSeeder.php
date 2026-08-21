@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -20,6 +21,8 @@ class RolePermissionSeeder extends Seeder
             ['permission_name' => 'Inventory', 'slug' => 'inventory'],
             ['permission_name' => 'Reports', 'slug' => 'reports'],
             ['permission_name' => 'Settings', 'slug' => 'settings'],
+            ['permission_name' => 'Units', 'slug' => 'units'],
+            ['permission_name' => 'Types', 'slug' => 'types'],
             ['permission_name' => 'Barcodes', 'slug' => 'barcodes'],
             ['permission_name' => 'UserRoles', 'slug' => 'userroles'],
         ];
@@ -30,19 +33,26 @@ class RolePermissionSeeder extends Seeder
 
         $roles = [
             ['role_name' => 'Admin', 'description' => 'Full access'],
-            ['role_name' => 'Staff', 'description' => 'Dashboard,Pos,Barcodes, Orders, Customers, Payments'],
-            ['role_name' => 'Salse', 'description' => 'Dashboard,Pos, Orders, Customers, Payments','Reports'],
-            ['role_name' => 'Stock', 'description' => 'Dashboard, Products, Categories, Inventory, Reports'],
+            ['role_name' => 'Staff', 'description' => 'Dashboard, Pos, Barcodes, Orders, Customers, Payments, Units, Types'],
+            ['role_name' => 'Salse', 'description' => 'Dashboard, Pos, Orders, Customers, Payments, Reports, Units, Types'], // Fixed comma issue here
+            ['role_name' => 'Stock', 'description' => 'Dashboard, Products, Categories, Inventory, Reports, Units, Types'],
         ];
 
         foreach ($roles as $role) {
             Role::updateOrCreate(['role_name' => $role['role_name']], $role);
         }
 
+        // Sync permissions for each role
         Role::where('role_name', 'Admin')->first()->permissions()->sync(Permission::pluck('id'));
+
         Role::where('role_name', 'Staff')->first()->permissions()->sync(
             Permission::whereIn('slug', ['dashboard','pos','barcodes','orders','customers','payments'])->pluck('id')
         );
+
+        Role::where('role_name', 'Salse')->first()->permissions()->sync(
+            Permission::whereIn('slug', ['dashboard','pos','orders','customers','payments','reports','units'])->pluck('id')
+        );
+
         Role::where('role_name', 'Stock')->first()->permissions()->sync(
             Permission::whereIn('slug', ['products','categories','inventory','reports'])->pluck('id')
         );
