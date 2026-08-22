@@ -38,7 +38,8 @@
         .sidebar.collapsed .sidebar-header .user-info,
         .sidebar.collapsed .sidebar-menu a span:not(.icon),
         .sidebar.collapsed .dropdown-arrow,
-        .sidebar.collapsed .version-tag-container {
+        .sidebar.collapsed .version-tag-container,
+        .sidebar.collapsed .submenu {
             display: none !important;
         }
         .sidebar.collapsed .sidebar-menu a {
@@ -53,6 +54,10 @@
         .sidebar.collapsed .sidebar-header {
             padding: 1.5rem 0.5rem;
             text-align: center;
+        }
+        .sidebar.collapsed .sidebar-header #logo img {
+            height: 36px;
+            width: 36px;
         }
 
         /* Sidebar Toggle Button */
@@ -123,7 +128,7 @@
         <div class="sidebar-header">
             <div id="logo">
                 <img src="/image/logokr.png" alt="Logo" style="height:50px; width:50px; border-radius:6px; object-fit:cover; vertical-align:middle;">
-{{--                <span class="l3" style="margin-left:10px;">System</span>--}}
+                {{--                <span class="l3" style="margin-left:10px;">System</span>--}}
             </div>
             <p class="user-info">
                 <i class="fas fa-user"></i>
@@ -173,22 +178,22 @@
                 <li><a href="{{ route('reports.index') }}"><span class="icon"><i class="fas fa-chart-line"></i></span> <span>Reports</span></a></li>
             @endif
 
-{{--            @if(Auth::user()->hasPermission('usermanagers') || Auth::user()->hasPermission('userroles'))--}}
-{{--                <li class="menu-container">--}}
-{{--                    <a href="javascript:void(0)" class="submenu-toggle">--}}
-{{--                        <span class="icon"><i class="fas fa-users"></i></span> <span>Users</span>--}}
-{{--                        <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>--}}
-{{--                    </a>--}}
-{{--                    <div class="submenu">--}}
-{{--                        @if(Auth::user()->hasPermission('usermanagers'))--}}
-{{--                            <a href="{{ route('usermanagers.index') }}"><span class="icon"><i class="fas fa-user"></i></span> User Managers</a>--}}
-{{--                        @endif--}}
-{{--                        @if(Auth::user()->hasPermission('userroles'))--}}
-{{--                            <a href="{{ route('userroles.index') }}"><span class="icon"><i class="fas fa-user-shield"></i></span> User Roles</a>--}}
-{{--                        @endif--}}
-{{--                    </div>--}}
-{{--                </li>--}}
-{{--            @endif--}}
+            {{--            @if(Auth::user()->hasPermission('usermanagers') || Auth::user()->hasPermission('userroles'))--}}
+            {{--                <li class="menu-container">--}}
+            {{--                    <a href="javascript:void(0)" class="submenu-toggle">--}}
+            {{--                        <span class="icon"><i class="fas fa-users"></i></span> <span>Users</span>--}}
+            {{--                        <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>--}}
+            {{--                    </a>--}}
+            {{--                    <div class="submenu">--}}
+            {{--                        @if(Auth::user()->hasPermission('usermanagers'))--}}
+            {{--                            <a href="{{ route('usermanagers.index') }}"><span class="icon"><i class="fas fa-user"></i></span> User Managers</a>--}}
+            {{--                        @endif--}}
+            {{--                        @if(Auth::user()->hasPermission('userroles'))--}}
+            {{--                            <a href="{{ route('userroles.index') }}"><span class="icon"><i class="fas fa-user-shield"></i></span> User Roles</a>--}}
+            {{--                        @endif--}}
+            {{--                    </div>--}}
+            {{--                </li>--}}
+            {{--            @endif--}}
 
             @if(Auth::user()->hasPermission('settings'))
                 <li class="menu-container">
@@ -305,9 +310,6 @@
         if (mainSidebar.classList.contains('collapsed')) {
             toggleIcon.classList.remove('fa-angles-left');
             toggleIcon.classList.add('fa-angles-right');
-            document.querySelectorAll('.menu-container.open').forEach(function(container) {
-                container.classList.remove('open');
-            });
         } else {
             toggleIcon.classList.remove('fa-angles-right');
             toggleIcon.classList.add('fa-angles-left');
@@ -337,6 +339,9 @@
 
             e.preventDefault();
             closeSidebar();
+            document.querySelectorAll('.menu-container.open').forEach(function(container) {
+                container.classList.remove('open');
+            });
             overlay.style.display = 'flex';
             setTimeout(function() {
                 window.location.href = href;

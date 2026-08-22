@@ -41,8 +41,8 @@
 
     .image-side {
       width: 50%;
-      background: url('image/coverLogin.jpg') center/cover no-repeat;
-      animation: zoomInOut 10s ease-in-out infinite;
+      background: url('image/coverLogin.png') center/cover no-repeat;
+      /*animation: zoomInOut 10s ease-in-out infinite;*/
     }
 
     .form-container {
