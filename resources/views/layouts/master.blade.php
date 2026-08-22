@@ -21,8 +21,8 @@
         .sidebar-menu :hover a { font-size: 17px; padding-left: 10px; transition: all 0.2s ease; }
         .l1 { color: #ff4d4d; } .l2 { color: #ffa500; } .l3 { color: #ffffff; }
         .sidebar-menu li:last-child a:hover { color: red; }
-        .sidebar-header .user-info { margin-top: 20px; display: flex; align-items: center; gap: 8px; font-size: 16px; margin-bottom: -10px; }
-        .sidebar-header .user-info i { font-size: 18px; color: #afdeff; }
+        .sidebar-header .user-info { margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: -10px; }
+        .sidebar-header .user-info i { font-size: 18px; color: #ffffff; }
 
         /* Collapsed Sidebar Styles (Icon-Only Mode) */
         .sidebar {
@@ -38,7 +38,8 @@
         .sidebar.collapsed .sidebar-header .user-info,
         .sidebar.collapsed .sidebar-menu a span:not(.icon),
         .sidebar.collapsed .dropdown-arrow,
-        .sidebar.collapsed .version-tag-container {
+        .sidebar.collapsed .version-tag-container,
+        .sidebar.collapsed .submenu {
             display: none !important;
         }
         .sidebar.collapsed .sidebar-menu a {
@@ -53,6 +54,10 @@
         .sidebar.collapsed .sidebar-header {
             padding: 1.5rem 0.5rem;
             text-align: center;
+        }
+        .sidebar.collapsed .sidebar-header #logo img {
+            height: 36px;
+            width: 36px;
         }
 
         /* Sidebar Toggle Button */
@@ -123,10 +128,10 @@
         <div class="sidebar-header">
             <div id="logo">
                 <img src="/image/logokr.png" alt="Logo" style="height:50px; width:50px; border-radius:6px; object-fit:cover; vertical-align:middle;">
-{{--                <span class="l3" style="margin-left:10px;">System</span>--}}
+                {{--                <span class="l3" style="margin-left:10px;">System</span>--}}
             </div>
             <p class="user-info">
-                <i class="fas fa-user"></i>
+                <i class="fas fa-circle-user"></i>
                 <span>{{ Auth::user()->name }}</span>
             </p>
         </div>
@@ -173,22 +178,22 @@
                 <li><a href="{{ route('reports.index') }}"><span class="icon"><i class="fas fa-chart-line"></i></span> <span>Reports</span></a></li>
             @endif
 
-{{--            @if(Auth::user()->hasPermission('usermanagers') || Auth::user()->hasPermission('userroles'))--}}
-{{--                <li class="menu-container">--}}
-{{--                    <a href="javascript:void(0)" class="submenu-toggle">--}}
-{{--                        <span class="icon"><i class="fas fa-users"></i></span> <span>Users</span>--}}
-{{--                        <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>--}}
-{{--                    </a>--}}
-{{--                    <div class="submenu">--}}
-{{--                        @if(Auth::user()->hasPermission('usermanagers'))--}}
-{{--                            <a href="{{ route('usermanagers.index') }}"><span class="icon"><i class="fas fa-user"></i></span> User Managers</a>--}}
-{{--                        @endif--}}
-{{--                        @if(Auth::user()->hasPermission('userroles'))--}}
-{{--                            <a href="{{ route('userroles.index') }}"><span class="icon"><i class="fas fa-user-shield"></i></span> User Roles</a>--}}
-{{--                        @endif--}}
-{{--                    </div>--}}
-{{--                </li>--}}
-{{--            @endif--}}
+            {{--            @if(Auth::user()->hasPermission('usermanagers') || Auth::user()->hasPermission('userroles'))--}}
+            {{--                <li class="menu-container">--}}
+            {{--                    <a href="javascript:void(0)" class="submenu-toggle">--}}
+            {{--                        <span class="icon"><i class="fas fa-users"></i></span> <span>Users</span>--}}
+            {{--                        <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>--}}
+            {{--                    </a>--}}
+            {{--                    <div class="submenu">--}}
+            {{--                        @if(Auth::user()->hasPermission('usermanagers'))--}}
+            {{--                            <a href="{{ route('usermanagers.index') }}"><span class="icon"><i class="fas fa-user"></i></span> User Managers</a>--}}
+            {{--                        @endif--}}
+            {{--                        @if(Auth::user()->hasPermission('userroles'))--}}
+            {{--                            <a href="{{ route('userroles.index') }}"><span class="icon"><i class="fas fa-user-shield"></i></span> User Roles</a>--}}
+            {{--                        @endif--}}
+            {{--                    </div>--}}
+            {{--                </li>--}}
+            {{--            @endif--}}
 
             @if(Auth::user()->hasPermission('settings'))
                 <li class="menu-container">
@@ -229,18 +234,18 @@
         </div>
 
         <div class="version-tag-container" style="margin-top: auto; padding: 16px 20px; text-align: center;">
-      <span style="
-        display: inline-block;
-        background: rgba(255,255,255,0.08);
-        color: #ffc546;
-        font-family: Arial, sans-serif;
-        font-size: 12px;
-        font-weight: 500;
-        letter-spacing: 0.3px;
-        padding: 4px 12px;
-        border-radius: 999px;
-        border: 1px solid rgba(255,255,255,0.15);
-      ">V2.0.0</span>
+            <span style="
+                display: inline-block;
+                background: rgba(255,255,255,0.08);
+                color: #ff5a05;
+                font-family: 'Inter', sans-serif;
+                font-size: 12px;
+                font-weight: 500;
+                letter-spacing: 0.3px;
+                padding: 4px 12px;
+                border-radius: 999px;
+                border: 1px solid rgba(255,255,255,0.15);
+            ">V2.0.0</span>
         </div>
 
     </div>
@@ -305,9 +310,6 @@
         if (mainSidebar.classList.contains('collapsed')) {
             toggleIcon.classList.remove('fa-angles-left');
             toggleIcon.classList.add('fa-angles-right');
-            document.querySelectorAll('.menu-container.open').forEach(function(container) {
-                container.classList.remove('open');
-            });
         } else {
             toggleIcon.classList.remove('fa-angles-right');
             toggleIcon.classList.add('fa-angles-left');
@@ -337,6 +339,9 @@
 
             e.preventDefault();
             closeSidebar();
+            document.querySelectorAll('.menu-container.open').forEach(function(container) {
+                container.classList.remove('open');
+            });
             overlay.style.display = 'flex';
             setTimeout(function() {
                 window.location.href = href;

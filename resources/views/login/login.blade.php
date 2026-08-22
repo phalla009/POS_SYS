@@ -14,7 +14,7 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #181c27;
+        background: repeating-linear-gradient(-45deg, #fff1e5, #ffe0c0, #fff1e5 3px, #ffe0c0 3px);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -26,14 +26,7 @@
       display: flex;
       max-width: 900px;
       width: 100%;
-      background: repeating-linear-gradient(
-            -45deg,
-            #0f1117,
-            #0f1117 2px,
-            #000000d1 2px,
-            #000000b1 3px,
-            rgb(9, 9, 9) 4px
-        );
+        background: repeating-linear-gradient(-45deg, #ffe4cb, #fbcea1, #ffe4cb 3px, #fbcea1 3px);
       border-radius: 15px;
       overflow: hidden;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -41,8 +34,8 @@
 
     .image-side {
       width: 50%;
-      background: url('image/coverLogin.jpg') center/cover no-repeat;
-      animation: zoomInOut 10s ease-in-out infinite;
+      background: url('image/coverLogin.png') center/cover no-repeat;
+      /*animation: zoomInOut 10s ease-in-out infinite;*/
     }
 
     .form-container {
@@ -78,10 +71,10 @@
       font-family: 'Arial', sans-serif;
       font-size: 36px;
       font-weight: bold;
-      color: white;
+      color: #ff5a05;
       text-align: center;
-      margin-bottom: 20px;
-      text-shadow: 2px 4px 5px #0f1117;
+      margin-bottom: 30px;
+      text-shadow: 2px 4px 5px #ffffff;
     }
 
     .form-group {
@@ -92,7 +85,7 @@
     .form-group label {
       display: block;
       margin-bottom: 8px;
-      color: whitesmoke;
+        color: #ff5a05;
       font-weight: 500;
       font-size: 14px;
     }
@@ -103,20 +96,20 @@
       border: 2px solid #e1e5e9;
       border-radius: 25px;
       font-size: 16px;
-      background-color: #f8f9fa;
+      background-color: #fff1e5;
       transition: all 0.3s ease;
     }
 
     .form-group input:focus {
       outline: none;
       border-color: #667eea;
-      background-color: white;
+      background-color: #fff1e5;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     .form-group.error input {
       border-color: #e74c3c;
-      background-color: #fdf2f2;
+      background-color: #fff1e5;
     }
 
     .error-message {
@@ -161,8 +154,9 @@
     .submit-btn {
       width: 100%;
       padding: 15px;
-      background: #ffffff1f;
-      color: white;
+        background: repeating-linear-gradient(-45deg, #fd6c24, #ff5a05, #fd6c24 3px, #ff5a05 3px);
+
+      color: #ffffff;
       border: none;
       border-radius: 24px;
       font-size: 16px;
@@ -171,7 +165,7 @@
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-bottom: 20px;
-      animation: bounceIn 1s ease 1s both;
+      /*animation: bounceIn 1s ease 1s both;*/
       transition: transform 0.3s ease;
     }
 
@@ -187,7 +181,7 @@
       padding: 14px 20px;
       text-align: center;
       font-size: 13px;
-      color: rgba(255, 255, 255, 0.727);
+      color: rgb(255 90 5);
       backdrop-filter: blur(4px);
       z-index: 10;
     }
@@ -290,7 +284,7 @@
         <img src="image/logokr.png" alt="Login Icon">
       </div>
 
-      <h1 class="form-title">Login</h1>
+      <h1 class="form-title">Welcome Back</h1>
 
       @if(session('success'))
         <div class="success-message">{{ session('success') }}</div>
@@ -319,7 +313,7 @@
 
         <button type="submit" class="submit-btn">Login</button>
           <footer class="site-footer">
-            &copy; 2024 Heang Phalla. All rights reserved.
+            &copy; 2024 HEANG Phalla. All rights reserved.
           </footer>
       </form>
     </div>

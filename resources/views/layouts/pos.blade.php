@@ -14,7 +14,7 @@
 
     /* ── TOPBAR STYLES ── */
     .pos-topbar {
-        background: #1e2333;
+        background: #fd6c24;
         padding: 12px 24px;
         display: flex;
         align-items: center;
@@ -40,13 +40,13 @@
 
     .pos-topbar-user {
         font-size: 13px;
-        color: #94a3b8;
+        color: #ffffff;
         display: flex;
         align-items: center;
         gap: 6px;
     }
 
-    .pos-topbar-user i { color: #6366f1; }
+    .pos-topbar-user i { color: #ffffff; }
 
     .pos-back-btn {
         display: flex;
@@ -301,7 +301,7 @@
     </h3>
     <div class="pos-topbar-right">
       <div class="pos-topbar-user">
-        <i class="fas fa-user"></i>
+        <i class="fas fa-circle-user"></i>
         {{ Auth::user()->name }} — {{ Auth::user()->role->role_name ?? 'No Role' }}
       </div>
       <a href="{{ route('dashboard') }}" class="btn btn-back">
