@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" type="image/x-icon" href="/image/logokr.jpg" />
+  <link rel="icon" type="image/x-icon" href="/image/logokr.png" />
   <title>User-Login</title>
   <style>
     * {
@@ -59,9 +59,9 @@
     .form-image img {
       max-width: 100px;
       border-radius: 50%;
-      animation: zoomIn 0.8s ease, rotateMe 5s linear infinite;
+      /*animation: zoomIn 0.8s ease, rotateMe 5s linear infinite;*/
       transition: all 0.3s ease;
-      filter: drop-shadow(4px 4px 6px rgb(255, 255, 255));
+      /*filter: drop-shadow(4px 4px 6px rgb(255, 255, 255));*/
     }
     /* Animation Definitions */
     @keyframes zoomIn {
@@ -75,12 +75,12 @@
     }
 
   .form-title {
-      font-family: 'Arial', sans-serif;  
-      font-size: 36px;                   
-      font-weight: bold;                
-      color: white;                     
-      text-align: center;           
-      margin-bottom: 20px;           
+      font-family: 'Arial', sans-serif;
+      font-size: 36px;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+      margin-bottom: 20px;
       text-shadow: 2px 4px 5px #0f1117;
     }
 
@@ -287,7 +287,7 @@
 
     <div class="form-container">
       <div class="form-image">
-        <img src="image/logokr.jpg" alt="Login Icon">
+        <img src="image/logokr.png" alt="Login Icon">
       </div>
 
       <h1 class="form-title">Login</h1>

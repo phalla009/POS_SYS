@@ -13,17 +13,16 @@ body {
 a {
     text-decoration: none;
 }
-
 /* =============================================
    SIDEBAR
 ============================================= */
 .sidebar {
     width: 300px;
     min-width: 300px;
-    background: #181c27;
+    background: #000000; /* Updated from #181c27 */
     color: white;
     padding: 0;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5); /* Slightly darker shadow for contrast */
     height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
@@ -32,11 +31,11 @@ a {
 }
 .sidebar-header {
     padding: 1.5rem;
-    background: #181c27;
+    background: #000000; /* Updated from #181c27 */
     text-align: center;
     font-size: 1.5rem;
     font-weight: bold;
-    border-bottom: 1px solid #2d3343;
+    border-bottom: 1px solid #1f1f1f; /* Adjusted border for a clean pitch-black look */
 }
 .sidebar-menu {
     list-style: none;
@@ -44,7 +43,7 @@ a {
     margin: 0;
 }
 .sidebar-menu li {
-    border-bottom: 1px solid #3d5268;
+    border-bottom: none;
 }
 .sidebar-menu a {
     display: flex;
@@ -99,7 +98,7 @@ a {
     width: 40px;
     height: 40px;
     border: none;
-    background: #181c27;
+    background: #000000;
     border-radius: 4px;
     cursor: pointer;
     flex-direction: column;
@@ -111,7 +110,7 @@ a {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 .burger-btn:hover {
-    background: #2d3343;
+    background: #1a1a1a;
 }
 .burger-btn span {
     display: block;
@@ -887,7 +886,7 @@ h2 {
         display: block;
     }
     .sidebar-menu li {
-        border-bottom: 1px solid #3d5268;
+        border-bottom: none;
         border-right: none;
     }
     .main-content {
