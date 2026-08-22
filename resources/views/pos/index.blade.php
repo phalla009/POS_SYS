@@ -135,7 +135,7 @@
 
         /* ── PAYMENT METHOD TOGGLE ── */
         .pay-method-row { display: flex; gap: 8px; margin-bottom: 12px; }
-        .pay-method-btn { flex: 1; padding: 9px 10px; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; background: #fff; color: #374151; font-family: 'DM Sans', sans-serif; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .pay-method-btn { flex: 1; padding: 9px 10px; border: 1.5px solid #e5e7eb; border-radius: 24px; font-size: 13px; font-weight: 600; cursor: pointer; background: #fff; color: #374151; font-family: 'DM Sans', sans-serif; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
         .pay-method-btn:hover { border-color: #a5b4fc; color: #4f46e5; }
         .pay-method-btn.active-khqr { background: #111; color: #fff; border-color: #111; }
         .pay-method-btn.active-cash { background: #16a34a; color: #fff; border-color: #16a34a; }
@@ -152,15 +152,15 @@
         .cash-change-val { font-size: 15px; font-weight: 700; color: #15803d; font-family: 'DM Mono', monospace; }
         .cash-change-val.insufficient { color: #ef4444; }
 
-        .btn-checkout { width: 100%; padding: 11px; background: #111; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s, transform 0.15s, background 0.2s; font-family: 'DM Sans', sans-serif; letter-spacing: -0.01em;}
+        .btn-checkout { width: 100%; padding: 11px; background: #111; color: #fff; border: none; border-radius: 24px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s, transform 0.15s, background 0.2s; font-family: 'DM Sans', sans-serif; letter-spacing: -0.01em;}
         .btn-checkout:hover { opacity: 0.85; transform: translateY(-1px); }
         .btn-checkout:disabled { background: #d1d5db !important; cursor: not-allowed; transform: none; opacity: 1; }
 
-        .btn-clear-cart { width: 100%; padding: 8px; background: #fff; color: #ef4444; border: 1px solid #fca5a5; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 7px; transition: background 0.15s; font-family: 'DM Sans', sans-serif; }
+        .btn-clear-cart { width: 100%; padding: 8px; background: #fff; color: #ef4444; border: 1px solid #fca5a5; border-radius: 24px; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 7px; transition: background 0.15s; font-family: 'DM Sans', sans-serif; }
         .btn-clear-cart:hover { background: #fef2f2; }
 
         /* ── CUSTOMER DISPLAY BUTTON ── */
-        .btn-customer-display { width: 100%; padding: 8px; background: #fff; color: #6366f1; border: 1px solid #c7d2fe; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 7px; transition: background 0.15s; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-customer-display { width: 100%; padding: 8px; background: #fff; color: #6366f1; border: 1px solid #c7d2fe; border-radius: 24px; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 7px; transition: background 0.15s; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; justify-content: center; gap: 6px; }
         .btn-customer-display:hover { background: #eef2ff; }
 
         .no-results { text-align: center; color: #9ca3af; font-size: 13px; padding: 40px 0; }
@@ -180,11 +180,50 @@
         .remove-modal-icon i { font-size: 20px; color: #ef4444; }
         .remove-modal-box h3 { font-size: 17px; font-weight: 700; color: #1f2937; margin: 0 0 8px; }
         .remove-modal-box p { font-size: 13px; color: #6b7280; margin: 0 0 22px; line-height: 1.5; }
-        .remove-modal-actions { display: flex; gap: 8px; }
-        .btn-cancel-remove { flex: 1; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; background: #fff; color: #374151; font-family: 'DM Sans', sans-serif; transition: background 0.15s; }
-        .btn-cancel-remove:hover { background: #f9fafb; }
-        .btn-confirm-remove { flex: 1; padding: 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; background: #ef4444; color: #fff; font-family: 'DM Sans', sans-serif; transition: background 0.15s; }
-        .btn-confirm-remove:hover { background: #dc2626; }
+        .remove-modal-actions { display: flex; gap: 8px;}
+        .btn-cancel-remove {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: #fff;
+            color: #374151;
+            font-family: 'DM Sans', sans-serif;
+            transition: background 0.15s, box-shadow 0.15s;
+        }
+
+        .btn-cancel-remove:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 12px rgba(15, 20, 32, 0.08);
+        }
+
+        .btn-confirm-remove {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: repeating-linear-gradient(
+                -45deg,
+                #0f1117,
+                #000000d1,
+                #0f1117 3px,
+                #000000d1 3px
+            );
+            color: #fff;
+            font-family: 'DM Sans', sans-serif;
+            transition: background 0.15s;
+        }
+
+        .btn-confirm-remove:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px #181c27;
+        }
 
         /* ── TOAST ── */
         .toast { position: fixed; top: 60px; right: 28px; background: repeating-linear-gradient(
@@ -212,7 +251,7 @@
         .product-card:nth-child(n+9){ animation-delay: 0.27s; }
 
         /* ── ADD TO CART MODAL ── */
-        .atc-modal-box { background: #fff; border-radius: 20px; padding: 24px 24px 20px; max-width: 400px; width: 94%; box-shadow: 0 24px 60px rgba(0,0,0,0.18); }
+        .atc-modal-box { background: #fff; border-radius: 20px; padding: 24px 24px 20px; max-width: 600px; width: 100%; box-shadow: 0 24px 60px rgba(0,0,0,0.18); }
         .atc-section-label { font-size: 10.5px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 9px; }
         .atc-chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
         .atc-chip { padding: 6px 14px; border-radius: 24px; border: 1.5px solid #e5e7eb; background: #fff; color: #374151; font-size: 12.5px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }

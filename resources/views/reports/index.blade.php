@@ -10,11 +10,6 @@
 @endsection
 
 @section('content')
-
-{{-- ❌ លុប: #loading-overlay  — master layout មានហើយ --}}
-{{-- ❌ លុប: #logout-confirm   — master layout មានហើយ --}}
-{{-- ❌ លុប: logout JS         — master layout មានហើយ --}}
-
 <div class="content-section" id="report">
     <h2><i class="fas fa-chart-line"></i> Reports & Analytics</h2>
 
@@ -44,9 +39,9 @@
                 <label>Report Type:</label>
                 <select name="type" required class="form-control">
                     <option value="sales">Sales Report</option>
-                    <option value="inventory">Inventory Report</option>
-                    <option value="customer">Customer Report</option>
-                    <option value="financial">Financial Report</option>
+{{--                    <option value="inventory">Inventory Report</option>--}}
+{{--                    <option value="customer">Customer Report</option>--}}
+{{--                    <option value="financial">Financial Report</option>--}}
                 </select>
             </div>
             <div class="form-group">
