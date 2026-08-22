@@ -132,7 +132,6 @@
       <li><a href="{{ route('inventory-items.index') }}"><span class="icon"><i class="fas fa-boxes"></i></span> Inventory</a></li>
       @endif
 
-
       @if(Auth::user()->hasPermission('reports'))
       <li><a href="{{ route('reports.index') }}"><span class="icon"><i class="fas fa-chart-line"></i></span> Reports</a></li>
       @endif
@@ -163,13 +162,13 @@
 
           <div class="submenu">
               @if(Auth::user()->hasPermission('types'))
-                  <a href="{{ route('types.index') }}"><span class="icon"><i class="fas fa-layer-group"></i></span> Types</a>
+                  <a href="{{ route('types.index') }}"><span class="icon"><i class="fas fa-layer-group"></i></span> Setup Types</a>
               @endif
               @if(Auth::user()->hasPermission('units'))
-                  <a href="{{ route('units.index') }}"><span class="icon"><i class="fas fa-ruler"></i></span> Units</a>
+                  <a href="{{ route('units.index') }}"><span class="icon"><i class="fas fa-ruler"></i></span> Setup Units</a>
               @endif
               @if(Auth::user()->hasPermission('barcodes'))
-                  <a href="{{ route('barcodes.index') }}"><span class="icon"><i class="fas fa-barcode"></i></span> Barcode</a>
+                  <a href="{{ route('barcodes.index') }}"><span class="icon"><i class="fas fa-barcode"></i></span> Setup Barcode</a>
               @endif
           </div>
       </li>
