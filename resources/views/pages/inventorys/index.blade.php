@@ -7,6 +7,8 @@
 @section('headerBlock')
     <link rel="stylesheet" href="{{ URL::asset('css/main.css') }}">
     <link rel="stylesheet" href="{{ URL::asset('css/delete_form.css') }}">
+    {{-- SortableJS CDN សម្រាប់មុខងារ Drag & Drop Stat Cards --}}
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="{{ URL::asset('js/form.js') }}"></script>
     <script src="{{ URL::asset('js/delete_form.js') }}"></script>
     <style>
@@ -21,6 +23,28 @@
         .stock-in  { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
         .stock-low { background: #fef9c3; color: #a16207; border: 1px solid #fde047; }
         .stock-out { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+
+        /* Styles សម្រាប់ Stat Cards ឱ្យអាចទាញបាន */
+        .stats-grid {
+            cursor: default;
+        }
+        .stat-card {
+            cursor: grab !important;
+            user-select: none;
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
+        }
+        .stat-card:active {
+            cursor: grabbing !important;
+        }
+        .sortable-ghost {
+            opacity: 0.3;
+            background: #f0f0f0;
+            border: 2px dashed #030304;
+        }
+        .sortable-drag {
+            background: #ffffff;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
 
         /* Pagination */
         .inventory-pagination {
@@ -45,17 +69,17 @@
     <div class="content-section" id="inventory-items">
         <h2><i class="fas fa-boxes"></i> Inventory Items</h2>
 
-        <div style="margin-bottom:12px;">
+        <div style="margin: 16px 0 12px 0;">
             <a href="{{ route('inventory-items.create') }}" class="btn btn-primary page-link-loading" data-loading-text="Loading add...">
                 <i class="fas fa-circle-plus"></i> Add New Items
             </a>
         </div>
 
-        {{-- Stats Grid --}}
-        <div class="stats-grid">
+        {{-- Stats Grid ដាក់ id="sortableCards" ដើម្បីឱ្យអាចទាញប្ដូរទីតាំងឆ្វេងស្តាំបាន --}}
+        <div class="stats-grid" id="sortableCards">
             <div class="stat-card">
                 <h3>{{ $totalItems }}</h3>
-                <p>Total Stocks</p>
+                <p>Total Items</p>
             </div>
             <div class="stat-card">
                 <h3>{{ $lowStockItems }}</h3>
@@ -72,7 +96,7 @@
         </div>
 
         {{-- Table --}}
-        <div class="table-container" role="region" aria-label="Inventory items table">
+        <div class="table-container" role="region" aria-label="Inventory items table" style="margin-top: 20px;">
             <table>
                 <thead>
                 <tr>
@@ -80,8 +104,8 @@
                     <th>Name</th>
                     <th>Type</th>
                     <th>Unit</th>
-                    <th>Price</th>
                     <th>Qty</th>
+                    <th>Total Price</th>
                     <th>Status</th>
                     <th>Updated Date</th>
                     <th>Actions</th>
@@ -94,8 +118,8 @@
                         <td data-label="Name">{{ $item->name }}</td>
                         <td data-label="Type">{{ $item->type ?? '-' }}</td>
                         <td data-label="Unit">{{ $item->unit ?? '-' }}</td>
-                        <td data-label="Price">${{ number_format($item->price, 2) }}</td>
                         <td data-label="Qty">{{ $item->qty }}</td>
+                        <td data-label="Price">${{ number_format($item->price, 2) }}</td>
                         <td data-label="Status">
                             @if($item->status === 'out')
                                 <span class="stock-badge stock-out">Out of Stock</span>
@@ -185,6 +209,24 @@
     <x-delete-modal />
 
     <script>
+        // ===== Enable Drag & Drop for Stat Cards =====
+        document.addEventListener('DOMContentLoaded', () => {
+            const el = document.getElementById('sortableCards');
+            if (el) {
+                new Sortable(el, {
+                    animation: 200,
+                    ghostClass: 'sortable-ghost',
+                    dragClass: 'sortable-drag',
+                    onStart: function (evt) {
+                        evt.item.style.cursor = 'grabbing';
+                    },
+                    onEnd: function (evt) {
+                        evt.item.style.cursor = 'grab';
+                    }
+                });
+            }
+        });
+
         function showLoading(msg) {
             const ov = document.getElementById('loading-overlay');
             const lt = document.getElementById('loading-text');

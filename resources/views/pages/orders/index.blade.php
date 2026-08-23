@@ -7,6 +7,8 @@
 @section('headerBlock')
     <link rel="stylesheet" href="{{ URL::asset('css/main.css') }}">
     <link rel="stylesheet" href="{{ URL::asset('css/delete_form.css') }}">
+    {{-- SortableJS CDN សម្រាប់មុខងារ Drag & Drop --}}
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="{{ URL::asset('js/form.js') }}"></script>
     <script src="{{ URL::asset('js/delete_form.js') }}"></script>
 
@@ -48,7 +50,7 @@
 
         @media (max-width: 768px) { .filter-row { flex-direction: column; align-items: stretch; } .filter-row-actions { justify-content: flex-start; } }
 
-        /* Dashboard stat cards */
+        /* Dashboard stat cards - ធ្វើឱ្យអាចទាញបាន (Drag & Drop) */
         .stat-cards-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-top: 18px; width: 100%; box-sizing: border-box; }
         .stat-card {
             position: relative;
@@ -62,7 +64,20 @@
             min-width: 0;
             overflow: hidden;
             transition: transform 0.22s ease, box-shadow 0.22s ease;
+            cursor: grab !important;
+            user-select: none;
         }
+        .stat-card:active { cursor: grabbing !important; }
+        .sortable-ghost {
+            opacity: 0.3;
+            background: #f0f0f0;
+            border: 2px dashed #030304;
+        }
+        .sortable-drag {
+            background: #ffffff;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
         .stat-card::after {
             content: "";
             position: absolute;
@@ -80,18 +95,6 @@
         }
         .stat-card-label { font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.85); white-space: nowrap; }
         .stat-card-value { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /*.stat-card-orange   { background: repeating-linear-gradient(-45deg, #9a5e2d, #8c4f1e, #9a5e2d 3px, #8c4f1e 3px); box-shadow: 0 8px 20px -8px rgba(220,140,76,0.65); }*/
-        /*.stat-card-green    { background: repeating-linear-gradient(-45deg, #57c088, #2f8f5c, #57c088 3px, #2f8f5c 3px); box-shadow: 0 8px 20px -8px rgba(47,143,92,0.65); }*/
-        /*.stat-card-cyan     { background: repeating-linear-gradient(-45deg, #35d2ff, #00abdc, #35d2ff 3px, #00abdc 3px); box-shadow: 0 8px 20px -8px rgba(0,171,220,0.65); }*/
-        /*.stat-card-magenta  { background: repeating-linear-gradient(-45deg, #dd35a8, #a3106e, #dd35a8 3px, #a3106e 3px); box-shadow: 0 8px 20px -8px rgba(163,16,110,0.65); }*/
-        /*.stat-card-coral    { background: repeating-linear-gradient(-45deg, #dd8079, #b84f47, #dd8079 3px, #b84f47 3px); box-shadow: 0 8px 20px -8px rgba(184,79,71,0.65); }*/
-
-        /*.stat-card:hover.stat-card-orange   { box-shadow: 0 14px 28px -10px rgba(220,140,76,0.75); }*/
-        /*.stat-card:hover.stat-card-green    { box-shadow: 0 14px 28px -10px rgba(47,143,92,0.75); }*/
-        /*.stat-card:hover.stat-card-cyan     { box-shadow: 0 14px 28px -10px rgba(0,171,220,0.75); }*/
-        /*.stat-card:hover.stat-card-magenta  { box-shadow: 0 14px 28px -10px rgba(163,16,110,0.75); }*/
-        /*.stat-card:hover.stat-card-coral    { box-shadow: 0 14px 28px -10px rgba(184,79,71,0.75); }*/
 
         @media (max-width: 900px) { .stat-cards-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 480px) { .stat-cards-row { grid-template-columns: 1fr; } }
@@ -114,7 +117,6 @@
             justify-content: center;
             margin-top: 20px;
         }
-
     </style>
 @endsection
 
@@ -133,7 +135,7 @@
     <div class="content-section" id="orders">
         <h2><i class="fas fa-shopping-cart"></i> Orders Management</h2>
 
-        <div class="filter-section">
+        <div class="filter-section" style="margin-top: 15px;">
             <form method="GET" action="{{ route('orders.index') }}" class="filter-form" id="filterForm">
                 <div class="filter-row">
                     <div class="form-group">
@@ -155,7 +157,8 @@
                 </div>
             </form>
 
-            <div class="stat-cards-row">
+            {{-- Stat Cards អាចទាញប្តូរទីតាំងឆ្វេងស្តាំបានដោយដាក់ id="sortableCards" --}}
+            <div class="stat-cards-row" id="sortableCards">
                 <div class="stat-card stat-card-orange">
                     <i class="fas fa-file-invoice stat-card-icon"></i>
                     <span class="stat-card-label">Total Invoice</span>
@@ -197,7 +200,6 @@
             <table>
                 <thead>
                 <tr>
-                    {{-- Check if user is Admin using the correct role() relation --}}
                     @if(auth()->check() && auth()->user()->role && auth()->user()->role->role_name === 'Admin')
                         <th style="width:40px;text-align:center;"><input type="checkbox" id="selectAll" title="Select All"></th>
                     @endif
@@ -303,6 +305,24 @@
     @endif
 
     <script>
+        // ===== Enable Drag & Drop for Stat Cards =====
+        document.addEventListener('DOMContentLoaded', () => {
+            const el = document.getElementById('sortableCards');
+            if (el) {
+                new Sortable(el, {
+                    animation: 200,
+                    ghostClass: 'sortable-ghost',
+                    dragClass: 'sortable-drag',
+                    onStart: function (evt) {
+                        evt.item.style.cursor = 'grabbing';
+                    },
+                    onEnd: function (evt) {
+                        evt.item.style.cursor = 'grab';
+                    }
+                });
+            }
+        });
+
         document.getElementById('filterForm').addEventListener('submit', function() {
             showLoading('Filtering...');
         });

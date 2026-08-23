@@ -15,15 +15,19 @@ class InventoryItemController extends Controller
     public function index()
     {
         $allItems = InventoryItem::all();
-
-        $totalItems      = $allItems->sum('qty');
+        $totalItems      = $allItems->count();
+//
+//        $totalItems      = $allItems->sum('qty');
         $lowStockItems   = $allItems->filter(function ($item) {
             return $item->qty >= 1 && $item->qty <= InventoryItem::LOW_STOCK_THRESHOLD;
         })->count();
         $outOfStockItems = $allItems->where('qty', '<=', 0)->count();
         $inventoryValue  = $allItems->sum(function ($item) {
-            return $item->qty * $item->price;
+            return $item->price;
         });
+//        $inventoryValue  = $allItems->sum(function ($item) {
+//            return $item->qty * $item->price;
+//        });
 
         $items = InventoryItem::orderBy('name')->paginate(10)->withQueryString();
 
