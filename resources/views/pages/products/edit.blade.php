@@ -143,6 +143,9 @@
                 <div class="form-group" style="flex: 1; min-width: 250px;">
                     <label>Add More Images:</label>
                     <input type="file" name="images[]" multiple accept="image/*">
+                    @error('images.*')
+                        <p class="text-danger mt-1">{{ $message }}</p>
+                    @enderror
                     @error('images')
                         <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror

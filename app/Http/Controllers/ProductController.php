@@ -48,7 +48,11 @@ class ProductController extends Controller
             'status'      => 'required|in:active,inactive',
             'description' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
-            'images.*'    => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'images.*'    => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+        ], [
+            'images.*.max'   => 'The image size must not be greater than 5MB.',
+            'images.*.image' => 'The file must be an image.',
+            'images.*.mimes' => 'Only jpeg, png, jpg, gif, and svg formats are allowed.',
         ]);
 
         // Handle checkbox — unchecked sends nothing, so default to 0
@@ -99,9 +103,13 @@ class ProductController extends Controller
             'stock'           => 'required|integer',
             'status'          => 'required|in:active,inactive',
             'description'     => 'nullable|string|max:1000',
-            'images.*'        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'images.*'        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             'delete_images'   => 'nullable|array',
             'delete_images.*' => 'integer|exists:product_images,id',
+        ], [
+            'images.*.max'   => 'The image size must not be greater than 5MB.',
+            'images.*.image' => 'The file must be an image.',
+            'images.*.mimes' => 'Only jpeg, png, jpg, gif, and svg formats are allowed.',
         ]);
 
         // Handle checkbox — unchecked sends nothing, so default to 0

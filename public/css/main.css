@@ -293,8 +293,7 @@ a {
 .btn-primary:hover {
     background: #5a67d8;
 }
-.btn.btn-primary,
-.btn-update {
+.btn.btn-primary{
     background: repeating-linear-gradient(
         -45deg,
         #0f1117,
@@ -316,28 +315,18 @@ a {
     gap: 8px;
     user-select: none;
 }
-.btn-update {
-    background: #48bb78;
-    width: 100%;
-    justify-content: center;
-}
-.btn.btn-update:hover {
-    background: #38a169;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(56, 161, 105, 0.3);
-}
+
 .btn.btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px #181c27;
 }
-.btn-success {
+.btn-success,
+.btn-update {
     width: 45%;
     background: repeating-linear-gradient(-45deg, #48bb78,#3c9d64,#48bb78 3px,#3c9d64 3px);
     color: white;
-    transition:
-        0.3s ease,
-        transform 0.2s ease;
-    float: left;
+    transition:0.3s ease,transform 0.2s ease;
+    float: right;
     margin-top: 5px;
 }
 .btn-cancel {
@@ -347,10 +336,11 @@ a {
     transition:
         0.3s ease,
         transform 0.2s ease;
-    float: right;
+    float: left;
     margin-top: 5px;
 }
-.btn-success:hover {
+.btn-success:hover,
+.btn-update:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(56, 161, 105, 0.3);
 }
@@ -718,15 +708,7 @@ label {
     top: 20px;
     right: 20px;
     min-width: 300px;
-    background: repeating-linear-gradient(
-        -45deg,
-        #0f1117,
-        #0f1117 2px,
-        #000000d1 2px,
-        #000000b1 3px,
-        rgb(9, 9, 9) 4px,
-        rgb(9, 9, 9) 4px
-    );
+    background: repeating-linear-gradient(-45deg, #48bb78,#3c9d64,#48bb78 3px,#3c9d64 3px);
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     overflow: hidden;
@@ -762,7 +744,7 @@ label {
     left: 0;
     height: 4px;
     width: 100%;
-    background: #2ecc71;
+    background: #28a745;
     animation: progressAnim 4s linear forwards;
 }
 

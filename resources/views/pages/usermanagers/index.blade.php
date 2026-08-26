@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('pageTitle')
-    User Managers Listing
+    User Management Listing
 @endsection
 
 @section('headerBlock')
@@ -66,14 +66,14 @@
 @endif
 
 <div class="content-section" id="users">
-    <h2><i class="fas fa-user-shield"></i> User Managers Management</h2>
+    <h2><i class="fas fa-user-shield"></i> User Managements</h2>
 
     <div class="filter-section">
         <div class="filter-controls">
             <a href="{{ route('usermanagers.create') }}"
                class="btn btn-primary page-link-loading"
                data-loading-text="Loading add...">
-                <i class="fas fa-circle-plus"></i> Add New User Manager
+                <i class="fas fa-circle-plus"></i> Add New User
             </a>
 
             {{-- 🔍 Search Field --}}

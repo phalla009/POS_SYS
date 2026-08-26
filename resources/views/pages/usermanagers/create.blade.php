@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('pageTitle')
-    Add New User Manager
+    Add New User
 @endsection
 
 @section('headerBlock')
@@ -82,7 +82,7 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-user-shield"></i> Add New User Manager</h2>
+        <h2><i class="fas fa-user-shield"></i> Add New User </h2>
 
         <form id="userManagerForm" action="{{ route('usermanagers.store') }}" method="POST">
             @csrf
@@ -157,7 +157,7 @@
             {{-- Buttons --}}
             <div >
                 <button type="submit" class="btn btn-success">
-                    <i class="fas fa-save"></i> Add User Manager
+                    <i class="fas fa-save"></i> Add User
                 </button>
                 <button type="button" id="cancel" class="btn btn-cancel">
                     <i class="fas fa-times"></i> Cancel
