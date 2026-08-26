@@ -181,11 +181,11 @@
             <div class="form-group">
                 <label>Description:</label>
                 <textarea name="description"
-                        style="height: 180px; resize: none;">{{ old('description', $product->description) }}</textarea>
+                        style="height: 120px; resize: none;">{{ old('description', $product->description) }}</textarea>
             </div>
 
             <div>
-                <button class="btn btn-update" type="submit">
+                <button class="btn btn-update" type="submit" style="float: none; ">
                     <i class="fas fa-save"></i> Update Product
                 </button>
             </div>

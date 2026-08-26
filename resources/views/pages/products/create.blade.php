@@ -145,7 +145,7 @@
             <div class="form-group">
                 <label for="description">Description:</label>
                 <textarea id="description" name="description" placeholder="Enter description"
-                        style="height: 180px; resize: none;">{{ old('description') }}</textarea>
+                        style="height: 120px; resize: none;">{{ old('description') }}</textarea>
                 @error('description')
                     <p class="text-danger mt-1">{{ $message }}</p>
                 @enderror
