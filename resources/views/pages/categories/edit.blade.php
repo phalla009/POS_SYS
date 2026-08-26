@@ -44,7 +44,7 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-mobile-alt"></i> Edit Category</h2>
+        <h2><i class="fas fa-tags"></i> Edit Category</h2>
 
         <form id="categoryForm" action="{{ route('categories.update', $category->id) }}" method="POST">
             @csrf
@@ -88,17 +88,17 @@
                         id="description"
                         name="description"
                         placeholder="Enter description"
-                        rows="6" 
+                        rows="6"
                         style="width: 100%; min-height: 150px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: none; font-family: inherit; transition: border-color 0.2s;"
                     >{{ old('description', $category->description) }}</textarea>
-                    
+
                     @error('description')
                         <p class="text-danger mt-1" style="color: #dc3545; font-size: 0.875rem;">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
 
-           
+
 
             <div>
                 <button class="btn btn-update" type="submit">

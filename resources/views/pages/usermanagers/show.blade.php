@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('pageTitle')
-     UserManager Details
+     User Details
 @endsection
 
 @section('headerBlock')
@@ -115,7 +115,7 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-user-shield"></i> User Manager Details</h2>
+        <h2><i class="fas fa-user-shield"></i> User Details</h2>
 
         {{-- Row 1: Full Name, Login & Email --}}
         <div class="info-row-3">

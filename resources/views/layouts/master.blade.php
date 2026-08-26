@@ -203,7 +203,7 @@
                     </a>
                     <div class="submenu">
                         @if(Auth::user()->hasPermission('usermanagers'))
-                            <a href="{{ route('usermanagers.index') }}"><span class="icon"><i class="fas fa-user"></i></span> User Managers</a>
+                            <a href="{{ route('usermanagers.index') }}"><span class="icon"><i class="fas fa-user"></i></span> User Managements</a>
                         @endif
                         @if(Auth::user()->hasPermission('userroles'))
                             <a href="{{ route('userroles.index') }}"><span class="icon"><i class="fas fa-user-shield"></i></span> User Roles</a>
@@ -215,7 +215,7 @@
                             <a href="{{ route('units.index') }}"><span class="icon"><i class="fas fa-ruler"></i></span> Setup Units</a>
                         @endif
                         @if(Auth::user()->hasPermission('barcodes'))
-                            <a href="{{ route('barcodes.index') }}"><span class="icon"><i class="fas fa-barcode"></i></span> Setup Barcode</a>
+                            <a href="{{ route('barcodes.index') }}"><span class="icon"><i class="fas fa-barcode"></i></span> Setup Barcodes</a>
                         @endif
                     </div>
                 </li>

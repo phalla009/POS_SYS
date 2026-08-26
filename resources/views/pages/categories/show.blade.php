@@ -94,7 +94,7 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-mobile-alt"></i> Brand Details</h2>
+        <h2><i class="fas fa-tags"></i> Brand Details</h2>
 
         {{-- Row 1: Brand Name & Status --}}
         <div class="info-row">

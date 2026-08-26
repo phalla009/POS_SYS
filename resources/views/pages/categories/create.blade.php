@@ -58,7 +58,7 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-mobile-alt"></i> Add New Category</h2>
+        <h2><i class="fas fa-tags"></i> Add New Category</h2>
 
         <form action="{{ route('categories.store') }}" method="POST" id="categoryForm">
             @csrf
@@ -84,15 +84,15 @@
             <div class="form-row">
                 <div class="form-group" style="width: 100%;">
                     <label for="description">Description:</label>
-                    <textarea 
-                        id="description" 
-                        name="description" 
+                    <textarea
+                        id="description"
+                        name="description"
                         placeholder="Enter description"
                         style="width: 100%; min-height: 200px; padding: 12px; border: 1px solid #ccc; border-radius: 8px; resize: none;"
                     >{{ old('description') }}</textarea>
                 </div>
             </div>
-            
+
             <div >
                 <button id="submitCategory" type="submit" class="btn btn-success">
                     <i class="fas fa-save"></i> Add New Category

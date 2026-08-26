@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('pageTitle', 'Edit User Manager')
+@section('pageTitle', 'Edit User')
 
 @section('headerBlock')
     <link rel="stylesheet" href="{{ URL::asset('css/main.css') }}">
@@ -78,7 +78,7 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-user-shield"></i> Edit User Manager</h2>
+        <h2><i class="fas fa-user-shield"></i> Edit User</h2>
 
         <form id="editUserManagerForm" action="{{ route('usermanagers.update', $usermanager->id) }}" method="POST">
             @csrf
@@ -154,9 +154,9 @@
             {{-- Buttons --}}
             <div >
                 <button type="submit" class="btn btn-update">
-                    <i class="fas fa-save"></i> Update User Manager
+                    <i class="fas fa-save"></i> Update User
                 </button>
-               
+
             </div>
 
         </form>
