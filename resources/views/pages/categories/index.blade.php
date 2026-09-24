@@ -248,7 +248,7 @@
         justify-content: center;
         margin-top: 20px;
     }
-    
+
 </style>
 @endsection
 
@@ -291,12 +291,12 @@
                     @endif
                 </div>
 
-                {{-- Status filter --}}
-                <select name="status" class="status-filter-select" onchange="document.getElementById('searchForm').submit()">
-                    <option value="">All Statuses</option>
-                    <option value="active" {{ ($status ?? '') === 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="inactive" {{ ($status ?? '') === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                </select>
+{{--                --}}{{-- Status filter --}}
+{{--                <select name="status" class="status-filter-select" onchange="document.getElementById('searchForm').submit()">--}}
+{{--                    <option value="">All Statuses</option>--}}
+{{--                    <option value="active" {{ ($status ?? '') === 'active' ? 'selected' : '' }}>Active</option>--}}
+{{--                    <option value="inactive" {{ ($status ?? '') === 'inactive' ? 'selected' : '' }}>Inactive</option>--}}
+{{--                </select>--}}
 
                 <button type="submit" class="search-submit-btn">
                     <i class="fas fa-search"></i> Search

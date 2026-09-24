@@ -13,12 +13,11 @@
         /* Submenu styles */
         .submenu { max-height: 0; overflow: hidden; margin-top: 0; transition: max-height 0.3s ease, margin-top 0.3s ease; }
         li.menu-container.open .submenu { max-height: 500px; margin-top: 5px; }
-        .submenu a { display: block; margin: 5px 0; padding: 10px 20px; text-align: center; text-decoration: none; color: white; }
-        .submenu a:hover { background-color: #37546c; }
+        .submenu a { display: block; padding: 10px 15px 10px 55px; text-align: left; text-decoration: none; color: white; }
         .icon i { margin-right: 8px; font-size: 18px; }
         .dropdown-arrow { float: right; font-size: 15px; margin-top: 2px; margin-left: 80px; transition: transform 0.3s ease; }
         li.menu-container.open .dropdown-arrow i { transform: rotate(90deg); }
-        .sidebar-menu :hover a { font-size: 17px; padding-left: 10px; transition: all 0.2s ease; }
+        .sidebar-menu :hover a { font-size: 17px; transition: all 0.2s ease;}
         .l1 { color: #ff4d4d; } .l2 { color: #ffa500; } .l3 { color: #ffffff; }
         .sidebar-menu li:last-child a:hover { color: red; }
         .sidebar-header .user-info { margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: -10px; }
@@ -220,7 +219,10 @@
                     </div>
                 </li>
             @endif
-
+{{--                <li>--}}
+{{--                    <a id="about-link"><span class="icon"><i class="fas fa-info-circle"></i></span> <span>About</span></a>--}}
+{{--                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">@csrf</form>--}}
+{{--                </li>--}}
             <li>
                 <a id="logout-link"><span class="icon"><i class="fas fa-sign-out-alt"></i></span> <span>Logout</span></a>
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">@csrf</form>
@@ -315,8 +317,7 @@
             toggleIcon.classList.add('fa-angles-left');
         }
     });
-
-    // Submenu toggle
+    // Submenu toggle (បើកមួយ បិទមួយ)
     document.querySelectorAll('.submenu-toggle').forEach(function(link) {
         link.addEventListener('click', function(e) {
             if (mainSidebar.classList.contains('collapsed')) {
@@ -325,8 +326,16 @@
             }
             e.preventDefault();
             e.stopPropagation();
+
             const parent = this.closest('.menu-container');
-            if (parent) parent.classList.toggle('open');
+            document.querySelectorAll('.menu-container').forEach(function(container) {
+                if (container !== parent) {
+                    container.classList.remove('open');
+                }
+            });
+            if (parent) {
+                parent.classList.toggle('open');
+            }
         });
     });
 

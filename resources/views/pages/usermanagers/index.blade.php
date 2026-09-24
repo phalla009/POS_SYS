@@ -96,7 +96,7 @@
                     <th>Login</th>
                     <th>Email</th>
                     <th>Role</th>
-                    <th>Created At</th>
+{{--                    <th>Created At</th>--}}
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -121,7 +121,7 @@
                             @endphp
                             <span class="role-badge {{ $roleClass }}">{{ $roleName }}</span>
                         </td>
-                        <td data-label="Created At">{{ $user->created_at ? $user->created_at->format('d M, Y h:i A') : 'N/A' }}</td>
+{{--                        <td data-label="Created At">{{ $user->created_at ? $user->created_at->format('d M, Y h:i A') : 'N/A' }}</td>--}}
                         <td data-label="Actions">
                             <div class="action-buttons">
                                 <a href="{{ route('usermanagers.show', $user->id) }}"
