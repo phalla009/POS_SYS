@@ -34,7 +34,7 @@
             padding: 8px 18px;
             border-radius: 20px;
             font-size: 14px;
-            font-weight: 600px;
+            font-weight: 600;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
@@ -47,6 +47,59 @@
         }
         .btn-export i {
             margin-right: 6px;
+        }
+
+        /* Responsive Table Wrappers & Full Width Layout Overrides */
+        .report-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 15px;
+            border-radius: 8px;
+        }
+
+        .report-table-wrapper table.table {
+            width: 100% !important;
+            display: table !important;
+            border-collapse: collapse;
+        }
+
+        /* Prevent mobile CSS rules from turning table rows/cells into cards */
+        @media (max-width: 768px) {
+            .report-table-wrapper table.table,
+            .report-table-wrapper table.table thead,
+            .report-table-wrapper table.table tbody,
+            .report-table-wrapper table.table tfoot,
+            .report-table-wrapper table.table tr,
+            .report-table-wrapper table.table th,
+            .report-table-wrapper table.table td {
+                display: table-cell !important;
+                width: auto !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+            }
+
+            .report-table-wrapper table.table thead {
+                display: table-header-group !important;
+            }
+
+            .report-table-wrapper table.table tbody {
+                display: table-row-group !important;
+            }
+
+            .report-table-wrapper table.table tfoot {
+                display: table-footer-group !important;
+            }
+
+            .report-table-wrapper table.table tr {
+                display: table-row !important;
+            }
+
+            .report-table-wrapper table.table th,
+            .report-table-wrapper table.table td {
+                padding: 10px 12px !important;
+                white-space: nowrap;
+            }
         }
     </style>
 @endsection
@@ -73,19 +126,20 @@
         </a>
 
         <h2>{{ ucfirst($type) }} Report</h2>
-        <p><b>From</b>  {{ $start->format('d M , Y') }} <b>To</b> {{ $end->format('d M, Y') }}</p><br>
-      
+        <p><b>From</b> {{ $start->format('d M , Y') }} <b>To</b> {{ $end->format('d M, Y') }}</p><br>
+
         {{-- Sales Report --}}
         @if($type === 'sales')
-            <table class="table">
-                <thead>
+            <div class="report-table-wrapper">
+                <table class="table">
+                    <thead>
                     <tr>
                         <th>Date</th>
                         <th>Total Qty</th>
                         <th>Total ($)</th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
                     @foreach($results as $row)
                         <tr>
                             <td>{{ $row->date }}</td>
@@ -93,8 +147,8 @@
                             <td>${{ number_format($row->total ?? 0, 2) }}</td>
                         </tr>
                     @endforeach
-                </tbody>
-                <tfoot>
+                    </tbody>
+                    <tfoot>
                     <tr style="background-color: #1a73e8; color: #ffffff;">
                         <th style="padding: 12px 16px; font-size: 15px;">Grand Total</th>
                         <th style="padding: 12px 16px; font-size: 15px;">
@@ -103,24 +157,26 @@
                         <th style="padding: 12px 16px; font-size: 15px;">
                             ${{ number_format($results->sum('total'), 2) }} USD
                             <br>
-                            <small>៛{{ number_format($results->sum('total') * 4000, 0) }} KHR</small>
+                            <small style="color: #e2e8f0;">៛{{ number_format($results->sum('total') * 4000, 0) }} KHR</small>
                         </th>
                     </tr>
-                </tfoot>
-            </table>
+                    </tfoot>
+                </table>
+            </div>
 
-        {{-- Financial Report --}}
+            {{-- Financial Report --}}
         @elseif($type === 'financial')
             <h4>Financial Report ({{ $start->format('M d, Y') }} - {{ $end->format('M d, Y') }})</h4>
-            <table class="table">
-                <thead>
+            <div class="report-table-wrapper">
+                <table class="table">
+                    <thead>
                     <tr>
                         <th>Date</th>
                         <th>Sold Quantity</th>
                         <th>Revenue ($)</th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
                     @foreach($results as $row)
                         <tr>
                             <td>{{ \Carbon\Carbon::parse($row->date)->format('M d, Y') }}</td>
@@ -128,8 +184,8 @@
                             <td>${{ number_format($row->revenue ?? 0, 2) }}</td>
                         </tr>
                     @endforeach
-                </tbody>
-                <tfoot>
+                    </tbody>
+                    <tfoot>
                     <tr style="background-color: #1a73e8; color: #ffffff;">
                         <th style="padding: 12px 16px; font-size: 15px;">Grand Total</th>
                         <th style="padding: 12px 16px; font-size: 15px;">
@@ -139,26 +195,28 @@
                             ${{ number_format($results->sum('revenue'), 2) }}
                         </th>
                     </tr>
-                </tfoot>
-            </table>
+                    </tfoot>
+                </table>
+            </div>
 
-        {{-- Inventory Report --}}
+            {{-- Inventory Report --}}
         @elseif($type === 'inventory')
             @php
                 $grandTotalUSD = 0;
                 $totalQty      = 0;
                 $rate          = 4100;
             @endphp
-            <table class="table">
-                <thead>
+            <div class="report-table-wrapper">
+                <table class="table">
+                    <thead>
                     <tr>
                         <th>Product</th>
                         <th>Quantity</th>
                         <th>Price ($)</th>
                         <th>Total ($)</th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
                     @foreach($results as $row)
                         @php
                             $qty   = $row->quantity ?? $row->stock ?? 0;
@@ -173,52 +231,53 @@
                             <td>${{ number_format($total, 2) }}</td>
                         </tr>
                     @endforeach
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th>Total Qty:</th>
-                        <th>{{ $totalQty }}</th>
-                        <th style="text-align:right;">Grand Total (USD):</th>
-                        <th>${{ number_format($grandTotalUSD, 2) }}</th>
-                    </tr>
-                    <tr>
-                        <th colspan="3" style="text-align:right;">Grand Total (KHR):</th>
-                        <th>៛{{ number_format($grandTotalUSD * $rate) }}</th>
-                    </tr>
-                </tfoot>
-            </table>
-
-        {{-- Customer Report --}}
-        @elseif($type === 'customer')
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Gender</th>
-                            <th class="text-center">Total Qty</th>
-                            <th class="text-right">Total Price</th>
-                            <th>Joined</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($results as $row)
-                            <tr>
-                                <td>{{ $row->name }}</td>
-                                <td>{{ ucfirst($row->gender) }}</td>
-                                <td class="text-center">{{ number_format($row->total_qty ?? 0) }}</td>
-                                <td class="text-right">${{ number_format($row->total_price ?? 0, 2) }}</td>
-                                <td>{{ \Carbon\Carbon::parse($row->created_at)->format('M d, Y') }}</td>
-                            </tr>
-                        @endforeach
                     </tbody>
                     <tfoot>
-                        <tr style="background-color: #e3f2fd; color: #0d47a1; font-weight: bold;">
-                            <td colspan="2" class="text-right">Grand Total:</td>
-                            <td class="text-center">{{ number_format($results->sum('total_qty')) }}</td>
-                            <td class="text-right">${{ number_format($results->sum('total_price'), 2) }}</td>
-                            <td></td>
+                    <tr style="background-color: #1a73e8; color: #ffffff;">
+                        <th style="padding: 10px 14px;">Total Qty:</th>
+                        <th style="padding: 10px 14px;">{{ $totalQty }}</th>
+                        <th style="text-align:right; padding: 10px 14px;">Grand Total (USD):</th>
+                        <th style="padding: 10px 14px;">${{ number_format($grandTotalUSD, 2) }}</th>
+                    </tr>
+                    <tr style="background-color: #1557b0; color: #ffffff;">
+                        <th colspan="3" style="text-align:right; padding: 10px 14px;">Grand Total (KHR):</th>
+                        <th style="padding: 10px 14px;">៛{{ number_format($grandTotalUSD * $rate) }}</th>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            {{-- Customer Report --}}
+        @elseif($type === 'customer')
+            <div class="report-table-wrapper">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th class="text-center">Total Qty</th>
+                        <th class="text-right">Total Price</th>
+                        <th>Joined</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($results as $row)
+                        <tr>
+                            <td>{{ $row->name }}</td>
+                            <td>{{ ucfirst($row->gender) }}</td>
+                            <td class="text-center">{{ number_format($row->total_qty ?? 0) }}</td>
+                            <td class="text-right">${{ number_format($row->total_price ?? 0, 2) }}</td>
+                            <td>{{ \Carbon\Carbon::parse($row->created_at)->format('M d, Y') }}</td>
                         </tr>
+                    @endforeach
+                    </tbody>
+                    <tfoot>
+                    <tr style="background-color: #e3f2fd; color: #0d47a1; font-weight: bold;">
+                        <td colspan="2" class="text-right">Grand Total:</td>
+                        <td class="text-center">{{ number_format($results->sum('total_qty')) }}</td>
+                        <td class="text-right">${{ number_format($results->sum('total_price'), 2) }}</td>
+                        <td></td>
+                    </tr>
                     </tfoot>
                 </table>
             </div>
@@ -244,12 +303,14 @@
         const confirmNo     = document.getElementById('confirm-no');
         const logoutForm    = document.getElementById('logout-form');
 
-        logoutLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            logoutConfirm.style.display = 'flex';
-        });
-        confirmYes.addEventListener('click', function() { logoutForm.submit(); });
-        confirmNo.addEventListener('click',  function() { logoutConfirm.style.display = 'none'; });
+        if (logoutLink) {
+            logoutLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                logoutConfirm.style.display = 'flex';
+            });
+        }
+        if (confirmYes) confirmYes.addEventListener('click', function() { logoutForm.submit(); });
+        if (confirmNo)  confirmNo.addEventListener('click',  function() { logoutConfirm.style.display = 'none'; });
 
         document.getElementById('backBtn').addEventListener('click', function(e) {
             e.preventDefault();

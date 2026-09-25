@@ -145,7 +145,7 @@
         <form id="createRoleForm" action="{{ route('userroles.store') }}" method="POST">
             @csrf
 
-           <div class="form-row" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+            <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div class="form-group">
                     <label for="role_name">Role Name:</label>
                     <input id="role_name" type="text" name="role_name" value="{{ old('role_name') }}" placeholder="Enter role name">

@@ -7,12 +7,23 @@ use Illuminate\Http\Request;
 
 class TypeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $totalTypes = Type::count();
-        $types = Type::orderBy('name')->paginate(10)->withQueryString();
+        $search = $request->input('search');
 
-        return view('settings/types.index', compact('types', 'totalTypes'));
+        $totalTypes = Type::count();
+
+        $types = Type::when($search, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        })
+            ->orderBy('name')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('settings/types.index', compact('types', 'totalTypes', 'search'));
     }
 
     public function create()

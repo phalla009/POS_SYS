@@ -97,9 +97,6 @@
                     @enderror
                 </div>
             </div>
-
-
-
             <div>
                 <button class="btn btn-update" type="submit">
                     <i class="fas fa-save"></i> Update Category

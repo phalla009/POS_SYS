@@ -88,7 +88,7 @@
             @csrf
             @method('PUT')
 
-       
+
  <div class="form-row">
  {{-- Customer Name --}}
                 <div class="form-group">
@@ -130,15 +130,15 @@
                     @enderror
                 </div>
 
-                </div>    
+                </div>
 
-           
-  
+
+
 
            {{-- Password Toggle Button --}}
             <button type="button" id="togglePasswordBtn">
                 <i class="fas fa-lock"></i> Change Password
-            </button>       
+            </button>
 
 {{-- Password Section (hidden by default) --}}
             <div id="passwordSection">
@@ -159,10 +159,10 @@
             </div>
 
                 {{-- Status --}}
-                <div class="form-group">
-                    <label>Status:</label>
-                    <input type="text" value="{{ $customer->status }}" readonly class="readonly">
-                </div><br>
+{{--                <div class="form-group">--}}
+{{--                    <label>Status:</label>--}}
+{{--                    <input type="text" value="{{ $customer->status }}" readonly class="readonly">--}}
+{{--                </div>--}}
             <div>
                 <button class="btn btn-update" type="submit">
                     <i class="fas fa-save"></i> Update Customer

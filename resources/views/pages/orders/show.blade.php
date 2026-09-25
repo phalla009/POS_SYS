@@ -42,6 +42,30 @@
             margin-bottom: 16px;
         }
 
+        /* Responsive Media Queries for Mobile */
+        @media (max-width: 768px) {
+            .info-row,
+            .info-row-2 {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                margin-bottom: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .info-row,
+            .info-row-2 {
+                grid-template-columns: repeat(2, 1fr); /* Enforces 2-column on compact phones */
+                gap: 10px;
+            }
+            .info-box {
+                padding: 10px 12px;
+            }
+            .info-value {
+                font-size: 13px;
+            }
+        }
+
         .info-box {
             padding: 14px 18px;
             border-radius: 10px;
@@ -78,7 +102,7 @@
             white-space: pre-wrap;
             display: flex;
             align-items: center;
-            
+            word-break: break-word;
         }
 
         .status-badge {

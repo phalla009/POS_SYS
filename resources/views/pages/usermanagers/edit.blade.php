@@ -85,7 +85,7 @@
             @method('PUT')
 
             {{-- Row 1: Full Name, Login & Email --}}
-            <div class="form-row" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+            <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div class="form-group">
                     <label for="name">Full Name:</label>
                     <input id="name" type="text" name="name" value="{{ old('name', $usermanager->name) }}" placeholder="Enter full name">
@@ -103,10 +103,22 @@
                     <input id="email" type="email" name="email" value="{{ old('email', $usermanager->email) }}" placeholder="Enter email">
                     @error('email') <p class="text-danger">{{ $message }}</p> @enderror
                 </div>
+                <div class="form-group">
+                    <label for="role_id">Assign Role:</label>
+                    <select id="role_id" name="role_id">
+                        <option value="">Select role</option>
+                        @foreach($roles as $role)
+                            <option value="{{ $role->id }}" {{ old('role_id', $usermanager->role_id) == $role->id ? 'selected' : '' }}>
+                                {{ $role->role_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('role_id') <p class="text-danger">{{ $message }}</p> @enderror
+                </div>
             </div>
 
             {{-- Row 2: Password & Confirm Password --}}
-            <div class="form-row" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 12px;">
+            <div class="form-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 12px;">
                 <div class="form-group">
                     <label for="password">Password: <small>(leave blank to keep current)</small></label>
                     <input id="password" type="password" name="password" placeholder="Enter new password">
@@ -121,29 +133,16 @@
             </div>
 
             {{-- Row 3: Role & Description --}}
-            <div class="form-row" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 12px;">
-                <div class="form-group">
-                    <label for="role_id">Assign Role:</label>
-                    <select id="role_id" name="role_id">
-                        <option value="">Select role</option>
-                        @foreach($roles as $role)
-                            <option value="{{ $role->id }}" {{ old('role_id', $usermanager->role_id) == $role->id ? 'selected' : '' }}>
-                                {{ $role->role_name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('role_id') <p class="text-danger">{{ $message }}</p> @enderror
-                </div>
 
                 <div class="form-group">
                     <label for="description">Description:</label>
                     <textarea id="description" name="description"
-                        placeholder="Enter a brief description about this user manager..."
+                        placeholder="description..."
                         rows="3"
                         style="width: 100%; resize: none;">{{ old('description', $usermanager->description) }}</textarea>
                     @error('description') <p class="text-danger">{{ $message }}</p> @enderror
                 </div>
-            </div>
+
              {{-- <div class="form-group">
                     <label>Permissions for Selected Role:</label>
                     <div id="permissionsContainer" class="perm-display-grid">

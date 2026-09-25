@@ -39,7 +39,7 @@
             overflow-y: auto;
         }
         .pos-products-panel::-webkit-scrollbar { width: 5px; }
-        .pos-products-panel::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+        .pos-products-panel::-webkit-scrollbar-thumb { background: repeating-linear-gradient(-45deg, #fff1ed, #ffffff, #fff1ed 3px, #ffffff 3px); border-radius: 10px; }
 
         /* ── SEARCH ── */
         .pos-search-wrap { position: relative; margin-bottom: 16px; }

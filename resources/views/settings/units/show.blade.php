@@ -88,15 +88,15 @@
         <h2><i class="fas fa-ruler"></i> Unit Details: {{ $unit->name }}</h2>
 
         {{-- Row 1: Name & Abbreviation --}}
-        <div class="info-row">
+        <div class="info-row" style="grid-template-columns: 1fr;">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-tag"></i> Unit Name</div>
                 <div class="info-value">{{ $unit->name }}</div>
             </div>
-            <div class="info-box">
-                <div class="info-label"><i class="fas fa-compress-alt"></i> Abbreviation</div>
-                <div class="info-value">{{ $unit->abbreviation ?? '-' }}</div>
-            </div>
+{{--            <div class="info-box">--}}
+{{--                <div class="info-label"><i class="fas fa-compress-alt"></i> Abbreviation</div>--}}
+{{--                <div class="info-value">{{ $unit->abbreviation ?? '-' }}</div>--}}
+{{--            </div>--}}
         </div>
 
         {{-- Row 2: Description (Full Width) --}}

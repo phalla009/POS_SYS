@@ -40,6 +40,7 @@
             border-radius: 10px;
             border: 1px solid #e5e7eb;
             transition: border-color 0.2s, box-shadow 0.2s;
+            word-break: break-word;
         }
 
         .info-box:hover {
@@ -74,7 +75,7 @@
             font-weight: 500;
         }
 
-         .status-badge {
+        .status-badge {
             display: inline-flex; align-items: center; gap: 5px;
             padding: 4px 12px; border-radius: 20px; font-size: 12.5px; font-weight: 600;
             text-transform: capitalize;
@@ -85,7 +86,7 @@
         .pos-yes { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
         .pos-no  { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
 
-        /* Image Gallery */
+        /* Image Gallery & Layout */
         .product-layout {
             display: grid;
             grid-template-columns: 280px 1fr;
@@ -138,6 +139,46 @@
             justify-content: center;
             color: #9ca3af;
             font-size: 13px;
+        }
+
+        /* ── Mobile & Tablet Responsive Media Queries ── */
+        @media (max-width: 768px) {
+            .product-layout {
+                grid-template-columns: 1fr; /* Stacks image gallery above details on tablet/mobile */
+                gap: 16px;
+            }
+
+            .main-image,
+            .no-image {
+                height: 260px; /* Slightly taller hero image display on single column mobile view */
+            }
+
+            .info-row {
+                grid-template-columns: repeat(2, 1fr); /* Maintains 2-column layout on mobile */
+                gap: 12px;
+                margin-bottom: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .info-row {
+                grid-template-columns: repeat(2, 1fr); /* Enforces 2-column layout on small phones */
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+
+            .info-box {
+                padding: 10px 12px;
+            }
+
+            .info-value {
+                font-size: 13px;
+            }
+
+            .thumbnail-list img {
+                width: 48px;
+                height: 48px;
+            }
         }
     </style>
 @endsection
@@ -200,7 +241,7 @@
                     </div>
                 </div>
 
-                {{-- Row 2: Brand & Price --}}
+                {{-- Row 2: Category & Price --}}
                 <div class="info-row">
                     <div class="info-box">
                         <div class="info-label"><i class="fas fa-tag"></i> Category</div>
@@ -219,18 +260,18 @@
                         <div class="info-value">{{ $product->stock }}</div>
                     </div>
                     <div class="info-box">
-                    <div class="info-label"><i class="fas fa-circle-check"></i> Status</div>
-                    <div class="info-value">
-                        <span class="status-badge status-{{ $product->status }}">
-                            <i class="fas fa-circle"></i> {{ $product->status }}
-                        </span>
+                        <div class="info-label"><i class="fas fa-circle-check"></i> Status</div>
+                        <div class="info-value">
+                            <span class="status-badge status-{{ $product->status }}">
+                                <i class="fas fa-circle"></i> {{ $product->status }}
+                            </span>
+                        </div>
                     </div>
-            </div>
                 </div>
 
-                {{-- Row 4: Add to POS & Description --}}
+                {{-- Row 4: Add to POS --}}
                 <div class="info-row">
-                    <div class="info-box">
+                    <div class="info-box full">
                         <div class="info-label"><i class="fas fa-cash-register"></i> Add to POS</div>
                         <div class="info-value">
                             <span class="status-badge {{ $product->add_to_pos ? 'pos-yes' : 'pos-no' }}">

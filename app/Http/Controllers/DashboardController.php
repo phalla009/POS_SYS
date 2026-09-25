@@ -57,6 +57,16 @@ class DashboardController extends Controller
         $runtime = $productionLogs->pluck('run_time')->toArray();
         $downtime = $productionLogs->pluck('downtime')->toArray();
 
+        $salesByDay = Order::selectRaw('DAY(created_at) as day, SUM(total_amount) as total_amount, SUM(quantity) as total_qty')
+            ->whereMonth('created_at', date('m'))
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('day')
+            ->orderBy('day')
+            ->get();
+
+        $chartLabels = $salesByDay->pluck('day');
+        $chartAmount = $salesByDay->pluck('total_amount');
+        $chartQty    = $salesByDay->pluck('total_qty');
         return view('index', compact(
             'totalProducts',
             'totalInvoice',
@@ -68,7 +78,10 @@ class DashboardController extends Controller
             'monthlyRevenue',
             'productionPhases',
             'runtime',
-            'downtime'
+            'downtime',
+            'chartLabels',
+            'chartAmount',
+            'chartQty'
         ));
     }
 }

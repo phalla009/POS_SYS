@@ -10,25 +10,34 @@
     <script src="{{ URL::asset('js/form.js') }}"></script>
     <script src="{{ URL::asset('js/delete_form.js') }}"></script>
     <style>
+        .filter-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
         .search-wrapper {
             position: relative;
             display: flex;
             align-items: center;
+            flex: 1;
+            min-width: 250px;
         }
         .search-wrapper .search-icon {
             position: absolute;
-            left: 10px;
+            left: 12px;
             color: #9ca3af;
             pointer-events: none;
             font-size: 14px;
         }
         .search-wrapper input[type="text"] {
-            padding: 10px 12px 10px 32px;
+            padding: 10px 12px 10px 36px;
             border: 1px solid #d1d5db;
             border-radius: 24px;
             font-size: 14px;
-            width: 400px;
-            margin-top: -5px;
+            width: 100%;
+            max-width: 600px;
             outline: none;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
@@ -37,55 +46,69 @@
             box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
         }
         #noResultsRow { display: none; }
+
+        @media (max-width: 768px) {
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-wrapper {
+                width: 100%;
+            }
+            .search-wrapper input[type="text"] {
+                max-width: 100%;
+                margin-top: 0;
+            }
+        }
     </style>
 @endsection
 
 @section('content')
 
-@if(session('success'))
-<div id="successMessage" class="custom-success">
-    <div class="success-content">
-        <span class="success-icon">✔</span>
-        <span class="success-text">{{ session('success') }}</span>
-    </div>
-    <div class="progress-bar"></div>
-</div>
-@endif
+    @if(session('success'))
+        <div id="successMessage" class="custom-success">
+            <div class="success-content">
+                <span class="success-icon">✔</span>
+                <span class="success-text">{{ session('success') }}</span>
+            </div>
+            <div class="progress-bar"></div>
+        </div>
+    @endif
 
-<div class="content-section" id="roles">
-    <h2><i class="fas fa-user-shield"></i> Roles Management</h2>
+    <div class="content-section" id="roles">
+        <h2><i class="fas fa-user-shield"></i> Roles Management</h2>
 
-    <div class="filter-section">
-        <div class="filter-controls">
-            <a href="{{ route('userroles.create') }}"
-               class="btn btn-primary page-link-loading"
-               data-loading-text="Loading form...">
-                <i class="fas fa-circle-plus"></i> Add New Role
-            </a>
+        <div class="filter-section">
+            <div class="filter-controls">
+                <a href="{{ route('userroles.create') }}"
+                   class="btn btn-primary page-link-loading"
+                   data-loading-text="Loading form...">
+                    <i class="fas fa-circle-plus"></i> Add New Role
+                </a>
 
-            {{-- 🔍 Search Field --}}
-            <div class="search-wrapper">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text"
-                       id="roleSearch"
-                       placeholder="Search name or description..."
-                       autocomplete="off">
+                {{-- 🔍 Search Field --}}
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text"
+                           id="roleSearch"
+                           placeholder="Search name or description..."
+                           autocomplete="off">
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="table-container">
-        <table>
-            <thead>
+        <div class="table-container">
+            <table>
+                <thead>
                 <tr>
                     <th>#</th>
                     <th>Role Name</th>
                     <th>Description</th>
-{{--                    <th>Created At</th>--}}
+                    {{--                    <th>Created At</th>--}}
                     <th>Actions</th>
                 </tr>
-            </thead>
-            <tbody id="rolesTable">
+                </thead>
+                <tbody id="rolesTable">
                 @forelse ($roles as $role)
                     <tr class="role-row">
                         <td data-label="No">#{{ $loop->iteration }}</td>
@@ -107,7 +130,7 @@
                             {{ $role->role_name }}
                         </td>
                         <td data-label="Description">{{ $role->description ?? 'N/A' }}</td>
-{{--                        <td data-label="Created At">{{ $role->created_at ? $role->created_at->format('d M, Y h:i A') :'N/A' }}</td>--}}
+                        {{--                        <td data-label="Created At">{{ $role->created_at ? $role->created_at->format('d M, Y h:i A') :'N/A' }}</td>--}}
                         <td data-label="Actions">
                             <div class="action-buttons">
                                 <a href="{{ route('userroles.show', $role->id) }}"
@@ -123,9 +146,9 @@
                                     <i class="fas fa-pen"></i>
                                 </a>
                                 <button type="button"
-                                    class="action-btn delete-btn openDeleteModal"
-                                    data-action="{{ route('userroles.destroy', $role->id) }}"
-                                    title="Delete Role">
+                                        class="action-btn delete-btn openDeleteModal"
+                                        data-action="{{ route('userroles.destroy', $role->id) }}"
+                                        title="Delete Role">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -133,45 +156,42 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" style="text-align:center;" id="found">No roles found.</td>
+                        <td colspan="4" style="text-align:center;" id="found">No roles found.</td>
                     </tr>
                 @endforelse
 
                 {{-- Shown when search yields no matches --}}
                 <tr id="noResultsRow">
-                    <td colspan="5" style="text-align:center; color:#6b7280;">
+                    <td colspan="4" style="text-align:center; color:#6b7280;">
                         <i class="fas fa-search" style="margin-right:6px;"></i> No results match your search.
                     </td>
                 </tr>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
-{{-- Delete Confirmation Modal --}}
-<x-delete-modal />
+    {{-- Delete Confirmation Modal --}}
+    <x-delete-modal />
 
-<script>
+    <script>
+        // 🔍 Live search — filters by role name and description
+        document.getElementById('roleSearch').addEventListener('input', function () {
+            const term = this.value.toLowerCase().trim();
+            const rows = document.querySelectorAll('#rolesTable .role-row');
+            let visibleCount = 0;
 
-    // 🔍 Live search — filters by role name and description
-    document.getElementById('roleSearch').addEventListener('input', function () {
-        const term = this.value.toLowerCase().trim();
-        const rows = document.querySelectorAll('#rolesTable .role-row');
-        let visibleCount = 0;
+            rows.forEach(function (row) {
+                const name = row.querySelector('[data-label="Role Name"]')?.textContent.toLowerCase() ?? '';
+                const desc = row.querySelector('[data-label="Description"]')?.textContent.toLowerCase() ?? '';
 
-        rows.forEach(function (row) {
-            const name = row.querySelector('[data-label="Role Name"]')?.textContent.toLowerCase() ?? '';
-            const desc = row.querySelector('[data-label="Description"]')?.textContent.toLowerCase() ?? '';
+                const matches = name.includes(term) || desc.includes(term);
+                row.style.display = matches ? '' : 'none';
+                if (matches) visibleCount++;
+            });
 
-            const matches = name.includes(term) || desc.includes(term);
-            row.style.display = matches ? '' : 'none';
-            if (matches) visibleCount++;
+            document.getElementById('noResultsRow').style.display = (visibleCount === 0) ? '' : 'none';
         });
-
-        document.getElementById('noResultsRow').style.display = (visibleCount === 0) ? '' : 'none';
-    });
-
-
-</script>
+    </script>
 
 @endsection

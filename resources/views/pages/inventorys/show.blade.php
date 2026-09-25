@@ -47,6 +47,7 @@
             border-radius: 10px;
             border: 1px solid #e5e7eb;
             transition: border-color 0.2s, box-shadow 0.2s;
+            word-break: break-word;
         }
 
         .info-box:hover {
@@ -85,6 +86,28 @@
         .stock-low { background: #fef9c3; color: #a16207; border: 1px solid #fde047; }
         .stock-out { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
         .stock-badge i { font-size: 8px; color: inherit; }
+
+        /* ── Mobile 2-Column Responsive Rules ── */
+        @media (max-width: 768px) {
+            .info-row,
+            .info-row-3 {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 12px;
+                margin-bottom: 12px;
+            }
+
+            .info-box {
+                padding: 10px 12px;
+            }
+
+            .info-label {
+                font-size: 10px;
+            }
+
+            .info-value {
+                font-size: 13px;
+            }
+        }
     </style>
 @endsection
 
@@ -129,10 +152,6 @@
                 <div class="info-label"><i class="fas fa-cubes"></i> Quantity</div>
                 <div class="info-value">{{ $item->qty }}</div>
             </div>
-        </div>
-
-        {{-- Row 3: Status --}}
-        <div class="info-row">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-circle-check"></i> Status</div>
                 <div class="info-value">
@@ -147,7 +166,7 @@
             </div>
         </div>
 
-        {{-- Row 4: Created At & Last Updated --}}
+        {{-- Row 3: Created At & Last Updated --}}
         <div class="info-row">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-calendar-plus"></i> Created At</div>

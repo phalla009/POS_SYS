@@ -10,13 +10,23 @@ class UnitController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
+
         $totalUnits = Unit::count();
 
-        $units = Unit::orderBy('name')->paginate(10)->withQueryString();
+        $units = Unit::when($search, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        })
+            ->orderBy('name')
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('settings/units.index', compact('units', 'totalUnits'));
+        return view('settings/units.index', compact('units', 'totalUnits', 'search'));
     }
 
     /**

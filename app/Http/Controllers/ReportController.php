@@ -20,13 +20,16 @@ class ReportController extends Controller
         $ordersThisMonth = Order::whereMonth('created_at', date('m'))->count();
         $newCustomers = Customer::whereMonth('created_at', date('m'))->count();
         $customerSatisfaction = 92;
-        $salesByDay = Order::selectRaw('DAY(created_at) as day, SUM(total_amount) as total')
-                            ->whereMonth('created_at', date('m'))
-                            ->groupBy('day')
-                            ->orderBy('day')
-                            ->get();
+        $salesByDay = Order::selectRaw('DAY(created_at) as day, SUM(total_amount) as total_amount, SUM(quantity) as total_qty')
+            ->whereMonth('created_at', date('m'))
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('day')
+            ->orderBy('day')
+            ->get();
+
         $chartLabels = $salesByDay->pluck('day');
-        $chartData   = $salesByDay->pluck('total');
+        $chartAmount = $salesByDay->pluck('total_amount');
+        $chartQty    = $salesByDay->pluck('total_qty');
 
         return view('reports.index', compact(
             'salesThisMonth',
@@ -34,7 +37,8 @@ class ReportController extends Controller
             'newCustomers',
             'customerSatisfaction',
             'chartLabels',
-            'chartData'
+            'chartAmount',
+            'chartQty'
         ));
     }
 

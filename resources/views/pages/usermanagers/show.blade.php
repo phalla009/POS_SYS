@@ -118,7 +118,7 @@
         <h2><i class="fas fa-user-shield"></i> User Details</h2>
 
         {{-- Row 1: Full Name, Login & Email --}}
-        <div class="info-row-3">
+        <div class="info-row">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-user"></i> Full Name</div>
                 <div class="info-value">{{ $usermanager->name }}</div>
@@ -128,33 +128,31 @@
                 <div class="info-label"><i class="fas fa-id-badge"></i> Login</div>
                 <div class="info-value">{{ $usermanager->login }}</div>
             </div>
-
-            <div class="info-box">
-                <div class="info-label"><i class="fas fa-envelope"></i> Email</div>
-                <div class="info-value">{{ $usermanager->email }}</div>
-            </div>
         </div>
 
         {{-- Row 2: Role & Created At --}}
         <div class="info-row">
             <div class="info-box">
+                <div class="info-label"><i class="fas fa-envelope"></i> Email</div>
+                <div class="info-value">{{ $usermanager->email }}</div>
+            </div>
+            <div class="info-box">
                 <div class="info-label"><i class="fas fa-user-tag"></i> Role</div>
                 <div class="info-value">{{ $usermanager->role->role_name ?? 'N/A' }}</div>
             </div>
-
-            <div class="info-box">
-                <div class="info-label"><i class="fas fa-calendar-plus"></i> Created At</div>
-                <div class="info-value">{{ $usermanager->created_at ? $usermanager->created_at->format('Y-m-d H:i') : 'N/A' }}</div>
-            </div>
         </div>
-
-        {{-- Row 3: Description & Last Updated --}}
-        <div class="info-row">
+        <div class="info-row" style="grid-template-columns: 1fr;">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-align-left"></i> Description</div>
                 <div class="info-value">{{ $usermanager->description ?? 'N/A' }}</div>
             </div>
-
+        </div>
+        {{-- Row 3: Description & Last Updated --}}
+        <div class="info-row">
+            <div class="info-box">
+                <div class="info-label"><i class="fas fa-calendar-plus"></i> Created At</div>
+                <div class="info-value">{{ $usermanager->created_at ? $usermanager->created_at->format('Y-m-d H:i') : 'N/A' }}</div>
+            </div>
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-clock"></i> Last Updated</div>
                 <div class="info-value">{{ $usermanager->updated_at ? $usermanager->updated_at->format('Y-m-d H:i') : 'N/A' }}</div>

@@ -24,14 +24,19 @@
         .stock-low { background: #fef9c3; color: #a16207; border: 1px solid #fde047; }
         .stock-out { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
 
-        /* Styles សម្រាប់ Stat Cards ឱ្យអាចទាញបាន */
+        /* Styles សម្រាប់ Stat Cards Grid */
         .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
             cursor: default;
         }
+
         .stat-card {
             cursor: grab !important;
             user-select: none;
             transition: transform 0.22s ease, box-shadow 0.22s ease;
+            word-break: break-word;
         }
         .stat-card:active {
             cursor: grabbing !important;
@@ -46,11 +51,45 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
 
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
         /* Pagination */
         .inventory-pagination {
             display: flex;
             justify-content: center;
             margin-top: 20px;
+        }
+
+        /* ── Mobile 2-Column Rules ── */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 12px 10px;
+            }
+
+            .stat-card h3 {
+                font-size: 1.2rem;
+                margin-bottom: 4px;
+            }
+
+            .stat-card p {
+                font-size: 11px;
+            }
         }
     </style>
 @endsection

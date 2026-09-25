@@ -48,9 +48,7 @@
         .filter-form .btn-light:hover { background-color: #c82333; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(200,35,51,0.25); }
         #filterBtn, #clearBtn { width: auto; }
 
-        @media (max-width: 768px) { .filter-row { flex-direction: column; align-items: stretch; } .filter-row-actions { justify-content: flex-start; } }
-
-        /* Dashboard stat cards - ធ្វើឱ្យអាចទាញបាន (Drag & Drop) */
+        /* Dashboard stat cards - Drag & Drop */
         .stat-cards-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-top: 18px; width: 100%; box-sizing: border-box; }
         .stat-card {
             position: relative;
@@ -96,9 +94,6 @@
         .stat-card-label { font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.85); white-space: nowrap; }
         .stat-card-value { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        @media (max-width: 900px) { .stat-cards-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (max-width: 480px) { .stat-cards-row { grid-template-columns: 1fr; } }
-
         /* Bulk toolbar */
         #bulkToolbar { display: none; align-items: center; gap: 12px; margin-bottom: 12px; padding: 10px 16px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; animation: slideDown 0.2s ease; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
@@ -116,6 +111,125 @@
             display: flex;
             justify-content: center;
             margin-top: 20px;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* ── Responsive Mobile & Tablet Rules ── */
+        @media (max-width: 900px) {
+            .stat-cards-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 768px) {
+            .filter-row { flex-direction: column; align-items: stretch; }
+            .filter-row-actions { justify-content: flex-start; }
+            .filter-row-actions .btn { flex: 1; justify-content: center; }
+        }
+
+        /* 2 Columns Force for Mobile (< 576px) */
+        @media (max-width: 576px) {
+            .stat-cards-row {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 14px 12px;
+            }
+
+            .stat-card-label {
+                font-size: 10.5px;
+            }
+
+            .stat-card-value {
+                font-size: 17px;
+            }
+
+            .stat-card-icon {
+                top: 10px;
+                right: 10px;
+                font-size: 13px;
+            }
+
+            /* Make 5th item full width across 2 columns */
+            .stat-card:nth-child(5) {
+                grid-column: span 2;
+            }
+
+            /* Card view for mobile tables */
+            .table-container table,
+            .table-container thead,
+            .table-container tbody,
+            .table-container th,
+            .table-container td,
+            .table-container tr {
+                display: block;
+            }
+
+            .table-container thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            .table-container tr {
+                background: #fff;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                margin-bottom: 12px;
+                padding: 12px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            }
+
+            .table-container td {
+                border: none;
+                position: relative;
+                padding: 8px 0 8px 45% !important;
+                text-align: right !important;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                min-height: 36px;
+            }
+
+            .table-container td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0;
+                width: 40%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: 600;
+                color: #64748b;
+                font-size: 13px;
+            }
+
+            .table-container td[data-label="Actions"] {
+                padding-left: 0 !important;
+                justify-content: flex-end;
+                margin-top: 6px;
+                border-top: 1px dashed #edf2f7;
+                padding-top: 10px !important;
+            }
+
+            .table-container td[data-label="Actions"]::before {
+                display: none;
+            }
+
+            .table-container td#found {
+                padding: 20px !important;
+                text-align: center !important;
+                justify-content: center;
+            }
+
+            .table-container td#found::before {
+                display: none;
+            }
         }
     </style>
 @endsection
@@ -157,7 +271,7 @@
                 </div>
             </form>
 
-            {{-- Stat Cards អាចទាញប្តូរទីតាំងឆ្វេងស្តាំបានដោយដាក់ id="sortableCards" --}}
+            {{-- Stat Cards --}}
             <div class="stat-cards-row" id="sortableCards">
                 <div class="stat-card stat-card-orange">
                     <i class="fas fa-file-invoice stat-card-icon"></i>
@@ -197,50 +311,52 @@
         @endif
 
         <div class="table-container">
-            <table>
-                <thead>
-                <tr>
-                    @if(auth()->check() && auth()->user()->role && auth()->user()->role->role_name === 'Admin')
-                        <th style="width:40px;text-align:center;"><input type="checkbox" id="selectAll" title="Select All"></th>
-                    @endif
-                    <th>#</th>
-                    <th>Order ID</th>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Order Date</th>
-                    <th>Paid Amount</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody id="ordersTable">
-                @forelse ($orders as $order)
+            <div class="table-responsive">
+                <table>
+                    <thead>
                     <tr>
                         @if(auth()->check() && auth()->user()->role && auth()->user()->role->role_name === 'Admin')
-                            <td style="text-align:center;"><input type="checkbox" class="row-checkbox" value="{{ $order->id }}"></td>
+                            <th style="width:40px;text-align:center;"><input type="checkbox" id="selectAll" title="Select All"></th>
                         @endif
-                        <td data-label="No">#{{ $loop->iteration + ($orders->currentPage() - 1) * $orders->perPage() }}</td>
-                        <td data-label="Order ID">{{ $order->order_number }}</td>
-                        <td data-label="Product">{{ $order->product->name ?? 'N/A' }}</td>
-                        <td data-label="Quantity">{{ $order->quantity }}</td>
-                        <td data-label="Order Date">
-                            {{ $order->created_at?->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') ?? 'N/A' }}
-                        </td>
-                        <td data-label="Paid Amount">${{ number_format($order->total_amount ?? 0, 2) }}</td>
-                        <td data-label="Actions">
-                            <div class="action-buttons">
-                                <a href="{{ route('orders.show', $order->id) }}"
-                                   class="action-btn show-btn page-link-loading"
-                                   data-loading-text="Loading details..." title="View Details">
-                                    <i class="fas fa-info-circle"></i>
-                                </a>
-                            </div>
-                        </td>
+                        <th>#</th>
+                        <th>Order ID</th>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Order Date</th>
+                        <th>Paid Amount</th>
+                        <th>Actions</th>
                     </tr>
-                @empty
-                    <tr><td colspan="9" style="text-align:center;" id="found">No order found.</td></tr>
-                @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody id="ordersTable">
+                    @forelse ($orders as $order)
+                        <tr>
+                            @if(auth()->check() && auth()->user()->role && auth()->user()->role->role_name === 'Admin')
+                                <td style="text-align:center;"><input type="checkbox" class="row-checkbox" value="{{ $order->id }}"></td>
+                            @endif
+                            <td data-label="No">#{{ $loop->iteration + ($orders->currentPage() - 1) * $orders->perPage() }}</td>
+                            <td data-label="Order ID">{{ $order->order_number }}</td>
+                            <td data-label="Product">{{ $order->product->name ?? 'N/A' }}</td>
+                            <td data-label="Quantity">{{ $order->quantity }}</td>
+                            <td data-label="Order Date">
+                                {{ $order->created_at?->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') ?? 'N/A' }}
+                            </td>
+                            <td data-label="Paid Amount">${{ number_format($order->total_amount ?? 0, 2) }}</td>
+                            <td data-label="Actions">
+                                <div class="action-buttons">
+                                    <a href="{{ route('orders.show', $order->id) }}"
+                                       class="action-btn show-btn page-link-loading"
+                                       data-loading-text="Loading details..." title="View Details">
+                                        <i class="fas fa-info-circle"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="9" style="text-align:center;" id="found">No order found.</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         {{-- Pagination --}}
