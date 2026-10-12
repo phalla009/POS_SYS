@@ -463,7 +463,7 @@
                         <th>Products</th>
                         <th>Categories</th>
                         <th>Price</th>
-                        <th>Last Update</th>
+{{--                        <th>Last Update</th>--}}
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -494,9 +494,9 @@
                         <td data-label="Price" style="color: #2e7d32; font-weight: 600;">
                             ${{ number_format($product->price, 2) }}
                         </td>
-                        <td data-label="Create Date">
-                            {{ $product->updated_at?->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') ?? 'N/A' }}
-                        </td>
+{{--                        <td data-label="Create Date">--}}
+{{--                            {{ $product->updated_at?->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') ?? 'N/A' }}--}}
+{{--                        </td>--}}
                         <td data-label="Actions">
                             <div class="action-buttons">
                                 <a href="{{ route('products.show', $product->id) }}"

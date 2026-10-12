@@ -146,7 +146,7 @@
                     <th>Qty</th>
                     <th>Total Price</th>
                     <th>Status</th>
-                    <th>Last Updated</th>
+{{--                    <th>Last Updated</th>--}}
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -168,7 +168,7 @@
                                 <span class="stock-badge stock-in">In Stock</span>
                             @endif
                         </td>
-                        <td data-label="Updated Date">{{ $item->updated_at->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') }}</td>
+{{--                        <td data-label="Updated Date">{{ $item->updated_at->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') }}</td>--}}
                         <td data-label="Actions">
                             <div class="action-buttons">
                                 <a href="{{ route('inventory-items.show', $item->id) }}"
