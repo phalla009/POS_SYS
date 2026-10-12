@@ -476,7 +476,7 @@
                         <th>#</th>
                         <th>Category Name</th>
                         <th>Status</th>
-                        <th>Created At</th>
+                        <th>Last Update</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -487,13 +487,13 @@
                                 <input type="checkbox" class="row-checkbox" value="{{ $category->id }}">
                             </td>
                             <td data-label="No">#{{ $loop->iteration + ($categories->currentPage() - 1) * $categories->perPage() }}</td>
-                            <td data-label="Category Name">{{ $category->name }}</td>
+                            <td data-label="Category Name" style="color: black; font-weight: 600;">{{ $category->name }}</td>
                             <td data-label="Status">
                                 <span class="status-badge status-{{ $category->status }}">
                                     <i class="fas fa-circle"></i> {{ $category->status }}
                                 </span>
                             </td>
-                            <td data-label="Created At">{{ $category->created_at ? $category->created_at->format('d M, y H:i A') : 'N/A' }}</td>
+                            <td data-label="Created At">{{ $category->updated_at ? $category->updated_at->format('d M, y H:i A') : 'N/A' }}</td>
                             <td data-label="Actions">
                                 <div class="action-buttons">
                                     <a href="{{ route('categories.show', $category->id) }}"

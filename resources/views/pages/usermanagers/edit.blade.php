@@ -78,37 +78,38 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-user-shield"></i> Edit User</h2>
+        <h2><i class="fas fa-user-edit"></i> Edit User</h2>
 
         <form id="editUserManagerForm" action="{{ route('usermanagers.update', $usermanager->id) }}" method="POST">
             @csrf
             @method('PUT')
 
-            {{-- Row 1: Full Name, Login & Email --}}
+            {{-- Row 1: Full Name, Login, Email & Role --}}
             <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div class="form-group">
-                    <label for="name">Full Name:</label>
+                    <label for="name"><i class="fas fa-user"></i> Full Name:</label>
                     <input id="name" type="text" name="name" value="{{ old('name', $usermanager->name) }}" placeholder="Enter full name">
                     @error('name') <p class="text-danger">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="login">User Login:</label>
+                    <label for="login"><i class="fas fa-user-tag"></i> User Login:</label>
                     <input id="login" type="text" name="login" value="{{ old('login', $usermanager->login) }}" placeholder="Enter login username">
                     @error('login') <p class="text-danger">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Email:</label>
+                    <label for="email"><i class="fas fa-envelope"></i> Email:</label>
                     <input id="email" type="email" name="email" value="{{ old('email', $usermanager->email) }}" placeholder="Enter email">
                     @error('email') <p class="text-danger">{{ $message }}</p> @enderror
                 </div>
+
                 <div class="form-group">
-                    <label for="role_id">Assign Role:</label>
+                    <label for="role_id"><i class="fas fa-user-shield"></i> Assign Role:</label>
                     <select id="role_id" name="role_id">
                         <option value="">Select role</option>
                         @foreach($roles as $role)
-                            <option value="{{ $role->id }}" {{ old('role_id', $usermanager->role_id) == $role->id ? 'selected' : '' }}>
+                            <option value="{{ $role->id }}" {{ old('role_id', $usermanager->role_id) ==$role->id ? 'selected' : '' }}>
                                 {{ $role->role_name }}
                             </option>
                         @endforeach
@@ -120,42 +121,35 @@
             {{-- Row 2: Password & Confirm Password --}}
             <div class="form-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 12px;">
                 <div class="form-group">
-                    <label for="password">Password: <small>(leave blank to keep current)</small></label>
+                    <label for="password"><i class="fas fa-lock"></i> Password: <small>(leave blank to keep current)</small></label>
                     <input id="password" type="password" name="password" placeholder="Enter new password">
                     @error('password') <p class="text-danger">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="password_confirmation">Confirm Password:</label>
+                    <label for="password_confirmation"><i class="fas fa-key"></i> Confirm Password:</label>
                     <input id="password_confirmation" type="password" name="password_confirmation" placeholder="Confirm password">
                     @error('password_confirmation') <p class="text-danger">{{ $message }}</p> @enderror
                 </div>
             </div>
 
-            {{-- Row 3: Role & Description --}}
-
+            {{-- Row 3: Description --}}
+            <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div class="form-group">
-                    <label for="description">Description:</label>
+                    <label for="description"><i class="fas fa-align-left"></i> Description:</label>
                     <textarea id="description" name="description"
-                        placeholder="description..."
-                        rows="3"
-                        style="width: 100%; resize: none;">{{ old('description', $usermanager->description) }}</textarea>
+                              placeholder="description..."
+                              rows="3"
+                              style="width: 100%; resize: none;height: 120px; ">{{ old('description', $usermanager->description) }}</textarea>
                     @error('description') <p class="text-danger">{{ $message }}</p> @enderror
                 </div>
-
-             {{-- <div class="form-group">
-                    <label>Permissions for Selected Role:</label>
-                    <div id="permissionsContainer" class="perm-display-grid">
-                        <span style="color: #9ca3af; font-size: 12.5px; grid-column: span 2;">Select a role to view permissions...</span>
-                    </div>
-                </div> --}}
+            </div>
 
             {{-- Buttons --}}
-            <div >
+            <div>
                 <button type="submit" class="btn btn-update">
-                    <i class="fas fa-save"></i> Update User
+                    <i class="fas fa-sync-alt"></i> Update User
                 </button>
-
             </div>
 
         </form>
@@ -177,47 +171,52 @@
         });
 
         document.getElementById('editUserManagerForm').addEventListener('submit', function () {
-            loadingText.textContent = 'Saving...';
+            loadingText.textContent = 'Updating...';
             overlay.style.display = 'flex';
         });
 
-        document.getElementById('cancel').addEventListener('click', function () {
-            document.getElementById('editUserManagerForm').reset();
-            if (roleSelect.value) {
-                roleSelect.dispatchEvent(new Event('change'));
-            } else {
-                permissionsContainer.innerHTML =
-                    '<span style="color:#9ca3af;font-size:12.5px;grid-column:span 2;">Select a role to view permissions...</span>';
-            }
-        });
+        const cancelBtn = document.getElementById('cancel');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function () {
+                document.getElementById('editUserManagerForm').reset();
+                if (roleSelect && roleSelect.value) {
+                    roleSelect.dispatchEvent(new Event('change'));
+                } else if (permissionsContainer) {
+                    permissionsContainer.innerHTML =
+                        '<span style="color:#9ca3af;font-size:12.5px;grid-column:span 2;">Select a role to view permissions...</span>';
+                }
+            });
+        }
 
         const roles = @json($roles);
         const roleSelect = document.getElementById('role_id');
         const permissionsContainer = document.getElementById('permissionsContainer');
 
-        roleSelect.addEventListener('change', function () {
-            const roleId = this.value;
-            permissionsContainer.innerHTML = '';
-            const role = roles.find(r => r.id == roleId);
+        if (roleSelect && permissionsContainer) {
+            roleSelect.addEventListener('change', function () {
+                const roleId = this.value;
+                permissionsContainer.innerHTML = '';
+                const role = roles.find(r => r.id == roleId);
 
-            if (role && role.permissions && role.permissions.length > 0) {
-                role.permissions.forEach(p => {
-                    const div = document.createElement('div');
-                    div.className = 'perm-display-item';
-                    div.innerHTML = `
-                        <input type="checkbox" checked disabled id="perm_${p.id}">
-                        <label for="perm_${p.id}" style="font-size:12.5px; color:#4b5563; cursor:default;">${p.permission_name}</label>
-                    `;
-                    permissionsContainer.appendChild(div);
-                });
-            } else {
-                permissionsContainer.innerHTML =
-                    '<span style="color:#9ca3af;font-size:12.5px;grid-column:span 2;">No permissions found for this role.</span>';
+                if (role && role.permissions && role.permissions.length > 0) {
+                    role.permissions.forEach(p => {
+                        const div = document.createElement('div');
+                        div.className = 'perm-display-item';
+                        div.innerHTML = `
+                            <input type="checkbox" checked disabled id="perm_${p.id}">
+                            <label for="perm_${p.id}" style="font-size:12.5px; color:#4b5563; cursor:default;">${p.permission_name}</label>
+                        `;
+                        permissionsContainer.appendChild(div);
+                    });
+                } else {
+                    permissionsContainer.innerHTML =
+                        '<span style="color:#9ca3af;font-size:12.5px;grid-column:span 2;">No permissions found for this role.</span>';
+                }
+            });
+
+            if (roleSelect.value) {
+                roleSelect.dispatchEvent(new Event('change'));
             }
-        });
-
-        if (roleSelect.value) {
-            roleSelect.dispatchEvent(new Event('change'));
         }
     </script>
 @endsection

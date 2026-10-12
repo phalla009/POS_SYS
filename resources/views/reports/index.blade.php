@@ -85,20 +85,20 @@
         {{-- Stat Cards Grid (2-Column Grid on Mobile) --}}
         <div class="stats-grid" id="sortableCards">
             <div class="stat-card">
-                <h3>${{ number_format($salesThisMonth ?? 0, 2) }}</h3>
                 <p>This Month Sales</p>
+                <h3>${{ number_format($salesThisMonth ?? 0, 2) }}</h3>
             </div>
             <div class="stat-card">
-                <h3>{{ $ordersThisMonth ?? 0 }}</h3>
                 <p>Orders This Month</p>
+                <h3>{{ $ordersThisMonth ?? 0 }}</h3>
             </div>
             <div class="stat-card">
-                <h3>{{ $newCustomers ?? 0 }}</h3>
                 <p>New Customers</p>
+                <h3>{{ $newCustomers ?? 0 }}</h3>
             </div>
             <div class="stat-card">
-                <h3>{{ $customerSatisfaction ?? 0 }}%</h3>
                 <p>Customer Satisfaction</p>
+                <h3>{{ $customerSatisfaction ?? 0 }}%</h3>
             </div>
         </div>
 

@@ -196,11 +196,10 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-box-open"></i> Product Details</h2>
+        <h2><i class="fas fa-box-open"></i> Product Details</h2><br>
 
         {{-- Image + Info Layout --}}
         <div class="product-layout">
-
             {{-- Image Gallery --}}
             <div class="image-gallery">
                 @if ($product->images->count() > 0)
@@ -271,7 +270,7 @@
 
                 {{-- Row 4: Add to POS --}}
                 <div class="info-row">
-                    <div class="info-box full">
+                    <div class="info-box">
                         <div class="info-label"><i class="fas fa-cash-register"></i> Add to POS</div>
                         <div class="info-value">
                             <span class="status-badge {{ $product->add_to_pos ? 'pos-yes' : 'pos-no' }}">

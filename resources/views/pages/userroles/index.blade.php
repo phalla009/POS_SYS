@@ -85,15 +85,14 @@
                    data-loading-text="Loading form...">
                     <i class="fas fa-circle-plus"></i> Add New Role
                 </a>
-
-                {{-- 🔍 Search Field --}}
-                <div class="search-wrapper">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text"
-                           id="roleSearch"
-                           placeholder="Search name or description..."
-                           autocomplete="off">
-                </div>
+            </div>
+            {{-- Search Field --}}
+            <div class="search-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text"
+                       id="roleSearch"
+                       placeholder="Search name or description..."
+                       autocomplete="off">
             </div>
         </div>
 
@@ -112,7 +111,7 @@
                 @forelse ($roles as $role)
                     <tr class="role-row">
                         <td data-label="No">#{{ $loop->iteration }}</td>
-                        <td data-label="Role Name">
+                        <td data-label="Role Name" style="color: black; font-weight: 600;">
                             @php
                                 $icon    = 'fas fa-user';
                                 $bgColor = '#7f8c8d';

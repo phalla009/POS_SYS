@@ -101,7 +101,7 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-user"></i> Customer Details</h2>
+        <h2><i class="fas fa-user"></i> Customer Details</h2><br>
 
         {{-- Row 1: Name & Gender --}}
         <div class="info-row">
@@ -131,7 +131,7 @@
                     <span class="status-badge status-{{ $customer->status }}">
                         <i class="fas fa-circle"></i> {{ $customer->status }}
                     </span>
-                </div> 
+                </div>
             </div>
         </div>
 
@@ -139,11 +139,11 @@
         <div class="info-row">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-calendar-plus"></i> Created At</div>
-                <div class="info-value">{{ $customer->created_at ? $customer->created_at->format('Y-m-d H:i') : 'N/A' }}</div>
+                <div class="info-value">{{ $customer->created_at ? $customer->created_at->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
             </div>
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-clock"></i> Last Updated</div>
-                <div class="info-value">{{ $customer->updated_at ? $customer->updated_at->format('Y-m-d H:i') : 'N/A' }}</div>
+                <div class="info-value">{{ $customer->updated_at ? $customer->updated_at->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
             </div>
         </div>
 

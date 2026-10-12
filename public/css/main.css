@@ -301,10 +301,10 @@ a {
 .btn.btn-primary{
     background: repeating-linear-gradient(
         -45deg,
-        #0f1117,
-        #000000d1,
-        #0f1117 3px,
-        #000000d1 3px
+        #3d6c3d,
+        #2e652e,
+        #3d6c3d 3px,
+        #2e652e 3px
     );
     color: white;
     padding: 10px 20px;
@@ -323,12 +323,18 @@ a {
 
 .btn.btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px #181c27;
+    box-shadow: 0 4px 12px #005e00;
 }
 .btn-success,
 .btn-update {
     width: 45%;
-    background: repeating-linear-gradient(-45deg, #48bb78,#3c9d64,#48bb78 3px,#3c9d64 3px);
+    background: repeating-linear-gradient(
+        -45deg,
+        #3d6c3d,
+        #2e652e,
+        #3d6c3d 3px,
+        #2e652e 3px
+    );
     color: white;
     transition:0.3s ease,transform 0.2s ease;
     float: left;
@@ -347,7 +353,7 @@ a {
 .btn-success:hover,
 .btn-update:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(56, 161, 105, 0.3);
+    box-shadow: 0 4px 12px rgb(0 94 0);
 }
 .btn-cancel:hover {
     transform: translateY(-2px);
@@ -377,11 +383,10 @@ a {
     padding: 10px 20px;
     background: repeating-linear-gradient(
         -45deg,
-        #0f1117,
-        #0f1117 2px,
-        #000000d1 2px,
-        rgb(9, 9, 9) 4px,
-        rgb(9, 9, 9) 4px
+        #ff4242,
+        #ff2e2e,
+        #ff4242 3px,
+        #ff2e2e 3px
     );
     color: #fff;
     font-size: 14px;
@@ -396,7 +401,7 @@ a {
 .btn-back:hover {
     color: #fff;
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.46);
+    box-shadow: 0 4px 6px -1px rgb(255 0 0 / 0.46);
 }
 .btn-back:active {
     transform: translateY(0);
@@ -419,7 +424,7 @@ a {
     background: repeating-linear-gradient(
         -45deg,
         #0f1117,
-        #181c27 2px,
+        #11141b 2px,
         rgb(9, 9, 9) 4px,
         rgb(9, 9, 9) 4px
     );

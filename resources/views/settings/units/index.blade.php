@@ -87,6 +87,17 @@
         }
         .search-results-badge i { font-size: 11px; }
 
+        /* Abbreviation Badge */
+        .abbr-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #f1f5f9;
+            color: #475569;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
         /* Pagination */
         .inventory-pagination {
             display: flex;
@@ -125,9 +136,11 @@
 
         {{-- Controls Header --}}
         <div class="controls-header">
-            <a href="{{ route('units.create') }}" class="btn btn-primary page-link-loading" data-loading-text="Loading add...">
-                <i class="fas fa-circle-plus"></i> Add New Unit
-            </a>
+            <div class="filter-controls">
+                <a href="{{ route('units.create') }}" class="btn btn-primary page-link-loading" data-loading-text="Loading add...">
+                    <i class="fas fa-circle-plus"></i> Add New Unit
+                </a>
+            </div>
 
             {{-- Auto Search Form --}}
             <form method="GET" action="{{ route('units.index') }}" class="search-wrapper" id="searchForm">
@@ -135,22 +148,10 @@
                     <i class="fas fa-search search-icon"></i>
                     <input type="text" name="search" id="searchInput"
                            value="{{ $search ?? '' }}"
-                           placeholder="Search units..." autocomplete="off">
-                    @if(!empty($search))
-                        <button type="button" class="search-clear-btn" id="clearSearchBtn" title="Clear">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    @endif
+                           placeholder="Search units, abbreviation or description..."
+                           autocomplete="off">
                 </div>
             </form>
-
-            {{-- Results Badge --}}
-            @if(!empty($search))
-                <span class="search-results-badge">
-                    <i class="fas fa-filter"></i>
-                    {{ $units->total() }} result{{ $units->total() !== 1 ? 's' : '' }} for &ldquo;{{ $search }}&rdquo;
-                </span>
-            @endif
         </div>
 
         {{-- Table --}}
@@ -160,6 +161,7 @@
                 <tr>
                     <th>#</th>
                     <th>Name</th>
+                    <th>Abbreviation</th>
                     <th>Description</th>
                     <th>Updated Date</th>
                     <th>Actions</th>
@@ -169,7 +171,14 @@
                 @forelse ($units as $unit)
                     <tr>
                         <td data-label="No">#{{ $loop->iteration + ($units->currentPage() - 1) * $units->perPage() }}</td>
-                        <td data-label="Name">{{ $unit->name }}</td>
+                        <td data-label="Name" style="color: black; font-weight: 600;">{{ $unit->name }}</td>
+                        <td data-label="Abbreviation">
+                            @if(!empty($unit->abbreviation))
+                                <span class="abbr-badge">{{ $unit->abbreviation }}</span>
+                            @else
+                                <span style="color: #9ca3af;">N/A</span>
+                            @endif
+                        </td>
                         <td data-label="Description">{{ $unit->description ?? 'N/A' }}</td>
                         <td data-label="Updated Date">{{ $unit->updated_at->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') }}</td>
                         <td data-label="Actions">
@@ -197,7 +206,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" style="text-align:center; padding:30px;" id="found">
+                        <td colspan="6" style="text-align:center; padding:30px;" id="found">
                             @if(!empty($search))
                                 <i class="fas fa-search" style="font-size:24px;color:#ccc;display:block;margin-bottom:8px;"></i>
                                 No units found matching &ldquo;<strong>{{ $search }}</strong>&rdquo;.
@@ -230,7 +239,7 @@
 
                     {{-- Page numbers --}}
                     @foreach ($units->getUrlRange(1, $units->lastPage()) as $page => $url)
-                        @if ($page == $units->currentPage())
+                        @if ($page == $types->currentPage() ?? $units->currentPage())
                             <li class="page-btn active"><span>{{ $page }}</span></li>
                         @else
                             <li class="page-btn">

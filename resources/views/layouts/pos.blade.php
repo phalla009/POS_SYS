@@ -14,7 +14,7 @@
 
         /* ── TOPBAR STYLES ── */
         .pos-topbar {
-            background: repeating-linear-gradient(-45deg, #fd6c24, #ff5a05, #fd6c24 3px, #ff5a05 3px);
+            background: repeating-linear-gradient(-45deg, #6e432a, #593828, #6e432a 3px, #ff5a05 3px);
             padding: 12px 24px;
             display: flex;
             align-items: center;

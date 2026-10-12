@@ -191,7 +191,7 @@
             font-weight: 600;
             cursor: pointer;
             background: #fff;
-            color: #374151;
+            color: #ff1818;
             font-family: 'DM Sans', sans-serif;
             transition: background 0.15s, box-shadow 0.15s;
         }
@@ -211,10 +211,10 @@
             cursor: pointer;
             background: repeating-linear-gradient(
                 -45deg,
-                #0f1117,
-                #000000d1,
-                #0f1117 3px,
-                #000000d1 3px
+                #3d6c3d,
+                #2e652e,
+                #3d6c3d 3px,
+                #2e652e 3px
             );
             color: #fff;
             font-family: 'DM Sans', sans-serif;
@@ -223,18 +223,18 @@
 
         .btn-confirm-remove:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px #181c27;
+            box-shadow: 0 4px 12px #005e00;
         }
 
         /* ── TOAST ── */
-        .toast { position: fixed; top: 60px; right: 28px; background: repeating-linear-gradient(
+        .toast { position: fixed; top: 60px; right: 28px;background: repeating-linear-gradient(
             -45deg,
-            #0f1117,
-            #0f1117 2px,
-            #000000d1 2px,
-            rgb(9, 9, 9) 4px,
-            rgb(9, 9, 9) 4px
-        ); color: #fff; padding: 12px 20px; border-radius: 5px; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 999999; opacity: 0; transform: translateY(12px); transition: opacity 0.25s, transform 0.25s; pointer-events: none; }
+            #3d6c3d,
+            #2e652e,
+            #3d6c3d 3px,
+            #2e652e 3px
+        );
+            color: #fff; padding: 12px 20px; border-radius: 6px; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 999999; opacity: 0; transform: translateY(12px); transition: opacity 0.25s, transform 0.25s; pointer-events: none; }
         .toast.show { opacity: 1; transform: translateY(0); }
         .toast.success i { color: #10b981; }
         .toast.error   i { color: #ef4444; }
@@ -726,7 +726,7 @@
                     <i class="fas fa-times" style="margin-right:5px;"></i>Cancel
                 </button>
                 <button class="btn-confirm-remove" onclick="confirmAddToCart()"
-                        style="background:#111;display:flex;align-items:center;justify-content:center;gap:7px;">
+                        style="display:flex;align-items:center;justify-content:center;gap:7px;">
                     <i class="fas fa-cart-plus"></i> Add to Cart
                 </button>
             </div>

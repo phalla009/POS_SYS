@@ -117,20 +117,20 @@
         {{-- Stats Grid ដាក់ id="sortableCards" ដើម្បីឱ្យអាចទាញប្ដូរទីតាំងឆ្វេងស្តាំបាន --}}
         <div class="stats-grid" id="sortableCards">
             <div class="stat-card">
-                <h3>{{ $totalItems }}</h3>
                 <p>Total Items</p>
+                <h3>{{ $totalItems }}</h3>
             </div>
             <div class="stat-card">
-                <h3>{{ $lowStockItems }}</h3>
                 <p>Low Stock Products</p>
+                <h3>{{ $lowStockItems }}</h3>
             </div>
             <div class="stat-card">
-                <h3>{{ $outOfStockItems }}</h3>
                 <p>Out of Stocks</p>
+                <h3>{{ $outOfStockItems }}</h3>
             </div>
             <div class="stat-card">
-                <h3>${{ number_format($inventoryValue, 2) }}</h3>
                 <p>Inventory Value</p>
+                <h3>${{ number_format($inventoryValue, 2) }}</h3>
             </div>
         </div>
 
@@ -146,7 +146,7 @@
                     <th>Qty</th>
                     <th>Total Price</th>
                     <th>Status</th>
-                    <th>Updated Date</th>
+                    <th>Last Updated</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -154,11 +154,11 @@
                 @forelse ($items as $item)
                     <tr>
                         <td data-label="No">#{{ $loop->iteration + ($items->currentPage() - 1) * $items->perPage() }}</td>
-                        <td data-label="Name">{{ $item->name }}</td>
+                        <td data-label="Name" style="color: black; font-weight: 600;">{{ $item->name }}</td>
                         <td data-label="Type">{{ $item->type ?? '-' }}</td>
                         <td data-label="Unit">{{ $item->unit ?? '-' }}</td>
-                        <td data-label="Qty">{{ $item->qty }}</td>
-                        <td data-label="Price">${{ number_format($item->price, 2) }}</td>
+                        <td data-label="Qty" style="color: black; font-weight: 600;">{{ $item->qty }}</td>
+                        <td data-label="Price" style="color: #2e7d32; font-weight: 600;">${{ number_format($item->price, 2) }}</td>
                         <td data-label="Status">
                             @if($item->status === 'out')
                                 <span class="stock-badge stock-out">Out of Stock</span>

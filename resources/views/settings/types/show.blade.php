@@ -85,7 +85,7 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-layer-group"></i> Type Details: {{ $type->name }}</h2>
+        <h2><i class="fas fa-layer-group"></i> Type Details </h2><br>
 
         {{-- Row 1: Name --}}
         <div class="info-row">
@@ -107,11 +107,11 @@
         <div class="info-row" style="grid-template-columns: repeat(2, 1fr);">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-calendar-plus"></i> Created At</div>
-                <div class="info-value">{{ $type->created_at ? $type->created_at->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') : 'N/A' }}</div>
+                <div class="info-value">{{ $type->created_at ? $type->created_at->timezone('Asia/Phnom_Penh')->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
             </div>
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-clock"></i> Last Updated</div>
-                <div class="info-value">{{ $type->updated_at ? $type->updated_at->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') : 'N/A' }}</div>
+                <div class="info-value">{{ $type->updated_at ? $type->updated_at->timezone('Asia/Phnom_Penh')->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
             </div>
         </div>
 

@@ -15,7 +15,7 @@
             @csrf
             <div class="form-row">
                 <div class="form-group">
-                    <label for="name">Name</label>
+                    <label for="name"><i class="fas fa-tag"></i> Name</label>
                     <input type="text" name="name" id="name" value="{{ old('name') }}">
                     @error('name')
                     <p class="text-danger mt-1">{{ $message }}</p>
@@ -25,7 +25,7 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="type">Type</label>
+                    <label for="type"><i class="fas fa-layer-group"></i> Type</label>
                     <select name="type" id="type">
                         <option value="">Select type</option>
                         @foreach($types as $type)
@@ -39,7 +39,7 @@
                     @enderror
                 </div>
                 <div class="form-group">
-                    <label for="unit">Unit</label>
+                    <label for="unit"><i class="fas fa-balance-scale"></i> Unit</label>
                     <select name="unit" id="unit">
                         <option value="">Select unit</option>
                         @foreach($units as $unit)
@@ -56,7 +56,7 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="price">Price</label>
+                    <label for="price"><i class="fas fa-dollar-sign"></i> Price</label>
                     <input type="number" step="0.01" min="0" name="price" id="price" value="{{ old('price') }}">
                     @error('price')
                     <p class="text-danger mt-1">{{ $message }}</p>
@@ -64,7 +64,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="qty">Quantity</label>
+                    <label for="qty"><i class="fas fa-cubes"></i> Quantity</label>
                     <input type="number" min="0" name="qty" id="qty" value="{{ old('qty') }}">
                     @error('qty')
                     <p class="text-danger mt-1">{{ $message }}</p>
@@ -95,8 +95,8 @@
         });
 
         form.addEventListener('submit', function() {
-            loadingText.textContent = 'Saving...';
-            overlay.style.display = 'flex';
+            if (loadingText) loadingText.textContent = 'Saving...';
+            if (overlay) overlay.style.display = 'flex';
         });
 
         document.getElementById('cancelBtn').addEventListener('click', function() {

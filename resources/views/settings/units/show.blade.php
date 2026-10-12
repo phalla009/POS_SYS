@@ -85,7 +85,7 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-ruler"></i> Unit Details: {{ $unit->name }}</h2>
+        <h2><i class="fas fa-ruler"></i> Unit Details </h2><br>
 
         {{-- Row 1: Name & Abbreviation --}}
         <div class="info-row" style="grid-template-columns: 1fr;">
@@ -111,11 +111,11 @@
         <div class="info-row">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-calendar-plus"></i> Created At</div>
-                <div class="info-value">{{ $unit->created_at ? $unit->created_at->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') : 'N/A' }}</div>
+                <div class="info-value">{{ $unit->created_at ? $unit->created_at->timezone('Asia/Phnom_Penh')->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
             </div>
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-clock"></i> Last Updated</div>
-                <div class="info-value">{{ $unit->updated_at ? $unit->updated_at->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') : 'N/A' }}</div>
+                <div class="info-value">{{ $unit->updated_at ? $unit->updated_at->timezone('Asia/Phnom_Penh')->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
             </div>
         </div>
 

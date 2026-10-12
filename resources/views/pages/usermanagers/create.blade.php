@@ -90,24 +90,25 @@
             {{-- Row 1: Full Name, Login & Email --}}
             <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div class="form-group">
-                    <label for="name">Full Name:</label>
+                    <label for="name"><i class="fas fa-user"></i> Full Name:</label>
                     <input id="name" type="text" name="name" value="{{ old('name') }}" placeholder="Enter full name">
                     @error('name') <p class="text-danger">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="login">User Login:</label>
+                    <label for="login"><i class="fas fa-user-tag"></i> User Login:</label>
                     <input id="login" type="text" name="login" value="{{ old('login') }}" placeholder="Enter login username">
                     @error('login') <p class="text-danger">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Email:</label>
+                    <label for="email"><i class="fas fa-envelope"></i> Email:</label>
                     <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="Enter email">
                     @error('email') <p class="text-danger">{{ $message }}</p> @enderror
                 </div>
+
                 <div class="form-group">
-                    <label for="role_id">Assign Role:</label>
+                    <label for="role_id"><i class="fas fa-user-shield"></i> Assign Role:</label>
                     <select id="role_id" name="role_id">
                         <option value="">Select role</option>
                         @foreach($roles as $role)
@@ -123,38 +124,30 @@
             {{-- Row 2: Password & Confirm Password --}}
             <div class="form-row grid-row-2">
                 <div class="form-group">
-                    <label for="password">Password:</label>
+                    <label for="password"><i class="fas fa-lock"></i> Password:</label>
                     <input id="password" type="password" name="password" placeholder="Enter password">
                     @error('password') <p class="text-danger">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="password_confirmation">Confirm Password:</label>
+                    <label for="password_confirmation"><i class="fas fa-key"></i> Confirm Password:</label>
                     <input id="password_confirmation" type="password" name="password_confirmation" placeholder="Confirm password">
                     @error('password_confirmation') <p class="text-danger">{{ $message }}</p> @enderror
                 </div>
             </div>
-            {{-- Row 3: Role & Description --}}
 
-                <div class="form-group" >
-                    <label for="description">Description:</label>
-                    <textarea id="description" name="description"
-                        placeholder="description..."
-                        rows="3"
-                        style="width: 100%; resize: none;">{{ old('description') }}</textarea>
-                    @error('description') <p class="text-danger">{{ $message }}</p> @enderror
-                </div>
-
-
-            {{-- <div class="form-group">
-                    <label>Permissions for Selected Role:</label>
-                    <div id="permissionsContainer" class="perm-display-grid">
-                        <span style="color: #9ca3af; font-size: 12.5px; grid-column: span 2;">Select a role to view permissions...</span>
-                    </div>
-                </div> --}}
+            {{-- Row 3: Description --}}
+            <div class="form-group">
+                <label for="description"><i class="fas fa-align-left"></i> Description:</label>
+                <textarea id="description" name="description"
+                          placeholder="description..."
+                          rows="3"
+                          style="width: 100%; resize: none;height: 120px; ">{{ old('description') }}</textarea>
+                @error('description') <p class="text-danger">{{ $message }}</p> @enderror
+            </div>
 
             {{-- Buttons --}}
-            <div >
+            <div>
                 <button type="submit" class="btn btn-success">
                     <i class="fas fa-save"></i> Add User
                 </button>
@@ -188,37 +181,42 @@
 
         document.getElementById('cancel').addEventListener('click', function() {
             document.getElementById('userManagerForm').reset();
-            document.getElementById('permissionsContainer').innerHTML =
-                '<span style="color:#9ca3af;font-size:12.5px;grid-column:span 2;">Select a role to view permissions...</span>';
+            const permissionsContainer = document.getElementById('permissionsContainer');
+            if (permissionsContainer) {
+                permissionsContainer.innerHTML =
+                    '<span style="color:#9ca3af;font-size:12.5px;grid-column:span 2;">Select a role to view permissions...</span>';
+            }
         });
 
         const roles = @json($roles);
         const roleSelect = document.getElementById('role_id');
         const permissionsContainer = document.getElementById('permissionsContainer');
 
-        roleSelect.addEventListener('change', function() {
-            const roleId = this.value;
-            permissionsContainer.innerHTML = '';
-            const role = roles.find(r => r.id == roleId);
+        if (roleSelect && permissionsContainer) {
+            roleSelect.addEventListener('change', function() {
+                const roleId = this.value;
+                permissionsContainer.innerHTML = '';
+                const role = roles.find(r => r.id == roleId);
 
-            if (role && role.permissions && role.permissions.length > 0) {
-                role.permissions.forEach(p => {
-                    const div = document.createElement('div');
-                    div.className = 'perm-display-item';
-                    div.innerHTML = `
-                        <input type="checkbox" checked disabled id="perm_${p.id}">
-                        <label for="perm_${p.id}" style="font-size:12.5px; color:#4b5563; cursor:default;">${p.permission_name}</label>
-                    `;
-                    permissionsContainer.appendChild(div);
-                });
-            } else {
-                permissionsContainer.innerHTML =
-                    '<span style="color:#9ca3af;font-size:12.5px;grid-column:span 2;">No permissions found for this role.</span>';
+                if (role && role.permissions && role.permissions.length > 0) {
+                    role.permissions.forEach(p => {
+                        const div = document.createElement('div');
+                        div.className = 'perm-display-item';
+                        div.innerHTML = `
+                            <input type="checkbox" checked disabled id="perm_${p.id}">
+                            <label for="perm_${p.id}" style="font-size:12.5px; color:#4b5563; cursor:default;">${p.permission_name}</label>
+                        `;
+                        permissionsContainer.appendChild(div);
+                    });
+                } else {
+                    permissionsContainer.innerHTML =
+                        '<span style="color:#9ca3af;font-size:12.5px;grid-column:span 2;">No permissions found for this role.</span>';
+                }
+            });
+
+            if (roleSelect.value) {
+                roleSelect.dispatchEvent(new Event('change'));
             }
-        });
-
-        if (roleSelect.value) {
-            roleSelect.dispatchEvent(new Event('change'));
         }
     </script>
 @endsection

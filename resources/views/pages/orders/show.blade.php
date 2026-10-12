@@ -137,7 +137,7 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-shopping-cart"></i> Order Details</h2>
+        <h2><i class="fas fa-shopping-cart"></i> Order Details</h2><br>
 
         {{-- Row 1: Order ID, Customer, Status --}}
         <div class="info-row">

@@ -124,7 +124,7 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-boxes"></i> Inventory Item Details</h2>
+        <h2><i class="fas fa-boxes"></i> Inventory Item Details</h2><br>
 
         {{-- Row 1: Name & Type --}}
         <div class="info-row">
@@ -133,24 +133,27 @@
                 <div class="info-value">{{ $item->name }}</div>
             </div>
             <div class="info-box">
-                <div class="info-label"><i class="fas fa-layer-group"></i> Type</div>
-                <div class="info-value">{{ $item->type ?? '-' }}</div>
+                <div class="info-label"><i class="fas fa-cubes"></i> Quantity</div>
+                <div class="info-value">{{ $item->qty }}</div>
             </div>
+
         </div>
 
         {{-- Row 2: Unit, Price, Qty --}}
-        <div class="info-row-3">
-            <div class="info-box">
-                <div class="info-label"><i class="fas fa-ruler"></i> Unit</div>
-                <div class="info-value">{{ $item->unit ?? '-' }}</div>
-            </div>
+        <div class="info-row">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-dollar-sign"></i> Price</div>
                 <div class="info-value">${{ number_format($item->price, 2) }}</div>
             </div>
             <div class="info-box">
-                <div class="info-label"><i class="fas fa-cubes"></i> Quantity</div>
-                <div class="info-value">{{ $item->qty }}</div>
+                <div class="info-label"><i class="fas fa-ruler"></i> Unit</div>
+                <div class="info-value">{{ $item->unit ?? '-' }}</div>
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-box">
+                <div class="info-label"><i class="fas fa-layer-group"></i> Type</div>
+                <div class="info-value">{{ $item->type ?? '-' }}</div>
             </div>
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-circle-check"></i> Status</div>
@@ -165,16 +168,15 @@
                 </div>
             </div>
         </div>
-
         {{-- Row 3: Created At & Last Updated --}}
         <div class="info-row">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-calendar-plus"></i> Created At</div>
-                <div class="info-value">{{ $item->created_at ? $item->created_at->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') : 'N/A' }}</div>
+                <div class="info-value">{{ $item->created_at ? $item->created_at->timezone('Asia/Phnom_Penh')->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
             </div>
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-clock"></i> Last Updated</div>
-                <div class="info-value">{{ $item->updated_at ? $item->updated_at->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') : 'N/A' }}</div>
+                <div class="info-value">{{ $item->updated_at ? $item->updated_at->timezone('Asia/Phnom_Penh')->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
             </div>
         </div>
 

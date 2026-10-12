@@ -71,7 +71,7 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-box-open"></i> Edit Product</h2>
+        <h2><i class="fas fa-edit"></i> Edit Product</h2>
 
         <form id="productForm" action="{{ route('products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -80,17 +80,17 @@
             <!-- Product Name & Brand -->
             <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div class="form-group" style="flex: 1; min-width: 250px;">
-                    <label>Product Name:</label>
-                    <input type="text" name="name" value="{{ old('name', $product->name) }}">
+                    <label for="name"><i class="fas fa-tag"></i> Product Name:</label>
+                    <input id="name" type="text" name="name" value="{{ old('name', $product->name) }}">
                     @error('name')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div class="form-group" style="flex: 1; min-width: 250px;">
-                    <label>Brand:</label>
-                    <select name="category_id">
-                        <option value="">Select Brand</option>
+                    <label for="category_id"><i class="fas fa-copyright"></i> Category:</label>
+                    <select id="category_id" name="category_id">
+                        <option value="">Select Category</option>
                         @foreach($categories as $category)
                             <option value="{{ $category->id }}" {{ $product->category_id == $category->id ? 'selected' : '' }}>
                                 {{ $category->name }}
@@ -98,7 +98,7 @@
                         @endforeach
                     </select>
                     @error('category_id')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
@@ -106,60 +106,62 @@
             <!-- Price & Stock -->
             <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div class="form-group" style="flex: 1; min-width: 250px;">
-                    <label>Price:</label>
-                    <input type="number" name="price" step="0.01" value="{{ old('price', $product->price) }}">
+                    <label for="price"><i class="fas fa-dollar-sign"></i> Price:</label>
+                    <input id="price" type="number" name="price" step="0.01" value="{{ old('price', $product->price) }}">
                     @error('price')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div class="form-group" style="flex: 1; min-width: 250px;">
-                    <label>Stock:</label>
-                    <input type="number" name="stock" value="{{ old('stock', $product->stock) }}">
+                    <label for="stock"><i class="fas fa-cubes"></i> Stock:</label>
+                    <input id="stock" type="number" name="stock" value="{{ old('stock', $product->stock) }}">
                     @error('stock')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
 
             <!-- Current Images -->
-            <div class="form-group">
-                <label>Current Images:</label>
-                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                    @foreach($product->images as $image)
-                        <div class="image-wrapper">
-                            <img src="{{ asset('images/products/' . $image->image) }}" alt="Product Image">
-                            <label>
-                                <input type="checkbox" name="delete_images[]" value="{{ $image->id }}">
-                                Remove
-                            </label>
-                        </div>
-                    @endforeach
+            <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div class="form-group">
+                    <label><i class="fas fa-photo-video"></i> Current Images:</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        @foreach($product->images as $image)
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/products/' . $image->image) }}" alt="Product Image">
+                                <label>
+                                    <input type="checkbox" name="delete_images[]" value="{{ $image->id }}">
+                                    <i class="fas fa-trash-alt"></i> Remove
+                                </label>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
 
             <!-- Add More Images & Status -->
             <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div class="form-group" style="flex: 1; min-width: 250px;">
-                    <label>Add More Images:</label>
-                    <input type="file" name="images[]" multiple accept="image/*">
+                    <label for="images"><i class="fas fa-images"></i> Add More Images:</label>
+                    <input id="images" type="file" name="images[]" multiple accept="image/*">
                     @error('images.*')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                     @error('images')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div class="form-group" style="flex: 1; min-width: 250px;">
-                    <label>Status:</label>
-                    <select name="status">
+                    <label for="status"><i class="fas fa-toggle-on"></i> Status:</label>
+                    <select id="status" name="status">
                         <option value="">Select Status</option>
                         <option value="active"   {{ $product->status == 'active'   ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ $product->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
                     </select>
                     @error('status')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
@@ -168,25 +170,25 @@
             <div class="form-group">
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 10px;">
                     <input id="add_to_pos" type="checkbox" name="add_to_pos" value="1"
-                        {{ old('add_to_pos', $product->add_to_pos) ? 'checked' : '' }}
-                        style="width: 18px; height: 18px; cursor: pointer; accent-color: #3498db;">
-                    <span>Add to POS</span>
+                           {{ old('add_to_pos', $product->add_to_pos) ? 'checked' : '' }}
+                           style="width: 18px; height: 18px; cursor: pointer; accent-color: #3498db;">
+                    <span><i class="fas fa-cash-register"></i> Add to POS</span>
                 </label>
                 @error('add_to_pos')
-                    <p class="text-danger mt-1">{{ $message }}</p>
+                <p class="text-danger mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <!-- Description -->
             <div class="form-group">
-                <label>Description:</label>
-                <textarea name="description"
-                        style="height: 120px; resize: none;">{{ old('description', $product->description) }}</textarea>
+                <label for="description"><i class="fas fa-align-left"></i> Description:</label>
+                <textarea id="description" name="description"
+                          style="height: 120px; resize: none;">{{ old('description', $product->description) }}</textarea>
             </div>
 
             <div>
                 <button class="btn btn-update" type="submit" style="float: none; ">
-                    <i class="fas fa-save"></i> Update Product
+                    <i class="fas fa-sync-alt"></i> Update Product
                 </button>
             </div>
         </form>

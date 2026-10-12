@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('pageTitle')
-   Edited Categories
+    Edited Categories
 @endsection
 
 @section('headerBlock')
@@ -44,7 +44,7 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-tags"></i> Edit Category</h2>
+        <h2><i class="fas fa-edit"></i> Edit Category</h2>
 
         <form id="categoryForm" action="{{ route('categories.update', $category->id) }}" method="POST">
             @csrf
@@ -52,7 +52,7 @@
 
             <div class="form-row" style="display: flex; gap: 20px;">
                 <div class="form-group" style="width: 100%;">
-                    <label for="name">Category Name:</label>
+                    <label for="name"><i class="fas fa-tag"></i> Category Name:</label>
                     <input
                         id="name"
                         type="text"
@@ -61,12 +61,12 @@
                         placeholder="Enter category name"
                     >
                     @error('name')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div class="form-group" style="width: 100%;">
-                    <label for="status" style="font-weight: 500; margin-bottom: 8px; display: block;">Status:</label>
+                    <label for="status" style="font-weight: 500; margin-bottom: 8px; display: block;"><i class="fas fa-toggle-on"></i> Status:</label>
                     <select
                         id="status"
                         name="status"
@@ -76,30 +76,30 @@
                         <option value="inactive" {{ old('status', $category->status) === 'inactive' ? 'selected' : '' }}>Inactive</option>
                     </select>
                     @error('status')
-                        <p class="text-danger mt-1" style="color: #dc3545; font-size: 0.875rem;">{{ $message }}</p>
+                    <p class="text-danger mt-1" style="color: #dc3545; font-size: 0.875rem;">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group" style="width: 100%;">
-                    <label for="description" style="font-weight: 500; margin-bottom: 8px; display: block;">Description:</label>
+                    <label for="description" style="font-weight: 500; margin-bottom: 8px; display: block;"><i class="fas fa-align-left"></i> Description:</label>
                     <textarea
                         id="description"
                         name="description"
                         placeholder="Enter description"
                         rows="6"
-                        style="width: 100%; min-height: 150px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: none; font-family: inherit; transition: border-color 0.2s;"
+                        style="height: 120px; resize: none;"
                     >{{ old('description', $category->description) }}</textarea>
 
                     @error('description')
-                        <p class="text-danger mt-1" style="color: #dc3545; font-size: 0.875rem;">{{ $message }}</p>
+                    <p class="text-danger mt-1" style="color: #dc3545; font-size: 0.875rem;">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
             <div>
                 <button class="btn btn-update" type="submit">
-                    <i class="fas fa-save"></i> Update Category
+                    <i class="fas fa-sync-alt"></i> Update Category
                 </button>
             </div>
         </form>

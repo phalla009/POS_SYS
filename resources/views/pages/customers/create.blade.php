@@ -66,87 +66,85 @@
         <a href="{{ route('customers.index') }}" id="backBtn" class="btn btn-back" aria-label="Back to customers list">
             <i class="fas fa-chevron-left"></i> Back
         </a>
-        <h2><i class="fas fa-users"></i> Add New Customer</h2>
+        <h2><i class="fas fa-user-plus"></i> Add New Customer</h2>
 
         <form id="customerForm" action="{{ route('customers.store') }}" method="POST">
             @csrf
 
-        
-    <div class="form-row">
-    {{-- Customer Name --}}
-                    <div class="form-group">
-                        <label for="name">Customer Name:</label>
-                        <input id="name" type="text" name="name" placeholder="Enter customer name" value="{{ old('name') }}">
-                        @error('name')
-                            <p class="text-danger mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    {{-- Gender --}}
-                    <div class="form-group">
-                        <label for="gender">Gender:</label>
-                        <select id="gender" name="gender">
-                            <option value="">Select Gender</option>
-                            <option value="male"   {{ old('gender') == 'male'   ? 'selected' : '' }}>Male</option>
-                            <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
-                        </select>
-                        @error('gender')
-                            <p class="text-danger mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-    </div>
-                 <div class="form-row">
-                      {{-- Phone --}}
+            <div class="form-row">
+                {{-- Customer Name --}}
                 <div class="form-group">
-                    <label for="phone">Phone:</label>
+                    <label for="name"><i class="fas fa-user"></i> Customer Name:</label>
+                    <input id="name" type="text" name="name" placeholder="Enter customer name" value="{{ old('name') }}">
+                    @error('name')
+                    <p class="text-danger mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Gender --}}
+                <div class="form-group">
+                    <label for="gender"><i class="fas fa-venus-mars"></i> Gender:</label>
+                    <select id="gender" name="gender">
+                        <option value="">Select Gender</option>
+                        <option value="male"   {{ old('gender') == 'male'   ? 'selected' : '' }}>Male</option>
+                        <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
+                    </select>
+                    @error('gender')
+                    <p class="text-danger mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="form-row">
+                {{-- Phone --}}
+                <div class="form-group">
+                    <label for="phone"><i class="fas fa-phone"></i> Phone:</label>
                     <input id="phone" type="text" name="phone" placeholder="Enter phone number" value="{{ old('phone') }}">
                     @error('phone')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-{{-- Email (full width) --}}
+
+                {{-- Email --}}
                 <div class="form-group form-group-full">
-                    <label for="email">Email:</label>
+                    <label for="email"><i class="fas fa-envelope"></i> Email:</label>
                     <input id="email" type="email" name="email" placeholder="Enter email address" value="{{ old('email') }}">
                     @error('email')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-               
+            </div>
 
-                 </div>
- <div class="form-row">
-
-
+            <div class="form-row">
                 {{-- Password --}}
                 <div class="form-group">
-                    <label for="password">Password: <small style="color:#888;"></small></label>
+                    <label for="password"><i class="fas fa-lock"></i> Password:</label>
                     <input id="password" type="password" name="password" placeholder="Enter password" autocomplete="new-password">
                     @error('password')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-                
+
                 {{-- Confirm Password --}}
                 <div class="form-group">
-                    <label for="password_confirmation">Confirm Password:</label>
+                    <label for="password_confirmation"><i class="fas fa-key"></i> Confirm Password:</label>
                     <input id="password_confirmation" type="password" name="password_confirmation" placeholder="Confirm password" autocomplete="new-password">
                 </div>
- </div>
-               {{-- Status --}}
-                <div class="form-group">
-                    <label for="status">Status:</label>
-                    <select id="status" name="status">
-                        <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                    </select>
-                    @error('status')
-                        <p class="text-danger mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-                
+            </div>
 
+            {{-- Status --}}
+{{--            <div class="form-row">--}}
+{{--                <div class="form-group">--}}
+{{--                    <label for="status"><i class="fas fa-toggle-on"></i> Status:</label>--}}
+{{--                    <select id="status" name="status">--}}
+{{--                        <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>--}}
+{{--                    </select>--}}
+{{--                    @error('status')--}}
+{{--                    <p class="text-danger mt-1">{{ $message }}</p>--}}
+{{--                    @enderror--}}
+{{--                </div>--}}
+{{--            </div>--}}
 
-         
             <div>
                 <button type="submit" class="btn btn-success">
                     <i class="fas fa-save"></i> Add Customer

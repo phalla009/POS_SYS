@@ -212,7 +212,7 @@
                     @forelse ($customers as $customer)
                         <tr>
                             <td data-label="No">#{{ $loop->iteration }}</td>
-                            <td data-label="Name"><i class="fas fa-user user-icon" style="margin-right: 6px;"></i>{{ $customer->name }}</td>
+                            <td data-label="Name" style="color: black; font-weight: 600;"><i class="fas fa-user user-icon" style="margin-right: 6px;"></i>{{ $customer->name }}</td>
                             <td data-label="Gender">{{ ucfirst($customer->gender) }}</td>
                             <td data-label="Phone">{{ $customer->phone }}</td>
                             <td data-label="Status">

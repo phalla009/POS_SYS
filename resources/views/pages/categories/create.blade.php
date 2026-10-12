@@ -64,41 +64,41 @@
             @csrf
             <div class="form-row">
                 <div class="form-group" style="width: 50%;">
-                    <label for="name">Category Name:</label>
+                    <label for="name"><i class="fas fa-tag"></i> Category Name:</label>
                     <input id="name" type="text" name="name" value="{{ old('name') }}" placeholder="Enter category name">
                     @error('name')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
                 <div class="form-group" style="width: 50%;">
-                    <label for="status">Status:</label>
+                    <label for="status"><i class="fas fa-toggle-on"></i> Status:</label>
                     <select id="status" name="status" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px;">
                         <option value="active" {{ old('status', 'active') === 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
                     </select>
                     @error('status')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group" style="width: 100%;">
-                    <label for="description">Description:</label>
+                    <label for="description"><i class="fas fa-align-left"></i> Description:</label>
                     <textarea
                         id="description"
                         name="description"
                         placeholder="Enter description"
-                        style="width: 100%; min-height: 200px; padding: 12px; border: 1px solid #ccc; border-radius: 8px; resize: none;"
+                        style="height: 120px; resize: none;"
                     >{{ old('description') }}</textarea>
                 </div>
             </div>
 
-            <div >
+            <div>
                 <button id="submitCategory" type="submit" class="btn btn-success">
                     <i class="fas fa-save"></i> Add New Category
                 </button>
             </div>
-            <div >
+            <div>
                 <button id="cancel" type="button" class="btn btn-cancel">
                     <i class="fas fa-times"></i> Cancel
                 </button>

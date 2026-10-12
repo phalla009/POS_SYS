@@ -125,9 +125,11 @@
 
         {{-- Controls Header --}}
         <div class="controls-header">
-            <a href="{{ route('types.create') }}" class="btn btn-primary page-link-loading" data-loading-text="Loading add...">
-                <i class="fas fa-circle-plus"></i> Add New Type
-            </a>
+            <div class="filter-controls">
+                <a href="{{ route('types.create') }}" class="btn btn-primary page-link-loading" data-loading-text="Loading add...">
+                    <i class="fas fa-circle-plus"></i> Add New Type
+                </a>
+            </div>
 
             {{-- Auto Search Form --}}
             <form method="GET" action="{{ route('types.index') }}" class="search-wrapper" id="searchForm">
@@ -135,22 +137,13 @@
                     <i class="fas fa-search search-icon"></i>
                     <input type="text" name="search" id="searchInput"
                            value="{{ $search ?? '' }}"
-                           placeholder="Search types..." autocomplete="off">
-                    @if(!empty($search))
-                        <button type="button" class="search-clear-btn" id="clearSearchBtn" title="Clear">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    @endif
+                           placeholder="Search types..."
+                           autocomplete="off">
+
                 </div>
             </form>
 
-            {{-- Results Badge --}}
-            @if(!empty($search))
-                <span class="search-results-badge">
-                    <i class="fas fa-filter"></i>
-                    {{ $types->total() }} result{{ $types->total() !== 1 ? 's' : '' }} for &ldquo;{{ $search }}&rdquo;
-                </span>
-            @endif
+
         </div>
 
         {{-- Table --}}
@@ -169,7 +162,7 @@
                 @forelse ($types as $type)
                     <tr>
                         <td data-label="No">#{{ $loop->iteration + ($types->currentPage() - 1) * $types->perPage() }}</td>
-                        <td data-label="Name">{{ $type->name }}</td>
+                        <td data-label="Name" style="color: black; font-weight: 600;">{{ $type->name }}</td>
                         <td data-label="Description">{{ $type->description ?? 'N/A' }}</td>
                         <td data-label="Updated Date">{{ $type->updated_at->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') }}</td>
                         <td data-label="Actions">
@@ -265,14 +258,14 @@
         let searchTimer = null;
 
         if (searchInput && searchForm) {
-            // Focus input and move cursor to the end after page load
+            // Restore focus and cursor position after re-render
             if (searchInput.value) {
                 searchInput.focus();
                 const valLen = searchInput.value.length;
                 searchInput.setSelectionRange(valLen, valLen);
             }
 
-            // Submit automatically 400ms after user stops typing
+            // Submit search automatically 400ms after user finishes typing
             searchInput.addEventListener('input', function() {
                 clearTimeout(searchTimer);
                 searchTimer = setTimeout(() => {
@@ -289,7 +282,7 @@
             });
         }
 
-        // ---- Page Loading Helper ----
+        // ---- Page Loading Spinner Helper ----
         function showLoading(msg) {
             const ov = document.getElementById('loading-overlay');
             const lt = document.getElementById('loading-text');

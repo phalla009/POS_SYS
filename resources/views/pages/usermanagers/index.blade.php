@@ -98,15 +98,14 @@
                    data-loading-text="Loading add...">
                     <i class="fas fa-circle-plus"></i> Add New User
                 </a>
-
-                {{-- 🔍 Search Field --}}
-                <div class="search-wrapper">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text"
-                           id="userSearch"
-                           placeholder="Search name, login, email, or role..."
-                           autocomplete="off">
-                </div>
+            </div>
+            {{--  Search Field --}}
+            <div class="search-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text"
+                       id="userSearch"
+                       placeholder="Search name, login, email, or role..."
+                       autocomplete="off">
             </div>
         </div>
 
@@ -129,7 +128,7 @@
                         <td data-label="Full Name">
                             <i class="fas fa-user user-icon"></i> {{ $user->name }}
                         </td>
-                        <td data-label="Login">{{ $user->login }}</td>
+                        <td data-label="Login" style="color: black; font-weight: 600;">{{ $user->login }}</td>
                         <td data-label="Email">{{ $user->email }}</td>
                         <td data-label="Role">
                             @php

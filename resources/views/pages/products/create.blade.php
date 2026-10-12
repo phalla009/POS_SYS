@@ -63,17 +63,17 @@
             <!-- Product Name & Brand -->
             <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div class="form-group" style="flex: 1; min-width: 250px;">
-                    <label for="name">Product Name:</label>
+                    <label for="name"><i class="fas fa-tag"></i> Product Name:</label>
                     <input id="name" type="text" name="name" placeholder="Enter product name" value="{{ old('name') }}">
                     @error('name')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div class="form-group" style="flex: 1; min-width: 250px;">
-                    <label for="category_id">Brand:</label>
+                    <label for="category_id"><i class="fas fa-copyright"></i> Category:</label>
                     <select id="category_id" name="category_id">
-                        <option value="">Select Brand</option>
+                        <option value="">Select Category</option>
                         @foreach($categories as $category)
                             <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
                                 {{ $category->name }}
@@ -81,7 +81,7 @@
                         @endforeach
                     </select>
                     @error('category_id')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
@@ -89,18 +89,18 @@
             <!-- Price & Stock -->
             <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div class="form-group" style="flex: 1; min-width: 250px;">
-                    <label for="price">Price:</label>
+                    <label for="price"><i class="fas fa-dollar-sign"></i> Price:</label>
                     <input id="price" type="number" name="price" step="0.01" value="{{ old('price') }}">
                     @error('price')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div class="form-group" style="flex: 1; min-width: 250px;">
-                    <label for="stock">Stock:</label>
+                    <label for="stock"><i class="fas fa-cubes"></i> Stock:</label>
                     <input id="stock" type="number" name="stock" value="{{ old('stock') }}">
                     @error('stock')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
@@ -108,22 +108,22 @@
             <!-- Images & Status -->
             <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div class="form-group" style="flex: 1; min-width: 250px;">
-                    <label for="images">Product Images:</label>
+                    <label for="images"><i class="fas fa-images"></i> Product Images:</label>
                     <input id="images" type="file" name="images[]" accept="image/*" multiple>
                     @error('images.*')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div class="form-group" style="flex: 1; min-width: 250px;">
-                    <label for="status">Status:</label>
+                    <label for="status"><i class="fas fa-toggle-on"></i> Status:</label>
                     <select id="status" name="status">
                         <option value="">Select Status</option>
                         <option value="active"   {{ old('status') == 'active'   ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                     </select>
                     @error('status')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
@@ -132,22 +132,22 @@
             <div class="form-group">
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 10px;">
                     <input id="add_to_pos" type="checkbox" name="add_to_pos" value="1"
-                        {{ old('add_to_pos') ? 'checked' : '' }}
-                        style="width: 18px; height: 18px; cursor: pointer; accent-color: #3498db;">
-                    <span>Add to POS</span>
+                           {{ old('add_to_pos') ? 'checked' : '' }}
+                           style="width: 18px; height: 18px; cursor: pointer; accent-color: #3498db;">
+                    <span><i class="fas fa-cash-register"></i> Add to POS</span>
                 </label>
                 @error('add_to_pos')
-                    <p class="text-danger mt-1">{{ $message }}</p>
+                <p class="text-danger mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <!-- Description -->
             <div class="form-group">
-                <label for="description">Description:</label>
+                <label for="description"><i class="fas fa-align-left"></i> Description:</label>
                 <textarea id="description" name="description" placeholder="Enter description"
-                        style="height: 120px; resize: none;">{{ old('description') }}</textarea>
+                          style="height: 120px; resize: none;">{{ old('description') }}</textarea>
                 @error('description')
-                    <p class="text-danger mt-1">{{ $message }}</p>
+                <p class="text-danger mt-1">{{ $message }}</p>
                 @enderror
             </div>
 

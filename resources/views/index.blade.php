@@ -172,7 +172,7 @@
         @endif
 
         {{-- Welcome Banner --}}
-        <div class="welcome-banner" style="margin-bottom: 20px; padding: 20px; background: #ffffff; border-left: 4px solid #030304; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+        <div class="welcome-banner" style="margin-bottom: 20px; position: sticky; top: 0; z-index: 100; padding: 20px; background: #ffffff; border-left: 4px solid #030304; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
             <h2 style="margin: 0; color: #030304; display: flex; align-items: center; gap: 8px;">
                 <span><i class="fas fa-hand-wave" style="color: #f39c12;"></i> Welcome back,</span>
                 <span style="color: #ff5a05;">{{ Auth::user()->name ?? 'User' }}!</span>

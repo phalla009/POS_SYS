@@ -125,7 +125,7 @@
         <div id="loading-text">Loading...</div>
     </div>
 
-   @if(session('success'))
+    @if(session('success'))
         <div id="successMessage" class="custom-success">
             <div class="success-content">
                 <span class="success-icon">✔</span>
@@ -147,18 +147,18 @@
 
             <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div class="form-group">
-                    <label for="role_name">Role Name:</label>
+                    <label for="role_name"><i class="fas fa-user-tag"></i> Role Name:</label>
                     <input id="role_name" type="text" name="role_name" value="{{ old('role_name') }}" placeholder="Enter role name">
                     @error('role_name')
-                        <p class="text-danger">{{ $message }}</p>
+                    <p class="text-danger">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="description">Description:</label>
+                    <label for="description"><i class="fas fa-align-left"></i> Description:</label>
                     <textarea id="description" name="description" style="width:100%;" placeholder="Enter role description">{{ old('description') }}</textarea>
                     @error('description')
-                        <p class="text-danger">{{ $message }}</p>
+                    <p class="text-danger">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
@@ -166,7 +166,7 @@
             <div class="field" style="margin-top: 20px;">
                 <fieldset style="border: none; padding: 0;">
                     <legend style="font-weight: 700; font-size: 16px; color: #1f2937; margin-bottom: 15px;">
-                        Select the permissions of your role
+                        <i class="fas fa-key"></i> Select the permissions of your role
                     </legend>
 
                     <div class="perm-outer-grid">
@@ -175,7 +175,9 @@
 
                                 <div class="perm-group-header">
                                     <div class="perm-group-dot"></div>
-                                    <h4 class="perm-group-title">{{ $permissionGroupName }}</h4>
+                                    <h4 class="perm-group-title">
+                                        <i class="fas fa-folder" style="margin-right: 4px;"></i> {{ $permissionGroupName }}
+                                    </h4>
                                 </div>
 
                                 <div class="perm-inner-grid">
@@ -185,8 +187,9 @@
                                                 type="checkbox"
                                                 value="{{ $perm->id }}"
                                                 name="permissions[]"
-                                                id="permissions{{ $perm->id }}">
-                                            <span>{{ $perm->permission_name }}</span>
+                                                id="permissions{{ $perm->id }}"
+                                                {{ is_array(old('permissions')) && in_array($perm->id, old('permissions')) ? 'checked' : '' }}>
+                                            <span><i class="fas fa-shield-alt" style="font-size: 11px; margin-right: 2px;"></i> {{ $perm->permission_name }}</span>
                                         </label>
                                     @endforeach
                                 </div>
@@ -202,7 +205,7 @@
                 <button type="submit" class="btn btn-success">
                     <i class="fas fa-save"></i> Add Role
                 </button>
-                <button type="button" class="btn btn-cancel">
+                <button type="button" id="cancelBtn" class="btn btn-cancel">
                     <i class="fas fa-times"></i> Cancel
                 </button>
             </div>
@@ -229,9 +232,12 @@
             overlay.style.display = 'flex';
         });
 
-        document.getElementById('cancel').addEventListener('click', function () {
-            document.getElementById('createRoleForm').reset();
-        });
+        const cancelBtn = document.getElementById('cancelBtn') || document.querySelector('.btn-cancel');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function () {
+                document.getElementById('createRoleForm').reset();
+            });
+        }
     </script>
 
 @endsection

@@ -9,14 +9,14 @@
         <a href="{{ route('inventory-items.index') }}" id="backBtn" class="btn btn-back" aria-label="Back to inventory items list">
             <i class="fas fa-chevron-left"></i> Back
         </a>
-        <h2><i class="fas fa-boxes"></i> Edit Inventory Item</h2>
+        <h2><i class="fas fa-edit"></i> Edit Inventory Item</h2>
 
         <form id="inventoryItemForm" action="{{ route('inventory-items.update', $item->id) }}" method="POST">
             @csrf
             @method('PUT')
             <div class="form-row">
                 <div class="form-group">
-                    <label for="name">Name</label>
+                    <label for="name"><i class="fas fa-tag"></i> Name</label>
                     <input type="text" name="name" id="name" value="{{ old('name', $item->name) }}">
                     @error('name')
                     <p class="text-danger mt-1">{{ $message }}</p>
@@ -26,7 +26,7 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="type">Type</label>
+                    <label for="type"><i class="fas fa-layer-group"></i> Type</label>
                     <select name="type" id="type">
                         <option value="">Select type</option>
                         @foreach($types as $type)
@@ -40,7 +40,7 @@
                     @enderror
                 </div>
                 <div class="form-group">
-                    <label for="unit">Unit</label>
+                    <label for="unit"><i class="fas fa-balance-scale"></i> Unit</label>
                     <select name="unit" id="unit">
                         <option value="">Select unit</option>
                         @foreach($units as $unit)
@@ -57,7 +57,7 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="price">Price</label>
+                    <label for="price"><i class="fas fa-dollar-sign"></i> Price</label>
                     <input type="number" step="0.01" min="0" name="price" id="price" value="{{ old('price', $item->price) }}">
                     @error('price')
                     <p class="text-danger mt-1">{{ $message }}</p>
@@ -65,7 +65,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="qty">Quantity</label>
+                    <label for="qty"><i class="fas fa-cubes"></i> Quantity</label>
                     <input type="number" min="0" name="qty" id="qty" value="{{ old('qty', $item->qty) }}">
                     @error('qty')
                     <p class="text-danger mt-1">{{ $message }}</p>
@@ -74,8 +74,8 @@
             </div>
 
             <div>
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-save"></i> Update Item
+                <button type="submit" class="btn btn-update">
+                    <i class="fas fa-sync-alt"></i> Update Item
                 </button>
             </div>
         </form>
@@ -93,12 +93,8 @@
         });
 
         form.addEventListener('submit', function() {
-            if (loadingText) loadingText.textContent = 'Saving...';
+            if (loadingText) loadingText.textContent = 'Updating...';
             if (overlay) overlay.style.display = 'flex';
-        });
-
-        document.getElementById('cancelBtn').addEventListener('click', function() {
-            form.reset();
         });
     </script>
 @endsection

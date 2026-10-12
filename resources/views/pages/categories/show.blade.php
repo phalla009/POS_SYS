@@ -93,47 +93,44 @@
         <a href="{{ route('categories.index') }}" id="backBtn" class="btn btn-back">
             <i class="fas fa-chevron-left"></i> Back
         </a>
+        <h2><i class="fas fa-tags"></i> Categories Details</h2><br>
+            {{-- Row 1: Brand Name & Status --}}
+            <div class="info-row">
+                <div class="info-box">
+                    <div class="info-label"><i class="fas fa-tag"></i> Category Name</div>
+                    <div class="info-value">{{ $category->name }}</div>
+                </div>
 
-        <h2><i class="fas fa-tags"></i> Brand Details</h2>
-
-        {{-- Row 1: Brand Name & Status --}}
-        <div class="info-row">
-            <div class="info-box">
-                <div class="info-label"><i class="fas fa-tag"></i> Brand Name</div>
-                <div class="info-value">{{ $category->name }}</div>
-            </div>
-
-            <div class="info-box">
-                <div class="info-label"><i class="fas fa-circle-check"></i> Status</div>
-                <div class="info-value">
+                <div class="info-box">
+                    <div class="info-label"><i class="fas fa-circle-check"></i> Status</div>
+                    <div class="info-value">
                     <span class="status-badge status-{{ $category->status }}">
                         <i class="fas fa-circle"></i> {{ $category->status }}
                     </span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        {{-- Row 2: Description --}}
-        <div class="info-row">
-            <div class="info-box" style="grid-column: 1 / -1;">
-                <div class="info-label"><i class="fas fa-align-left"></i> Description</div>
-                <div class="info-value">{{ $category->description ?? 'No description available.' }}</div>
-            </div>
-        </div>
-
-        {{-- Row 3: Created At & Last Updated --}}
-        <div class="info-row">
-            <div class="info-box">
-                <div class="info-label"><i class="fas fa-calendar-plus"></i> Created At</div>
-                <div class="info-value">{{ $category->created_at ? $category->created_at->format('Y-m-d H:i') : 'N/A' }}</div>
+            {{-- Row 2: Description --}}
+            <div class="info-row">
+                <div class="info-box" style="grid-column: 1 / -1;">
+                    <div class="info-label"><i class="fas fa-align-left"></i> Description</div>
+                    <div class="info-value">{{ $category->description ?? 'No description available.' }}</div>
+                </div>
             </div>
 
-            <div class="info-box">
-                <div class="info-label"><i class="fas fa-clock"></i> Last Updated</div>
-                <div class="info-value">{{ $category->updated_at ? $category->updated_at->format('Y-m-d H:i') : 'N/A' }}</div>
-            </div>
-        </div>
+            {{-- Row 3: Created At & Last Updated --}}
+            <div class="info-row">
+                <div class="info-box">
+                    <div class="info-label"><i class="fas fa-calendar-plus"></i> Created At</div>
+                    <div class="info-value">{{ $category->created_at ? $category->created_at->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
+                </div>
 
+                <div class="info-box">
+                    <div class="info-label"><i class="fas fa-clock"></i> Last Updated</div>
+                    <div class="info-value">{{ $category->updated_at ? $category->updated_at->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
+                </div>
+            </div>
     </div>
 
     <script>

@@ -334,13 +334,13 @@
                                 <td style="text-align:center;"><input type="checkbox" class="row-checkbox" value="{{ $order->id }}"></td>
                             @endif
                             <td data-label="No">#{{ $loop->iteration + ($orders->currentPage() - 1) * $orders->perPage() }}</td>
-                            <td data-label="Order ID">{{ $order->order_number }}</td>
+                            <td data-label="Order ID" style="color: black; font-weight: 600;">{{ $order->order_number }}</td>
                             <td data-label="Product">{{ $order->product->name ?? 'N/A' }}</td>
                             <td data-label="Quantity">{{ $order->quantity }}</td>
                             <td data-label="Order Date">
                                 {{ $order->created_at?->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') ?? 'N/A' }}
                             </td>
-                            <td data-label="Paid Amount">${{ number_format($order->total_amount ?? 0, 2) }}</td>
+                            <td data-label="Paid Amount" style="color: #2e7d32; font-weight: 600;">${{ number_format($order->total_amount ?? 0, 2) }}</td>
                             <td data-label="Actions">
                                 <div class="action-buttons">
                                     <a href="{{ route('orders.show', $order->id) }}"

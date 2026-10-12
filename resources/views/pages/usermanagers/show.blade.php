@@ -115,7 +115,7 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-user-shield"></i> User Details</h2>
+        <h2><i class="fas fa-user-shield"></i> User Details</h2><br>
 
         {{-- Row 1: Full Name, Login & Email --}}
         <div class="info-row">
@@ -151,11 +151,11 @@
         <div class="info-row">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-calendar-plus"></i> Created At</div>
-                <div class="info-value">{{ $usermanager->created_at ? $usermanager->created_at->format('Y-m-d H:i') : 'N/A' }}</div>
+                <div class="info-value">{{ $usermanager->created_at ? $usermanager->created_at->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
             </div>
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-clock"></i> Last Updated</div>
-                <div class="info-value">{{ $usermanager->updated_at ? $usermanager->updated_at->format('Y-m-d H:i') : 'N/A' }}</div>
+                <div class="info-value">{{ $usermanager->updated_at ? $usermanager->updated_at->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
             </div>
         </div>
 

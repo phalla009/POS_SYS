@@ -137,7 +137,7 @@
             <i class="fas fa-chevron-left"></i> Back
         </a>
 
-        <h2><i class="fas fa-user-shield"></i> Edit User Role</h2>
+        <h2><i class="fas fa-user-edit"></i> Edit User Role</h2>
 
         <form id="editRoleForm" action="{{ route('userroles.update', $role->id) }}" method="POST">
             @csrf
@@ -145,18 +145,18 @@
 
             <div class="form-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <div class="form-group">
-                    <label for="role_name">Role Name:</label>
+                    <label for="role_name"><i class="fas fa-user-tag"></i> Role Name:</label>
                     <input id="role_name" type="text" name="role_name" value="{{ old('role_name', $role->role_name) }}" placeholder="Enter role name">
                     @error('role_name')
-                        <p class="text-danger">{{ $message }}</p>
+                    <p class="text-danger">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="description">Description:</label>
+                    <label for="description"><i class="fas fa-align-left"></i> Description:</label>
                     <textarea id="description" name="description" style="width:100%;" placeholder="Enter role description">{{ old('description', $role->description) }}</textarea>
                     @error('description')
-                        <p class="text-danger">{{ $message }}</p>
+                    <p class="text-danger">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
@@ -164,7 +164,7 @@
             <div class="field" style="margin-top: 20px;">
                 <fieldset style="border: none; padding: 0;">
                     <legend style="font-weight: 700; font-size: 16px; color: #1f2937; margin-bottom: 15px;">
-                        Select the permissions of your role
+                        <i class="fas fa-key"></i> Select the permissions of your role
                     </legend>
 
                     <div class="perm-outer-grid">
@@ -173,7 +173,9 @@
 
                                 <div class="perm-group-header">
                                     <div class="perm-group-dot"></div>
-                                    <h4 class="perm-group-title">{{ $permissionGroupName }}</h4>
+                                    <h4 class="perm-group-title">
+                                        <i class="fas fa-folder" style="margin-right: 4px;"></i> {{ $permissionGroupName }}
+                                    </h4>
                                 </div>
 
                                 <div class="perm-inner-grid">
@@ -184,8 +186,8 @@
                                                 value="{{ $perm->id }}"
                                                 name="permissions[]"
                                                 id="permissions{{ $perm->id }}"
-                                                @if(in_array($perm->id, $rolePermissions)) checked @endif>
-                                            <span>{{ $perm->permission_name }}</span>
+                                                {{ in_array($perm->id, old('permissions', $rolePermissions)) ? 'checked' : '' }}>
+                                            <span><i class="fas fa-shield-alt" style="font-size: 11px; margin-right: 2px;"></i> {{ $perm->permission_name }}</span>
                                         </label>
                                     @endforeach
                                 </div>
@@ -197,9 +199,9 @@
                 </fieldset>
             </div>
 
-            <div >
+            <div>
                 <button type="submit" class="btn btn-update">
-                    <i class="fas fa-save"></i> Update Role
+                    <i class="fas fa-sync-alt"></i> Update Role
                 </button>
             </div>
         </form>
@@ -221,13 +223,16 @@
         });
 
         document.getElementById('editRoleForm').addEventListener('submit', function () {
-            loadingText.textContent = 'Saving...';
+            loadingText.textContent = 'Updating...';
             overlay.style.display = 'flex';
         });
 
-        document.getElementById('cancel').addEventListener('click', function () {
-            document.getElementById('editRoleForm').reset();
-        });
+        const cancelBtn = document.getElementById('cancel');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function () {
+                document.getElementById('editRoleForm').reset();
+            });
+        }
     </script>
 
 @endsection

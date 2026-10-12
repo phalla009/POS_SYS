@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('pageTitle')
-   Edited Customers
+    Edited Customers
 @endsection
 
 @section('headerBlock')
@@ -82,90 +82,84 @@
         <a href="{{ route('customers.index') }}" id="backBtn" class="btn btn-back">
             <i class="fas fa-chevron-left"></i> Back
         </a>
-        <h2><i class="fas fa-users"></i> Edit Customer</h2>
+        <h2><i class="fas fa-user-edit"></i> Edit Customer</h2>
 
         <form id="customerForm" action="{{ route('customers.update', $customer->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
-
- <div class="form-row">
- {{-- Customer Name --}}
+            <div class="form-row">
+                {{-- Customer Name --}}
                 <div class="form-group">
-                    <label>Customer Name:</label>
-                    <input type="text" name="name" value="{{ old('name', $customer->name) }}">
+                    <label for="name"><i class="fas fa-user"></i> Customer Name:</label>
+                    <input id="name" type="text" name="name" value="{{ old('name', $customer->name) }}">
                     @error('name')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
                 {{-- Gender --}}
                 <div class="form-group">
-                    <label>Gender:</label>
-                    <select name="gender">
+                    <label for="gender"><i class="fas fa-venus-mars"></i> Gender:</label>
+                    <select id="gender" name="gender">
                         <option value="">Select Gender</option>
                         <option value="male"   {{ (old('gender', $customer->gender) == 'male')   ? 'selected' : '' }}>Male</option>
                         <option value="female" {{ (old('gender', $customer->gender) == 'female') ? 'selected' : '' }}>Female</option>
                     </select>
                     @error('gender')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
- </div>
+            </div>
+
             <div class="form-row">
-                 {{-- Phone --}}
+                {{-- Phone --}}
                 <div class="form-group">
-                    <label>Phone:</label>
-                    <input type="text" name="phone" value="{{ old('phone', $customer->phone) }}">
+                    <label for="phone"><i class="fas fa-phone"></i> Phone:</label>
+                    <input id="phone" type="text" name="phone" value="{{ old('phone', $customer->phone) }}">
                     @error('phone')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-                     {{-- Email (full width) --}}
+
+                {{-- Email (full width) --}}
                 <div class="form-group form-group-full">
-                    <label>Email:</label>
-                    <input type="email" name="email" placeholder="Enter email address" value="{{ old('email', $customer->email) }}">
+                    <label for="email"><i class="fas fa-envelope"></i> Email:</label>
+                    <input id="email" type="email" name="email" placeholder="Enter email address" value="{{ old('email', $customer->email) }}">
                     @error('email')
-                        <p class="text-danger mt-1">{{ $message }}</p>
+                    <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
+            </div>
 
-                </div>
+            {{-- Password Toggle Button --}}
+            <div class="form-row">
+                <button type="button" id="togglePasswordBtn">
+                    <i class="fas fa-lock"></i> Change Password
+                </button>
+            </div>
 
-
-
-
-           {{-- Password Toggle Button --}}
-            <button type="button" id="togglePasswordBtn">
-                <i class="fas fa-lock"></i> Change Password
-            </button>
-
-{{-- Password Section (hidden by default) --}}
+            {{-- Password Section (hidden by default) --}}
             <div id="passwordSection">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="password">New Password:</label>
+                        <label for="password"><i class="fas fa-lock"></i> New Password:</label>
                         <input id="password" type="password" name="password" placeholder="Enter new password" autocomplete="new-password">
                         @error('password')
-                            <p class="text-danger mt-1">{{ $message }}</p>
+                        <p class="text-danger mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div class="form-group">
-                        <label for="password_confirmation">Confirm New Password:</label>
+                        <label for="password_confirmation"><i class="fas fa-key"></i> Confirm New Password:</label>
                         <input id="password_confirmation" type="password" name="password_confirmation" placeholder="Confirm new password" autocomplete="new-password">
                     </div>
                 </div>
             </div>
 
-                {{-- Status --}}
-{{--                <div class="form-group">--}}
-{{--                    <label>Status:</label>--}}
-{{--                    <input type="text" value="{{ $customer->status }}" readonly class="readonly">--}}
-{{--                </div>--}}
             <div>
                 <button class="btn btn-update" type="submit">
-                    <i class="fas fa-save"></i> Update Customer
+                    <i class="fas fa-sync-alt"></i> Update Customer
                 </button>
             </div>
         </form>
@@ -209,7 +203,7 @@
         // Auto-expand password section if there were validation errors on password
         @if($errors->has('password'))
             passwordSection.style.display = 'block';
-            toggleBtn.innerHTML = '<i class="fas fa-lock-open"></i> Cancel Password Change';
+        toggleBtn.innerHTML = '<i class="fas fa-lock-open"></i> Cancel Password Change';
         @endif
     </script>
 

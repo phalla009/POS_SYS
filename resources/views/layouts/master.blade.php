@@ -89,26 +89,119 @@
         @keyframes spin { 0%{ transform:rotate(0deg); } 100%{ transform:rotate(360deg); } }
         #loading-text { margin-top: 15px; font-size: 16px; color: #333; }
 
-        /* Logout modal */
+        /* Modal Overlay */
         #logout-confirm {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.45); backdrop-filter: blur(3px);
-            display: none; align-items: center; justify-content: center; z-index: 9999;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.65); /* Semi-transparent dark overlay */
+            backdrop-filter: blur(4px); /* Modern blur effect */
+            display: none; /* Controlled via JS */
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
+
+        /* Modal Box */
         .confirm-box {
-            background: #fff; width: 320px; padding: 30px 25px; border-radius: 14px;
-            text-align: center; box-shadow: 0 10px 35px rgba(0,0,0,0.25);
-            animation: popup 0.3s ease; font-family: Arial, sans-serif;
+            background: #ffffff;
+            width: 100%;
+            max-width: 380px;
+            padding: 32px 24px;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            animation: modalPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .icon-container { font-size: 42px; color: #e74c3c; margin-bottom: 15px; }
-        .confirm-box p { font-size: 18px; color: #333; margin-bottom: 25px; font-weight: 500; }
-        .confirm-box button { width: 110px; padding: 10px; border: none; border-radius: 24px; font-size: 15px; cursor: pointer; transition: 0.2s; }
-        #confirm-yes { background: #e74c3c; color: white; }
-        #confirm-no  { background: #e0e0e0; color: #555; }
-        #confirm-yes:hover { background: #c0392b; }
-        #confirm-no:hover  { background: #cfcfcf; }
-        #logout-link:hover { color: red; }
-        @keyframes popup { from { transform:scale(0.8); opacity:0; } to { transform:scale(1); opacity:1; } }
+
+        /* Main Icon Container */
+        .icon-container {
+            width: 64px;
+            height: 64px;
+            background-color: #fee2e2; /* Light red tint */
+            color: #ef4444; /* Vibrant danger red */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            font-size: 28px;
+        }
+
+        /* Text Styling */
+        .confirm-box h3 {
+            margin: 0 0 8px 0;
+            color: #0f172a;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .confirm-box p {
+            color: #64748b;
+            font-size: 14px;
+            margin: 0 0 24px 0;
+            line-height: 1.5;
+        }
+
+        /* Button Group Layout */
+        .button-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        /* Yes / Logout Button */
+        .btn-danger {
+            background-color: #ef4444;
+            color: #ffffff;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+        }
+
+        /* No / Cancel Button */
+        .btn-secondary {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+            color: #1e293b;
+            transform: translateY(-1px);
+        }
+
+        /* Entrance Animation */
+        @keyframes modalPop {
+            0% {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body>
@@ -127,7 +220,6 @@
         <div class="sidebar-header">
             <div id="logo">
                 <img src="/image/logokr.png" alt="Logo" style="height:50px; width:50px; border-radius:6px; object-fit:cover; vertical-align:middle;">
-                {{--                <span class="l3" style="margin-left:10px;">System</span>--}}
             </div>
             <p class="user-info">
                 <i class="fas fa-circle-user"></i>
@@ -177,23 +269,6 @@
                 <li><a href="{{ route('reports.index') }}"><span class="icon"><i class="fas fa-chart-line"></i></span> <span>Reports</span></a></li>
             @endif
 
-            {{--            @if(Auth::user()->hasPermission('usermanagers') || Auth::user()->hasPermission('userroles'))--}}
-            {{--                <li class="menu-container">--}}
-            {{--                    <a href="javascript:void(0)" class="submenu-toggle">--}}
-            {{--                        <span class="icon"><i class="fas fa-users"></i></span> <span>Users</span>--}}
-            {{--                        <span class="dropdown-arrow"><i class="fas fa-chevron-right"></i></span>--}}
-            {{--                    </a>--}}
-            {{--                    <div class="submenu">--}}
-            {{--                        @if(Auth::user()->hasPermission('usermanagers'))--}}
-            {{--                            <a href="{{ route('usermanagers.index') }}"><span class="icon"><i class="fas fa-user"></i></span> User Managers</a>--}}
-            {{--                        @endif--}}
-            {{--                        @if(Auth::user()->hasPermission('userroles'))--}}
-            {{--                            <a href="{{ route('userroles.index') }}"><span class="icon"><i class="fas fa-user-shield"></i></span> User Roles</a>--}}
-            {{--                        @endif--}}
-            {{--                    </div>--}}
-            {{--                </li>--}}
-            {{--            @endif--}}
-
             @if(Auth::user()->hasPermission('settings'))
                 <li class="menu-container">
                     <a href="javascript:void(0)" class="submenu-toggle">
@@ -219,10 +294,7 @@
                     </div>
                 </li>
             @endif
-{{--                <li>--}}
-{{--                    <a id="about-link"><span class="icon"><i class="fas fa-info-circle"></i></span> <span>About</span></a>--}}
-{{--                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">@csrf</form>--}}
-{{--                </li>--}}
+
             <li>
                 <a id="logout-link"><span class="icon"><i class="fas fa-sign-out-alt"></i></span> <span>Logout</span></a>
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">@csrf</form>
@@ -267,10 +339,20 @@
 <!-- Logout Modal -->
 <div id="logout-confirm">
     <div class="confirm-box">
-        <div class="icon-container"><i class="fas fa-sign-out-alt"></i></div>
-        <p>Are you sure you want to logout?</p>
-        <button id="confirm-yes">Yes, Logout!</button>
-        <button id="confirm-no">No, Keep it!</button>
+        <div class="icon-container">
+            <i class="fas fa-sign-out-alt"></i>
+        </div>
+        <h3>Logging Out?</h3>
+        <p>Are you sure you want to end your current session?</p>
+
+        <div class="button-group">
+            <button id="confirm-yes" class="btn btn-danger">
+                <i class="fas fa-check"></i> Yes, Logout!
+            </button>
+            <button id="confirm-no" class="btn btn-secondary">
+                <i class="fas fa-times"></i> No, Keep it!
+            </button>
+        </div>
     </div>
 </div>
 
@@ -317,7 +399,7 @@
             toggleIcon.classList.add('fa-angles-left');
         }
     });
-    // Submenu toggle (បើកមួយ បិទមួយ)
+    // Submenu toggle
     document.querySelectorAll('.submenu-toggle').forEach(function(link) {
         link.addEventListener('click', function(e) {
             if (mainSidebar.classList.contains('collapsed')) {
