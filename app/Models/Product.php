@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Product extends Model
 {
@@ -11,7 +12,7 @@ class Product extends Model
 
     protected $fillable = [
         'name',
-        'sku', 
+        'sku',
         'price',
         'stock',
         'description',
@@ -19,6 +20,8 @@ class Product extends Model
         'category_id',
         'add_to_pos',
         'created_at',
+        'created_by', // បន្ថែម
+        'updated_by', // បន្ថែម
     ];
 
     protected $casts = [
@@ -31,7 +34,7 @@ class Product extends Model
     /**
      * Relationship: Product belongs to Category.
      */
-    public function category()
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
@@ -42,6 +45,22 @@ class Product extends Model
     public function images()
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    /**
+     * Relationship: Creator of the product.
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Relationship: Updater of the product.
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /**
@@ -76,16 +95,6 @@ class Product extends Model
     public function getFormattedPriceAttribute()
     {
         return '$' . number_format($this->price, 2);
-    }
-
-    /**
-     * Brand scope (if applicable)
-     */
-    public function scopeByBrand($query, $brand)
-    {
-        return $query->when($brand, function ($query, $brand) {
-            return $query->where('brand', $brand);
-        });
     }
 
     /**

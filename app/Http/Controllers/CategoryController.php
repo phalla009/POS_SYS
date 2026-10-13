@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; // <-- ត្រូវមានកូដនេះនៅខាងលើ
 
 class CategoryController extends Controller
 {
@@ -15,8 +16,8 @@ class CategoryController extends Controller
         $search = $request->input('search');
 
         $categories = Category::when($search, function ($query, $search) {
-                $query->where('name', 'like', '%' . $search . '%');
-            })
+            $query->where('name', 'like', '%' . $search . '%');
+        })
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -78,6 +79,9 @@ class CategoryController extends Controller
             'description' => 'nullable|string|max:1000',
             'status'      => 'required|in:active,inactive',
         ]);
+
+        // កែពី updated_at មកជា updated_by
+        $validated['updated_by'] = Auth::id();
 
         $category->update($validated);
 

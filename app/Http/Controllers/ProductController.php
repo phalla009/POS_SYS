@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; // <-- 1. ត្រូវប្រាកដថាមានកូដនេះនៅខាងលើ
 use App\Imports\ProductsImport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ProductsExport;
@@ -15,12 +16,12 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $categories = Category::all();
-        $query = Product::with(['category', 'images']);
+        $query = Product::with(['category', 'images', 'creator', 'updater']);
 
         if ($request->search) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
-                ->orWhere('sku', 'like', '%' . $request->search . '%');
+                    ->orWhere('sku', 'like', '%' . $request->search . '%');
             });
         }
 
@@ -58,6 +59,10 @@ class ProductController extends Controller
         // Handle checkbox — unchecked sends nothing, so default to 0
         $validated['add_to_pos'] = $request->has('add_to_pos') ? 1 : 0;
 
+        // 2. កំណត់ User ID អ្នកបង្កើត និងអ្នកកែប្រែដំបូង
+        $validated['created_by'] = Auth::id();
+        $validated['updated_by'] = Auth::id();
+
         $product = Product::create($validated);
 
         // Auto-generate SKU: kr + date + padded id
@@ -83,7 +88,7 @@ class ProductController extends Controller
 
     public function show(string $id)
     {
-        $product = Product::with('images')->findOrFail($id);
+        $product = Product::with(['images', 'creator', 'updater'])->findOrFail($id);
         return view('pages/products.show', compact('product'));
     }
 
@@ -114,6 +119,9 @@ class ProductController extends Controller
 
         // Handle checkbox — unchecked sends nothing, so default to 0
         $validated['add_to_pos'] = $request->has('add_to_pos') ? 1 : 0;
+
+        // 3. កំណត់ User ID អ្នកកែប្រែចុងក្រោយ
+        $validated['updated_by'] = Auth::id();
 
         $product = Product::findOrFail($id);
         $product->update($validated);
@@ -172,12 +180,13 @@ class ProductController extends Controller
         $totalItems = $products->count();
         $lowStockItems = $products->where('stock', '<=', function ($query) {
             $query->select('min_stock')
-                  ->from('products')
-                  ->whereColumn('id', 'products.id');
+                ->from('products')
+                ->whereColumn('id', 'products.id');
         })->count();
 
         $outOfStockItems = $products->where('stock', '<=', 0)->count();
 
+        // កែតម្រូវសញ្ញាគុណ stock * price
         $inventoryValue = $products->sum(function ($product) {
             return $product->stock * $product->price;
         });
@@ -190,7 +199,6 @@ class ProductController extends Controller
             'inventoryValue'
         ));
     }
-
 
     public function import(Request $request)
     {
@@ -213,12 +221,14 @@ class ProductController extends Controller
 
         return redirect()->route('products.index')->with('success', 'Products imported successfully.');
     }
+
     public function export(Request $request)
     {
         $filename = 'products_' . now()->format('Ymd_His') . '.xlsx';
 
         return Excel::download(new ProductsExport($request), $filename);
     }
+
     public function bulkDestroy(Request $request)
     {
         $request->validate([

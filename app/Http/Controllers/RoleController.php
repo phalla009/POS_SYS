@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\Permission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; // <-- បន្ថែម Auth
 
 class RoleController extends Controller
 {
     // List roles
     public function index()
     {
-        $roles = Role::with('permissions')->get();
+        $roles = Role::with(['permissions', 'creator', 'updater'])->get();
         return view('pages/userroles.index', compact('roles'));
     }
 
@@ -35,6 +36,8 @@ class RoleController extends Controller
         $role = Role::create([
             'role_name' => $request->role_name,
             'description' => $request->description,
+            'created_by' => Auth::id(), // កំណត់អ្នកបង្កើត
+            'updated_by' => Auth::id(), // កំណត់អ្នកកែប្រែដំបូង
         ]);
 
         // Assign permissions
@@ -52,9 +55,10 @@ class RoleController extends Controller
 
         return view('pages/userroles.edit', compact('role', 'allPermissions', 'rolePermissions'));
     }
+
     public function show($id)
     {
-        $role = Role::findOrFail($id);
+        $role = Role::with(['creator', 'updater'])->findOrFail($id);
         return view('pages/userroles.show', compact('role'));
     }
 
@@ -72,6 +76,7 @@ class RoleController extends Controller
         $role->update([
             'role_name' => $request->role_name,
             'description' => $request->description,
+            'updated_by' => Auth::id(), // កំណត់អ្នកកែប្រែចុងក្រោយ
         ]);
 
         // Sync permissions (attach/detach)

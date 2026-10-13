@@ -111,18 +111,26 @@
         <div class="info-row">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-calendar-plus"></i> Created At</div>
-                <div class="info-value">{{ $unit->created_at ? $unit->created_at->timezone('Asia/Phnom_Penh')->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
+                <div class="info-value">{{ $unit->created_at ? $unit->created_at->timezone('Asia/Phnom_Penh')->format('Y-M-d \a\t g:i A') : 'N/A' }}</div>
             </div>
+
             <div class="info-box">
-                <div class="info-label"><i class="fas fa-clock"></i> Last Updated</div>
-                <div class="info-value">{{ $unit->updated_at ? $unit->updated_at->timezone('Asia/Phnom_Penh')->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
+                <div class="info-label"><i class="fas fa-user-edit"></i> Created By</div>
+                <div class="info-value">{{ $unit->creator?->name ?? 'N/A' }}</div>
             </div>
         </div>
 
-        <div class="form-actions" style="margin-top:20px;">
-            <a href="{{ route('units.edit', $unit->id) }}" class="btn btn-primary page-link-loading" data-loading-text="Opening editor...">
-                <i class="fas fa-pen"></i> Edit Unit
-            </a>
+        {{-- Row 4: Last Updated & Last Updated By --}}
+        <div class="info-row">
+            <div class="info-box">
+                <div class="info-label"><i class="fas fa-clock"></i> Last Updated At</div>
+                <div class="info-value">{{ $unit->updated_at ? $unit->updated_at->format('Y-M-d \a\t g:i A') : 'N/A' }}</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label"><i class="fas fa-user-edit"></i> Last Updated By</div>
+                <div class="info-value">{{ $unit->updater?->name ?? 'N/A' }}</div>
+            </div>
         </div>
     </div>
 

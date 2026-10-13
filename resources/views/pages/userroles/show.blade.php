@@ -31,8 +31,8 @@
         .info-row {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .info-box {
@@ -53,7 +53,7 @@
             color: #4338ca;
             text-transform: uppercase;
             letter-spacing: 0.06em;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -124,19 +124,6 @@
             </div>
         </div>
 
-        {{-- Row 2: Created & Updated --}}
-        <div class="info-row">
-            <div class="info-box">
-                <div class="info-label"><i class="fas fa-calendar-plus"></i> Created At</div>
-                <div class="info-value">{{ $role->created_at ? $role->created_at->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
-            </div>
-
-            <div class="info-box">
-                <div class="info-label"><i class="fas fa-clock"></i> Last Updated</div>
-                <div class="info-value">{{ $role->updated_at ? $role->updated_at->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
-            </div>
-        </div>
-
         {{-- Permissions --}}
         <div class="info-box" style="margin-bottom: 16px;">
             <div class="info-label"><i class="fas fa-shield-alt"></i> Permissions</div>
@@ -149,6 +136,32 @@
                 @empty
                     <span style="font-size: 13px; color: #9ca3af;">No permissions assigned.</span>
                 @endforelse
+            </div>
+        </div>
+
+        {{-- Row 2: Created & Updated --}}
+        <div class="info-row">
+            <div class="info-box">
+                <div class="info-label"><i class="fas fa-calendar-plus"></i> Created At</div>
+                <div class="info-value">{{ $role->created_at ? $role->created_at->format('Y-m-d \a\t g:i A') : 'N/A' }}</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label"><i class="fas fa-user-edit"></i> Created By</div>
+                <div class="info-value">{{ $role->creator?->name ?? 'N/A' }}</div>
+            </div>
+        </div>
+
+        {{-- Row 4: Last Updated & Last Updated By --}}
+        <div class="info-row">
+            <div class="info-box">
+                <div class="info-label"><i class="fas fa-clock"></i> Last Updated At</div>
+                <div class="info-value">{{ $role->updated_at ? $role->updated_at->format('Y-M-d \a\t g:i A') : 'N/A' }}</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label"><i class="fas fa-user-edit"></i> Last Updated By</div>
+                <div class="info-value">{{ $role->updater?->name ?? 'N/A' }}</div>
             </div>
         </div>
 

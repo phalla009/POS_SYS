@@ -6,14 +6,14 @@ use App\Models\UserManager;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth; // <-- បន្ថែម Auth
 
 class UserManagerController extends Controller
 {
     public function index()
     {
-        $users = UserManager::with('role')->get();
-       return view('pages/usermanagers.index', compact('users'));
-
+        $users = UserManager::with(['role', 'creator', 'updater'])->get();
+        return view('pages/usermanagers.index', compact('users'));
     }
 
     public function create()
@@ -40,16 +40,19 @@ class UserManagerController extends Controller
             'password' => Hash::make($request->password),
             'role_id' => $request->role_id,
             'description' => $request->description,
+            'created_by' => Auth::id(), // កំណត់អ្នកបង្កើត
+            'updated_by' => Auth::id(), // កំណត់អ្នកកែប្រែដំបូង
         ]);
 
         return redirect()->route('usermanagers.index')->with('success', 'User created successfully!');
-}
+    }
 
     public function edit(UserManager $usermanager)
     {
         $roles = Role::all();
         return view('pages/usermanagers.edit', compact('usermanager','roles'));
     }
+
     public function show(UserManager $usermanager)
     {
         return view('pages/usermanagers.show', compact('usermanager'));
@@ -73,6 +76,7 @@ class UserManagerController extends Controller
             'password' => $request->password ? Hash::make($request->password) : $usermanager->password,
             'role_id' => $request->role_id,
             'description' => $request->description,
+            'updated_by' => Auth::id(), // កំណត់អ្នកកែប្រែចុងក្រោយ
         ]);
 
         return redirect()->route('usermanagers.index')->with('success', 'User updated successfully!');

@@ -472,8 +472,8 @@
                 <table>
                     <thead>
                     <tr>
+                        <th style="width:36px;">#</th>
                         <th style="width:36px;"><input type="checkbox" id="selectAllCheckbox" title="Select all"></th>
-                        <th>#</th>
                         <th>Category Name</th>
                         <th>Status</th>
                         <th>Last Update</th>
@@ -483,17 +483,17 @@
                     <tbody id="categoriesTable">
                     @forelse ($categories as $category)
                         <tr data-id="{{ $category->id }}">
+                            <td data-label="No">#{{ $loop->iteration + ($categories->currentPage() - 1) * $categories->perPage() }}</td>
                             <td data-label="Select">
                                 <input type="checkbox" class="row-checkbox" value="{{ $category->id }}">
                             </td>
-                            <td data-label="No">#{{ $loop->iteration + ($categories->currentPage() - 1) * $categories->perPage() }}</td>
                             <td data-label="Category Name" style="color: black; font-weight: 600;">{{ $category->name }}</td>
                             <td data-label="Status">
                                 <span class="status-badge status-{{ $category->status }}">
                                     <i class="fas fa-circle"></i> {{ $category->status }}
                                 </span>
                             </td>
-                            <td data-label="Created At">{{ $category->updated_at ? $category->updated_at->format('d M, y H:i A') : 'N/A' }}</td>
+                            <td data-label="Created At">{{ $category->updated_at ? $category->updated_at->format('Y-M-d \a\t h:i A') : 'N/A' }}</td>
                             <td data-label="Actions">
                                 <div class="action-buttons">
                                     <a href="{{ route('categories.show', $category->id) }}"

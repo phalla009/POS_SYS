@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; // <-- បន្ថែម Auth
 
 class CustomerController extends Controller
 {
     // Show list of customers
     public function index()
     {
-        $customers = Customer::withCount('orders')->get();
+        $customers = Customer::with(['orders', 'creator', 'updater'])->get();
 
         foreach ($customers as $customer) {
             $customer->status = $customer->orders_count > 0 ? 'Active' : 'Inactive';
@@ -41,12 +42,14 @@ class CustomerController extends Controller
         ]);
 
         Customer::create([
-            'name'     => $validated['name'],
-            'gender'   => $validated['gender'],
-            'phone'    => $validated['phone'],
-            'email'    => $validated['email'],
-            'password' => bcrypt($validated['password']),
-            'status'   => $validated['status'],
+            'name'       => $validated['name'],
+            'gender'     => $validated['gender'],
+            'phone'      => $validated['phone'],
+            'email'      => $validated['email'],
+            'password'   => bcrypt($validated['password']),
+            'status'     => $validated['status'],
+            'created_by' => Auth::id(), // កំណត់អ្នកបង្កើត
+            'updated_by' => Auth::id(), // កំណត់អ្នកកែប្រែដំបូង
         ]);
 
         return redirect()->route('customers.create')->with('success', 'Customer added successfully.');
@@ -55,7 +58,7 @@ class CustomerController extends Controller
     // Show a customer
     public function show(string $id)
     {
-        $customer = Customer::findOrFail($id);
+        $customer = Customer::with(['creator', 'updater'])->findOrFail($id);
         return view('pages/customers.show', compact('customer'));
     }
 
@@ -93,6 +96,9 @@ class CustomerController extends Controller
         if ($request->has('status')) {
             $customer->status = $request->input('status');
         }
+
+        // កំណត់អ្នកកែប្រែចុងក្រោយ
+        $customer->updated_by = Auth::id();
 
         $customer->save();
         return redirect()->route('customers.index')->with('success', 'Customer updated successfully!');

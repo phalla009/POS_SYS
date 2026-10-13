@@ -3,12 +3,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Role extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['role_name', 'description'];
+    protected $fillable = [
+        'role_name',
+        'description',
+        'created_by', // បន្ថែម
+        'updated_by', // បន្ថែម
+    ];
 
     /**
      * Permissions relationship (many-to-many)
@@ -21,6 +27,22 @@ class Role extends Model
             'roles_id',          // foreign key on pivot for Role
             'permissions_id'     // foreign key on pivot for Permission
         )->withTimestamps();
+    }
+
+    /**
+     * អ្នកបង្កើត Role នេះ
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * អ្នកកែប្រែ Role ចុងក្រោយ
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /**

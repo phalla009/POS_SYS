@@ -31,15 +31,15 @@
         .info-row {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .info-row-3 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .info-box {
@@ -107,11 +107,11 @@
         <div class="info-row">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-user"></i> Customer Name</div>
-                <div class="info-value">{{ $customer->name }}</div>
+                <div class="info-value">{{ $customer->name ?? '-'}}</div>
             </div>
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-venus-mars"></i> Gender</div>
-                <div class="info-value">{{ ucfirst($customer->gender) }}</div>
+                <div class="info-value">{{ ucfirst($customer->gender) ?? '-'}}</div>
             </div>
         </div>
 
@@ -119,11 +119,11 @@
         <div class="info-row-3">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-phone"></i> Phone</div>
-                <div class="info-value">{{ $customer->phone }}</div>
+                <div class="info-value">{{ $customer->phone ?? '-'}}</div>
             </div>
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-envelope"></i> Email</div>
-                <div class="info-value">{{ $customer->email ?? 'No Email' }}</div>
+                <div class="info-value">{{ $customer->email ?? '-' }}</div>
             </div>
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-circle-check"></i> Status</div>
@@ -142,8 +142,21 @@
                 <div class="info-value">{{ $customer->created_at ? $customer->created_at->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
             </div>
             <div class="info-box">
-                <div class="info-label"><i class="fas fa-clock"></i> Last Updated</div>
-                <div class="info-value">{{ $customer->updated_at ? $customer->updated_at->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
+                <div class="info-label"><i class="fas fa-user-plus"></i> Created By</div>
+                <div class="info-value">{{ $customer->creator?->name ?? 'N/A' }}</div>
+            </div>
+        </div>
+
+        {{-- Row 4: Last Updated & Last Updated By --}}
+        <div class="info-row">
+            <div class="info-box">
+                <div class="info-label"><i class="fas fa-clock"></i> Last Updated At</div>
+                <div class="info-value">{{ $customer->updated_at ? $customer->updated_at->format('Y-M-d \a\t g:i A') : 'N/A' }}</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label"><i class="fas fa-user-edit"></i> Last Updated By</div>
+                <div class="info-value">{{ $customer->updater?->name ?? 'N/A' }}</div>
             </div>
         </div>
 

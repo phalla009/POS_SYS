@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Unit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; // <-- បន្ថែម Auth
 
 class UnitController extends Controller
 {
@@ -16,13 +17,14 @@ class UnitController extends Controller
 
         $totalUnits = Unit::count();
 
-        $units = Unit::when($search, function ($query, $search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('abbreviation', 'like', '%' . $search . '%')
-                    ->orWhere('description', 'like', '%' . $search . '%');
-            });
-        })
+        $units = Unit::with(['creator', 'updater'])
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('abbreviation', 'like', '%' . $search . '%')
+                        ->orWhere('description', 'like', '%' . $search . '%');
+                });
+            })
             ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
@@ -49,6 +51,10 @@ class UnitController extends Controller
             'description'  => 'nullable|string',
         ]);
 
+        // កំណត់អ្នកបង្កើត និងអ្នកកែប្រែដំបូង
+        $validated['created_by'] = Auth::id();
+        $validated['updated_by'] = Auth::id();
+
         Unit::create($validated);
 
         return redirect()
@@ -61,7 +67,7 @@ class UnitController extends Controller
      */
     public function show(string $id)
     {
-        $unit = Unit::findOrFail($id);
+        $unit = Unit::with(['creator', 'updater'])->findOrFail($id);
 
         return view('settings/units.show', compact('unit'));
     }
@@ -88,6 +94,9 @@ class UnitController extends Controller
             'abbreviation' => 'nullable|string|max:20',
             'description'  => 'nullable|string',
         ]);
+
+        // កំណត់អ្នកកែប្រែចុងក្រោយ
+        $validated['updated_by'] = Auth::id();
 
         $unit->update($validated);
 

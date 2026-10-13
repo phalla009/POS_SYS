@@ -31,8 +31,8 @@
         .info-row {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .info-box {
@@ -284,7 +284,7 @@
                 <div class="info-row">
                     <div class="info-box full">
                         <div class="info-label"><i class="fas fa-align-left"></i> Description</div>
-                        <div class="info-value">{{ $product->description ?: 'No description.' }}</div>
+                        <div class="info-value">{{ $product->description ?: '-' }}</div>
                     </div>
                 </div>
 
@@ -292,11 +292,24 @@
                 <div class="info-row">
                     <div class="info-box">
                         <div class="info-label"><i class="fas fa-calendar-plus"></i> Created</div>
-                        <div class="info-value">{{ $product->created_at->setTimezone('Asia/Phnom_Penh')->format('M d, Y \a\t g:i A') }}</div>
+                        <div class="info-value">{{ $product->created_at->setTimezone('Asia/Phnom_Penh')->format('Y-M-d \a\t g:i A') }}</div>
                     </div>
+
+                    <div class="info-box">
+                        <div class="info-label"><i class="fas fa-user-plus"></i> Created By</div>
+                        <div class="info-value">{{ $product->creator?->name ?? 'N/A' }}</div>
+                    </div>
+                </div>
+                {{-- Row 4: Last Updated & Last Updated By --}}
+                <div class="info-row">
                     <div class="info-box">
                         <div class="info-label"><i class="fas fa-clock"></i> Last Updated</div>
-                        <div class="info-value">{{ $product->updated_at->setTimezone('Asia/Phnom_Penh')->format('M d, Y \a\t g:i A') }}</div>
+                        <div class="info-value">{{ $product->updated_at->setTimezone('Asia/Phnom_Penh')->format('Y-M-d \a\t g:i A') }}</div>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-label"><i class="fas fa-user-edit"></i> Last Updated By</div>
+                        <div class="info-value">{{ $product->updater?->name ?? 'N/A' }}</div>
                     </div>
                 </div>
 

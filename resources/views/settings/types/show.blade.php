@@ -107,18 +107,26 @@
         <div class="info-row" style="grid-template-columns: repeat(2, 1fr);">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-calendar-plus"></i> Created At</div>
-                <div class="info-value">{{ $type->created_at ? $type->created_at->timezone('Asia/Phnom_Penh')->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
+                <div class="info-value">{{ $type->created_at ? $type->created_at->format('Y-M-d \a\t g:i A') : 'N/A' }}</div>
             </div>
+
             <div class="info-box">
-                <div class="info-label"><i class="fas fa-clock"></i> Last Updated</div>
-                <div class="info-value">{{ $type->updated_at ? $type->updated_at->timezone('Asia/Phnom_Penh')->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
+                <div class="info-label"><i class="fas fa-user-edit"></i> Created By</div>
+                <div class="info-value">{{ $type->creator?->name ?? 'N/A' }}</div>
             </div>
         </div>
 
-        <div class="form-actions" style="margin-top:20px;">
-            <a href="{{ route('types.edit', $type->id) }}" class="btn btn-primary page-link-loading" data-loading-text="Opening editor...">
-                <i class="fas fa-pen"></i> Edit Type
-            </a>
+        {{-- Row 4: Last Updated & Last Updated By --}}
+        <div class="info-row" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="info-box">
+                <div class="info-label"><i class="fas fa-clock"></i> Last Updated At</div>
+                <div class="info-value">{{ $type->updated_at ? $type->updated_at->format('Y-M-d \a\t g:i A') : 'N/A' }}</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label"><i class="fas fa-user-edit"></i> Last Updated By</div>
+                <div class="info-value">{{ $type->updater?->name ?? 'N/A' }}</div>
+            </div>
         </div>
     </div>
 

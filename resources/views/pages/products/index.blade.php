@@ -457,8 +457,8 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width:36px;"><input type="checkbox" id="selectAllCheckbox" title="Select all"></th>
                         <th style="width:40px;">#</th>
+                        <th style="width:36px;"><input type="checkbox" id="selectAllCheckbox" title="Select all"></th>
                         <th style="width:50px; text-align:center;">Image</th>
                         <th>Products</th>
                         <th>Categories</th>
@@ -470,11 +470,10 @@
                 <tbody id="productsTable">
                 @forelse ($products as $product)
                     <tr data-id="{{ $product->id }}">
+                        <td data-label="No">#{{ $loop->iteration + ($products->currentPage() - 1) * $products->perPage() }}</td>
                         <td data-label="Select">
                             <input type="checkbox" class="row-checkbox" value="{{ $product->id }}">
                         </td>
-                        <td data-label="No">#{{ $loop->iteration + ($products->currentPage() - 1) * $products->perPage() }}</td>
-
                         {{-- Product Image Thumbnail --}}
                         <td data-label="Image">
                             <div class="product-img-wrapper">

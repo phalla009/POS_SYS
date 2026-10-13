@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserManager extends Authenticatable
 {
@@ -18,7 +19,9 @@ class UserManager extends Authenticatable
         'email',
         'password',
         'role_id',
-        'description'
+        'description',
+        'created_by', // បន្ថែម
+        'updated_by', // បន្ថែម
     ];
 
     protected $hidden = [
@@ -29,9 +32,25 @@ class UserManager extends Authenticatable
     /**
      * UserManager belongs to a single role
      */
-    public function role()
+    public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    /**
+     * អ្នកបង្កើត User នេះ
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(UserManager::class, 'created_by');
+    }
+
+    /**
+     * អ្នកកែប្រែ User ចុងក្រោយ
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(UserManager::class, 'updated_by');
     }
 
     /**

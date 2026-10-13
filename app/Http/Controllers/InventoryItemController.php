@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\InventoryItem;
 use App\Models\Unit;
-use App\Models\Type; // Import the Type model
+use App\Models\Type;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; // <-- បន្ថែម Auth
 
 class InventoryItemController extends Controller
 {
@@ -14,10 +15,9 @@ class InventoryItemController extends Controller
      */
     public function index()
     {
-        $allItems = InventoryItem::all();
+        $allItems = InventoryItem::with(['creator', 'updater'])->get();
         $totalItems      = $allItems->count();
-//
-//        $totalItems      = $allItems->sum('qty');
+
         $lowStockItems   = $allItems->filter(function ($item) {
             return $item->qty >= 1 && $item->qty <= InventoryItem::LOW_STOCK_THRESHOLD;
         })->count();
@@ -25,11 +25,8 @@ class InventoryItemController extends Controller
         $inventoryValue  = $allItems->sum(function ($item) {
             return $item->price;
         });
-//        $inventoryValue  = $allItems->sum(function ($item) {
-//            return $item->qty * $item->price;
-//        });
 
-        $items = InventoryItem::orderBy('name')->paginate(10)->withQueryString();
+        $items = InventoryItem::with(['creator', 'updater'])->orderBy('name')->paginate(10)->withQueryString();
 
         return view('pages.inventorys.index', compact(
             'items',
@@ -46,7 +43,7 @@ class InventoryItemController extends Controller
     public function create()
     {
         $units = Unit::orderBy('name')->get();
-        $types = Type::orderBy('name')->get(); // Fetch types for the dropdown
+        $types = Type::orderBy('name')->get();
 
         return view('pages.inventorys.create', compact('units', 'types'));
     }
@@ -64,6 +61,10 @@ class InventoryItemController extends Controller
             'type'  => 'nullable|string|max:50',
         ]);
 
+        // កំណត់អ្នកបង្កើត និងអ្នកកែប្រែដំបូង
+        $validated['created_by'] = Auth::id();
+        $validated['updated_by'] = Auth::id();
+
         InventoryItem::create($validated);
 
         return redirect()
@@ -76,7 +77,7 @@ class InventoryItemController extends Controller
      */
     public function show(string $id)
     {
-        $item = InventoryItem::findOrFail($id);
+        $item = InventoryItem::with(['creator', 'updater'])->findOrFail($id);
 
         return view('pages.inventorys.show', compact('item'));
     }
@@ -88,7 +89,7 @@ class InventoryItemController extends Controller
     {
         $item  = InventoryItem::findOrFail($id);
         $units = Unit::orderBy('name')->get();
-        $types = Type::orderBy('name')->get(); // Fetch types for the edit dropdown
+        $types = Type::orderBy('name')->get();
 
         return view('pages.inventorys.edit', compact('item', 'units', 'types'));
     }
@@ -107,6 +108,9 @@ class InventoryItemController extends Controller
             'unit'  => 'nullable|string|max:50',
             'type'  => 'nullable|string|max:50',
         ]);
+
+        // កំណត់អ្នកកែប្រែចុងក្រោយ
+        $validated['updated_by'] = Auth::id();
 
         $item->update($validated);
 

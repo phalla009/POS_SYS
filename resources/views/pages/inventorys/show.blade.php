@@ -31,15 +31,15 @@
         .info-row {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .info-row-3 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .info-box {
@@ -174,9 +174,23 @@
                 <div class="info-label"><i class="fas fa-calendar-plus"></i> Created At</div>
                 <div class="info-value">{{ $item->created_at ? $item->created_at->timezone('Asia/Phnom_Penh')->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
             </div>
+
             <div class="info-box">
-                <div class="info-label"><i class="fas fa-clock"></i> Last Updated</div>
-                <div class="info-value">{{ $item->updated_at ? $item->updated_at->timezone('Asia/Phnom_Penh')->format('Y-m-d H:i \a\t g:i A') : 'N/A' }}</div>
+                <div class="info-label"><i class="fas fa-user-plus"></i> Created By</div>
+                <div class="info-value">{{ $item->creator?->name ?? 'N/A' }}</div>
+            </div>
+        </div>
+
+        {{-- Row 4: Last Updated & Last Updated By --}}
+        <div class="info-row">
+            <div class="info-box">
+                <div class="info-label"><i class="fas fa-clock"></i> Last Updated At</div>
+                <div class="info-value">{{ $item->updated_at ? $item->updated_at->format('Y-M-d \a\t g:i A') : 'N/A' }}</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label"><i class="fas fa-user-edit"></i> Last Updated By</div>
+                <div class="info-value">{{ $item->updater?->name ?? 'N/A' }}</div>
             </div>
         </div>
 
