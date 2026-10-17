@@ -49,6 +49,54 @@
             margin-right: 6px;
         }
 
+        /* Payment method badges */
+        .pay-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .pay-badge.cash  { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .pay-badge.bank  { background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; }
+        .pay-badge.other { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+
+        /* Financial summary cards */
+        .fin-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin: 14px 0 6px;
+        }
+        .fin-card {
+            border-radius: 12px;
+            padding: 16px 18px;
+            border: 1px solid transparent;
+        }
+        .fin-card-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+        .fin-card-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .fin-card.sales     { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+        .fin-card.inventory { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+        .fin-card.net       { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+        .fin-card.net.negative { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+        .net-negative { color: #dc2626; font-weight: 600; }
+        .net-positive { color: #15803d; font-weight: 600; }
+
+        @media (max-width: 768px) {
+            .fin-cards { grid-template-columns: 1fr; }
+            .fin-card-value { font-size: 20px; }
+        }
+
         /* Responsive Table Wrappers & Full Width Layout Overrides */
         .report-table-wrapper {
             width: 100%;
@@ -112,6 +160,15 @@
         <div id="loading-text">Going back...</div>
     </div>
 
+    @php
+        // Small helper: turns "Cash" / "Bank" / "-" into a coloured badge class
+        $payClass = fn ($label) => match ($label) {
+            'Cash'  => 'cash',
+            'Bank'  => 'bank',
+            default => 'other',
+        };
+    @endphp
+
     <div class="content-section">
 
         {{-- Back Button --}}
@@ -126,15 +183,17 @@
         </a>
 
         <h2>{{ ucfirst($type) }} Report</h2>
-        <p><b>From</b> {{ $start->format('d M , Y') }} <b>To</b> {{ $end->format('d M, Y') }}</p><br>
+        {{--        <p><b>From</b> {{ $start->format('d M , Y') }} <b>To</b> {{ $end->format('d M, Y') }}</p><br>--}}
 
         {{-- Sales Report --}}
         @if($type === 'sales')
+            <h4>Sale Report ({{ $start->format('d-M-Y') }} - {{ $end->format('d-M-Y') }})</h4>
             <div class="report-table-wrapper">
                 <table class="table">
                     <thead>
                     <tr>
                         <th>Date</th>
+                        <th>Payment Method</th>
                         <th>Total Qty</th>
                         <th>Total ($)</th>
                     </tr>
@@ -143,14 +202,26 @@
                     @foreach($results as $row)
                         <tr>
                             <td>{{ $row->date }}</td>
+                            <td><span class="pay-badge {{ $payClass($row->payment_method) }}">{{ $row->payment_method }}</span></td>
                             <td>{{ number_format($row->qty ?? 0) }}</td>
                             <td>${{ number_format($row->total ?? 0, 2) }}</td>
                         </tr>
                     @endforeach
                     </tbody>
                     <tfoot>
+                    {{-- Subtotal per payment method --}}
+                    <tr style="background-color: #f0fdf4; color: #15803d; font-weight: 700;">
+                        <td colspan="2" style="padding: 10px 16px; text-align:right;">Cash Total</td>
+                        <td style="padding: 10px 16px;">{{ number_format($results->where('payment_method', 'Cash')->sum('qty')) }}</td>
+                        <td style="padding: 10px 16px;">${{ number_format($results->where('payment_method', 'Cash')->sum('total'), 2) }}</td>
+                    </tr>
+                    <tr style="background-color: #fdf2f8; color: #be185d; font-weight: 700;">
+                        <td colspan="2" style="padding: 10px 16px; text-align:right;">Bank Total</td>
+                        <td style="padding: 10px 16px;">{{ number_format($results->where('payment_method', 'Bank')->sum('qty')) }}</td>
+                        <td style="padding: 10px 16px;">${{ number_format($results->where('payment_method', 'Bank')->sum('total'), 2) }}</td>
+                    </tr>
                     <tr style="background-color: #1a73e8; color: #ffffff;">
-                        <th style="padding: 12px 16px; font-size: 15px;">Grand Total</th>
+                        <th colspan="2" style="padding: 12px 16px; font-size: 15px;">Grand Total</th>
                         <th style="padding: 12px 16px; font-size: 15px;">
                             {{ number_format($results->sum('qty')) }}
                         </th>
@@ -164,35 +235,71 @@
                 </table>
             </div>
 
-            {{-- Financial Report --}}
+            {{-- Financial Report: Total Sales vs Total Inventory --}}
         @elseif($type === 'financial')
-            <h4>Financial Report ({{ $start->format('M d, Y') }} - {{ $end->format('M d, Y') }})</h4>
+            @php
+                $finSales     = $summary['sales']     ?? $results->sum('total_sales');
+                $finInventory = $summary['inventory'] ?? $results->sum('total_inventory');
+                $finNet       = $summary['net']       ?? ($finSales - $finInventory);
+            @endphp
+
+            <h4>Financial Report ({{ $start->format('d-M-Y') }} - {{ $end->format('d-M-Y') }})</h4>
+
+            {{-- Summary cards --}}
+            <div class="fin-cards">
+                <div class="fin-card sales">
+                    <div class="fin-card-label">Total Sales</div>
+                    <div class="fin-card-value">${{ number_format($finSales, 2) }}</div>
+                </div>
+                <div class="fin-card inventory">
+                    <div class="fin-card-label">Total Inventory</div>
+                    <div class="fin-card-value">${{ number_format($finInventory, 2) }}</div>
+                </div>
+                <div class="fin-card net {{ $finNet < 0 ? 'negative' : '' }}">
+                    <div class="fin-card-label">Net</div>
+                    <div class="fin-card-value">{{ $finNet < 0 ? '-' : '' }}${{ number_format(abs($finNet), 2) }}</div>
+                </div>
+            </div>
+
             <div class="report-table-wrapper">
                 <table class="table">
                     <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Sold Quantity</th>
-                        <th>Revenue ($)</th>
+                        <th>Sold Qty</th>
+                        <th>Total Sales ($)</th>
+                        <th>Inventory Items</th>
+                        <th>Total Inventory ($)</th>
+                        <th>Net ($)</th>
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach($results as $row)
+                    @forelse($results as $row)
                         <tr>
                             <td>{{ \Carbon\Carbon::parse($row->date)->format('M d, Y') }}</td>
-                            <td>{{ $row->sold_qty ?? 0 }}</td>
-                            <td>${{ number_format($row->revenue ?? 0, 2) }}</td>
+                            <td>{{ number_format($row->sold_qty ?? 0) }}</td>
+                            <td>${{ number_format($row->total_sales ?? 0, 2) }}</td>
+                            <td>{{ number_format($row->inventory_items ?? 0) }}</td>
+                            <td>${{ number_format($row->total_inventory ?? 0, 2) }}</td>
+                            <td class="{{ ($row->net ?? 0) < 0 ? 'net-negative' : 'net-positive' }}">
+                                {{ ($row->net ?? 0) < 0 ? '-' : '' }}${{ number_format(abs($row->net ?? 0), 2) }}
+                            </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding: 24px; color:#9ca3af;">No data for this period.</td>
+                        </tr>
+                    @endforelse
                     </tbody>
                     <tfoot>
                     <tr style="background-color: #1a73e8; color: #ffffff;">
                         <th style="padding: 12px 16px; font-size: 15px;">Grand Total</th>
+                        <th style="padding: 12px 16px; font-size: 15px;">{{ number_format($results->sum('sold_qty')) }}</th>
+                        <th style="padding: 12px 16px; font-size: 15px;">${{ number_format($finSales, 2) }}</th>
+                        <th style="padding: 12px 16px; font-size: 15px;">{{ number_format($results->sum('inventory_items')) }}</th>
+                        <th style="padding: 12px 16px; font-size: 15px;">${{ number_format($finInventory, 2) }}</th>
                         <th style="padding: 12px 16px; font-size: 15px;">
-                            {{ number_format($results->sum('sold_qty')) }}
-                        </th>
-                        <th style="padding: 12px 16px; font-size: 15px;">
-                            ${{ number_format($results->sum('revenue'), 2) }}
+                            {{ $finNet < 0 ? '-' : '' }}${{ number_format(abs($finNet), 2) }}
                         </th>
                     </tr>
                     </tfoot>

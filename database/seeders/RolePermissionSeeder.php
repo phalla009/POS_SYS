@@ -25,6 +25,7 @@ class RolePermissionSeeder extends Seeder
             ['permission_name' => 'Types', 'slug' => 'types'],
             ['permission_name' => 'Barcodes', 'slug' => 'barcodes'],
             ['permission_name' => 'UserRoles', 'slug' => 'userroles'],
+            ['permission_name' => 'Transactions', 'slug' => 'transactions'],
         ];
 
         foreach ($permissions as $perm) {

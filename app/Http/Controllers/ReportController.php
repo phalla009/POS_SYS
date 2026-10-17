@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Order;
 use App\Models\Customer;
 use App\Models\Report;
+use App\Models\InventoryItem;
 use App\Exports\ReportExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
@@ -16,7 +17,7 @@ class ReportController extends Controller
     public function index()
     {
         $salesThisMonth = Order::whereMonth('created_at', date('m'))
-                                ->sum('total_amount');
+            ->sum('total_amount');
         $ordersThisMonth = Order::whereMonth('created_at', date('m'))->count();
         $newCustomers = Customer::whereMonth('created_at', date('m'))->count();
         $customerSatisfaction = 92;
@@ -68,14 +69,31 @@ class ReportController extends Controller
         return [$start, $end];
     }
 
+    /**
+     * SQL that turns the value saved by the POS ('cash' / 'khqr')
+     * into the label shown in reports.
+     */
+    private function paymentLabelSql(): string
+    {
+        return "CASE orders.payment_method
+                    WHEN 'cash' THEN 'Cash'
+                    WHEN 'khqr' THEN 'Bank'
+                    ELSE '-'
+                END";
+    }
+
     private function getResults($type, $start, $end)
     {
+        $label = $this->paymentLabelSql();
+
         if ($type === 'sales') {
+            // One row per day PER payment method (Cash / Bank), as selected in POS.
             return DB::table('orders')
                 ->whereBetween('created_at', [$start, $end])
-                ->selectRaw('DATE(created_at) as date, SUM(quantity) as qty, SUM(total_amount) as total')
-                ->groupByRaw('DATE(created_at)')
+                ->selectRaw("DATE(created_at) as date, $label as payment_method, SUM(quantity) as qty, SUM(total_amount) as total")
+                ->groupByRaw("DATE(created_at), $label")
                 ->orderBy('date')
+                ->orderBy('payment_method')
                 ->get();
 
         } elseif ($type === 'inventory') {
@@ -103,7 +121,7 @@ class ReportController extends Controller
             return Customer::select('id', 'name', 'gender', 'created_at')
                 ->withCount(['orders as total_qty' => function ($query) use ($start, $end) {
                     $query->whereBetween('order_date', [$start, $end])
-                          ->select(DB::raw('SUM(quantity)'));
+                        ->select(DB::raw('SUM(quantity)'));
                 }])
                 ->withSum(['orders as total_price' => function ($query) use ($start, $end) {
                     $query->whereBetween('order_date', [$start, $end]);
@@ -111,12 +129,43 @@ class ReportController extends Controller
                 ->get();
 
         } elseif ($type === 'financial') {
-            return DB::table('orders')
+            // Total Sales: completed orders, grouped by day
+            $sales = DB::table('orders')
+                ->where('status', 'completed')
                 ->whereBetween('order_date', [$start, $end])
-                ->selectRaw('DATE(order_date) as date, SUM(quantity) as sold_qty, SUM(total_amount) as revenue')
+                ->selectRaw('DATE(order_date) as date, SUM(quantity) as sold_qty, SUM(total_amount) as total_sales')
                 ->groupByRaw('DATE(order_date)')
-                ->orderBy('date')
-                ->get();
+                ->get()
+                ->keyBy(fn ($r) => (string) $r->date);
+
+            // Total Inventory: stock bought, grouped by day
+            $inventory = InventoryItem::whereBetween('created_at', [$start, $end])
+                ->selectRaw('DATE(created_at) as date, COUNT(*) as inventory_items, SUM(price) as total_inventory')
+                ->groupByRaw('DATE(created_at)')
+                ->get()
+                ->keyBy(fn ($r) => (string) $r->date);
+
+            return $sales->keys()
+                ->merge($inventory->keys())
+                ->unique()
+                ->sort()
+                ->values()
+                ->map(function ($date) use ($sales, $inventory) {
+                    $s = $sales->get($date);
+                    $i = $inventory->get($date);
+
+                    $totalSales     = (float) ($s->total_sales ?? 0);
+                    $totalInventory = (float) ($i->total_inventory ?? 0);
+
+                    return (object) [
+                        'date'            => $date,
+                        'sold_qty'        => (int) ($s->sold_qty ?? 0),
+                        'total_sales'     => $totalSales,
+                        'inventory_items' => (int) ($i->inventory_items ?? 0),
+                        'total_inventory' => $totalInventory,
+                        'net'             => $totalSales - $totalInventory,
+                    ];
+                });
         }
 
         return collect();
@@ -133,8 +182,21 @@ class ReportController extends Controller
         $results    = $this->getResults($type, $start, $end);
         $grandTotal = $type === 'sales' ? $results->sum('total') : 0;
 
+        // Summary cards for the financial report
+        $summary = null;
+        if ($type === 'financial') {
+            $totalSales     = $results->sum('total_sales');
+            $totalInventory = $results->sum('total_inventory');
+
+            $summary = [
+                'sales'     => $totalSales,
+                'inventory' => $totalInventory,
+                'net'       => $totalSales - $totalInventory,
+            ];
+        }
+
         return view('reports.generated', compact(
-            'type', 'range', 'results', 'start', 'end', 'grandTotal'
+            'type', 'range', 'results', 'start', 'end', 'grandTotal', 'summary'
         ));
     }
 

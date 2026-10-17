@@ -225,6 +225,17 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px #005e00;
         }
+        .btn-confirm-remove:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* ── CONFIRM CHECKOUT MODAL ── */
+        .cc-box { max-width: 380px; }
+        .cc-rows { text-align: left; background: #f9fafb; border: 1px solid #f0f0f0; border-radius: 12px; padding: 12px 14px; margin: 0 0 20px; }
+        .cc-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #6b7280; padding: 5px 0; }
+        .cc-row span:last-child { font-weight: 600; color: #1f2937; font-family: 'DM Mono', monospace; }
+        .cc-row.total { margin-top: 6px; padding-top: 10px; border-top: 1px dashed #d1d5db; font-size: 15px; font-weight: 700; color: #111; }
+        .cc-row.total span:last-child { font-size: 22px; color: #ff0000; }
+        .cc-row.change span:last-child { color: #15803d; }
+        .cc-row.change.insufficient span:last-child { color: #ef4444; }
 
         /* ── TOAST ── */
         .toast { position: fixed; top: 60px; right: 28px;background: repeating-linear-gradient(
@@ -685,7 +696,7 @@
 @section('content')
 
     {{-- ════ ADD TO CART MODAL ════ --}}
-    <div class="remove-modal" id="addToCartModal" style="z-index:100001;" onclick="handleCheckout()">
+    <div class="remove-modal" id="addToCartModal" style="z-index:100001;">
         <div class="atc-modal-box">
             <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
                 <div id="atcThumbWrap"></div>
@@ -872,6 +883,35 @@
         </div>
     </div>
 
+    {{-- ════ CONFIRM CHECKOUT MODAL ════ --}}
+    <div class="remove-modal" id="confirmCheckoutModal" style="z-index:100002;">
+        <div class="remove-modal-box cc-box">
+            <div class="remove-modal-icon" style="background:#f0fdf4;">
+                <i class="fas fa-receipt" style="color:#16a34a;"></i>
+            </div>
+            <h3>Confirm Checkout</h3>
+            <p style="margin-bottom:16px;">Please review the order before confirming.</p>
+
+            <div class="cc-rows">
+                <div class="cc-row"><span>Items</span><span id="ccItems">0</span></div>
+                <div class="cc-row"><span>Payment</span><span id="ccMethod">Bank</span></div>
+                <div class="cc-row" id="ccGivenRow" style="display:none;"><span>Cash received</span><span id="ccGiven">$0.00</span></div>
+                <div class="cc-row change" id="ccChangeRow" style="display:none;"><span>Change</span><span id="ccChange">$0.00</span></div>
+                <div class="cc-row total"><span>Total</span><span id="ccTotal">$0.00</span></div>
+            </div>
+
+            <div class="remove-modal-actions">
+                <button class="btn-cancel-remove" onclick="closeConfirmCheckout()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn-confirm-remove" id="ccConfirmBtn" onclick="confirmCheckoutSubmit()"
+                        style="display:flex;align-items:center;justify-content:center;gap:7px;">
+                    <i class="fas fa-check-circle"></i> Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast">
         <i class="fas fa-check-circle"></i>
         <span id="toastText">Done.</span>
@@ -1025,8 +1065,13 @@
                     </div>
 
                     <button type="button" class="btn-checkout" id="checkoutBtn" disabled onclick="handleCheckout()">
-                        <i class="fas fa-qrcode" id="checkoutBtnIcon"></i>
-                        <span id="checkoutBtnText">Checkout via KHQR</span>
+                        <i class="fas fa-check-circle" id="checkoutBtnIcon"></i>
+                        <span id="checkoutBtnText">Checkout — Bank</span>
+                    </button>
+
+                    {{-- Optional: show the QR to the customer (Bank only) --}}
+                    <button type="button" class="btn-customer-display" id="showQrBtn" onclick="openKhqrModal()">
+                        <i class="fas fa-qrcode"></i> Show QR to customer
                     </button>
                 </form>
 
@@ -1115,8 +1160,14 @@
 
             <button type="button" class="btn-checkout" id="drawerCheckoutBtn" disabled onclick="handleDrawerCheckout()"
                     style="margin-top:8px;">
-                <i class="fas fa-qrcode" id="drawerCheckoutBtnIcon"></i>
-                <span id="drawerCheckoutBtnText">Checkout via KHQR</span>
+                <i class="fas fa-check-circle" id="drawerCheckoutBtnIcon"></i>
+                <span id="drawerCheckoutBtnText">Checkout — Bank</span>
+            </button>
+
+            {{-- Optional: show the QR to the customer (Bank only) --}}
+            <button type="button" class="btn-customer-display" id="drawerShowQrBtn"
+                    onclick="closeCartDrawer(); openKhqrModal();" style="margin-top:7px;">
+                <i class="fas fa-qrcode"></i> Show QR to customer
             </button>
 
             <div style="display:flex;gap:8px;margin-top:7px;">
@@ -1132,292 +1183,293 @@
 
     {{-- ════ SCRIPTS ════ --}}
     <script>
-    const overlay     = document.getElementById('loading-overlay');
-    const loadingText = document.getElementById('loading-text');
-    function showLoading(msg) {
-        if (loadingText) loadingText.textContent = msg || 'Loading...';
-        if (overlay) overlay.style.display = 'flex';
-    }
+        const overlay     = document.getElementById('loading-overlay');
+        const loadingText = document.getElementById('loading-text');
+        function showLoading(msg) {
+            if (loadingText) loadingText.textContent = msg || 'Loading...';
+            if (overlay) overlay.style.display = 'flex';
+        }
 
-    /* ─────────────────────────────────────────────
-       STATE
-    ───────────────────────────────────────────── */
-    let cart            = {};
-    let activeCat       = '';
-    let pendingRemoveId = null;
-    let khqrMd5         = null;
-    let khqrOrderRef    = null;
-    let pollTimer       = null;
-    let expiryTimer     = null;
-    let pollCount       = 0;
-    let currentTotal    = 0;
-    let khqrExpiresAt   = null;
-    let pendingCard      = null;
-    let selectedDiscount = '0';
-    let selectedSugar    = '100%';
-    let activePayMethod  = 'khqr';
-    let drawerPayMethod  = 'khqr';
+        /* ─────────────────────────────────────────────
+           STATE
+        ───────────────────────────────────────────── */
+        let cart            = {};
+        let activeCat       = '';
+        let pendingRemoveId = null;
+        let khqrMd5         = null;
+        let khqrOrderRef    = null;
+        let pollTimer       = null;
+        let expiryTimer     = null;
+        let pollCount       = 0;
+        let currentTotal    = 0;
+        let khqrExpiresAt   = null;
+        let pendingCard      = null;
+        let selectedDiscount = '0';
+        let selectedSugar    = '100%';
+        let activePayMethod  = 'khqr';
+        let drawerPayMethod  = 'khqr';
+        let pendingCheckout  = null;
 
-    const POLL_INTERVAL_MS = 5000;
-    const POLL_MAX_CYCLES  = 60;
-    const EXPIRY_WARN_SECS = 60;
+        const POLL_INTERVAL_MS = 5000;
+        const POLL_MAX_CYCLES  = 60;
+        const EXPIRY_WARN_SECS = 60;
 
-    /* ─────────────────────────────────────────────
-       RESPONSIVE HELPERS
-    ───────────────────────────────────────────── */
-    function isMobileTablet() {
-        return window.innerWidth <= 860;
-    }
+        /* ─────────────────────────────────────────────
+           RESPONSIVE HELPERS
+        ───────────────────────────────────────────── */
+        function isMobileTablet() {
+            return window.innerWidth <= 860;
+        }
 
-    /* ─────────────────────────────────────────────
-       CART DRAWER (mobile/tablet)
-    ───────────────────────────────────────────── */
-    function openCartDrawer() {
-        document.getElementById('cartDrawer').classList.add('open');
-        document.getElementById('cartDrawerOverlay').classList.add('open');
-        document.body.style.overflow = 'hidden';
-    }
+        /* ─────────────────────────────────────────────
+           CART DRAWER (mobile/tablet)
+        ───────────────────────────────────────────── */
+        function openCartDrawer() {
+            document.getElementById('cartDrawer').classList.add('open');
+            document.getElementById('cartDrawerOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
 
-    function closeCartDrawer() {
-        document.getElementById('cartDrawer').classList.remove('open');
-        document.getElementById('cartDrawerOverlay').classList.remove('open');
-        document.body.style.overflow = '';
-    }
+        function closeCartDrawer() {
+            document.getElementById('cartDrawer').classList.remove('open');
+            document.getElementById('cartDrawerOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
 
-    /* Swipe-down to close drawer */
-    (function() {
-        const drawer = document.getElementById('cartDrawer');
-        let startY = 0, isDragging = false;
+        /* Swipe-down to close drawer */
+        (function() {
+            const drawer = document.getElementById('cartDrawer');
+            let startY = 0, isDragging = false;
 
-        drawer.addEventListener('touchstart', function(e) {
-            const body = drawer.querySelector('.cart-drawer-body');
-            if (body && body.scrollTop > 0) return; // don't close if scrolled
-            startY = e.touches[0].clientY;
-            isDragging = true;
-        }, { passive: true });
+            drawer.addEventListener('touchstart', function(e) {
+                const body = drawer.querySelector('.cart-drawer-body');
+                if (body && body.scrollTop > 0) return; // don't close if scrolled
+                startY = e.touches[0].clientY;
+                isDragging = true;
+            }, { passive: true });
 
-        drawer.addEventListener('touchmove', function(e) {
-            if (!isDragging) return;
-            const dy = e.touches[0].clientY - startY;
-            if (dy > 0) {
-                drawer.style.transform = `translateY(${dy}px)`;
-                drawer.style.transition = 'none';
+            drawer.addEventListener('touchmove', function(e) {
+                if (!isDragging) return;
+                const dy = e.touches[0].clientY - startY;
+                if (dy > 0) {
+                    drawer.style.transform = `translateY(${dy}px)`;
+                    drawer.style.transition = 'none';
+                }
+            }, { passive: true });
+
+            drawer.addEventListener('touchend', function(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                const dy = e.changedTouches[0].clientY - startY;
+                drawer.style.transition = '';
+                if (dy > 90) {
+                    drawer.style.transform = '';
+                    closeCartDrawer();
+                } else {
+                    drawer.style.transform = '';
+                }
+            });
+        })();
+
+        /* ─────────────────────────────────────────────
+           CUSTOMER DISPLAY — BroadcastChannel
+        ───────────────────────────────────────────── */
+        const cdChannel = new BroadcastChannel('cart-sync');
+
+        function openCustomerDisplay() {
+            closeCartDrawer();
+            window.open('{{ route("pos.display") }}', 'customer-display', 'width=1280,height=720,toolbar=0,menubar=0,location=0');
+        }
+
+        function broadcastCart() {
+            const keys = Object.keys(cart);
+            let subtotal = 0, total = 0;
+            const items = keys.map(key => {
+                const item = cart[key];
+                const lineTotal = calculateItemTotal(item);
+                subtotal += item.price * item.qty;
+                total    += lineTotal;
+                return {
+                    name:      item.name,
+                    brand:     item.brand,
+                    image:     item.image,
+                    price:     item.price,
+                    qty:       item.qty,
+                    discount:  item.discount,
+                    sugar:     item.sugar,
+                    lineTotal: lineTotal,
+                };
+            });
+            const discount = subtotal - total;
+            const payload  = { items, subtotal, total, discount };
+
+            cdChannel.postMessage({ type: 'cart-update', data: payload });
+            try { localStorage.setItem('cd_cart', JSON.stringify(payload)); } catch(e) {}
+        }
+
+        function broadcastClear() {
+            cdChannel.postMessage({ type: 'cart-clear' });
+            try { localStorage.removeItem('cd_cart'); } catch(e) {}
+        }
+
+        function broadcastSuccess(total) {
+            cdChannel.postMessage({ type: 'checkout-success', data: { total } });
+            try { localStorage.removeItem('cd_cart'); } catch(e) {}
+        }
+
+        function makeCartKey(productId, discount, sugar) {
+            return `${productId}::${discount}::${sugar}`;
+        }
+
+        /* ─────────────────────────────────────────────
+           ADD TO CART MODAL
+        ───────────────────────────────────────────── */
+        function addToCart(card) {
+            pendingCard      = card;
+            selectedDiscount = '0';
+            selectedSugar    = '100%';
+
+            document.querySelectorAll('#discountChips .atc-chip').forEach(b => {
+                b.classList.toggle('active-disc', b.dataset.val === '0');
+            });
+            document.querySelectorAll('#sugarChips .atc-chip').forEach(b => {
+                b.classList.toggle('active-sugar', b.dataset.val === '100%');
+            });
+
+            document.getElementById('atcName').textContent  = card.dataset.name;
+            document.getElementById('atcBrand').textContent = card.dataset.brand;
+            document.getElementById('atcPrice').textContent = '$' + parseFloat(card.dataset.price).toFixed(2);
+
+            document.getElementById('atcThumbWrap').innerHTML = card.dataset.image
+                ? `<img src="${card.dataset.image}" style="width:56px;height:56px;border-radius:12px;object-fit:contain;border:1px solid #ebebeb;flex-shrink:0;padding:4px;">`
+                : `<div style="width:56px;height:56px;border-radius:12px;background:#f7f7f7;border:1px solid #ebebeb;display:flex;align-items:center;justify-content:center;color:#d4d4d4;font-size:20px;flex-shrink:0;"><i class="fas fa-box-open"></i></div>`;
+
+            document.getElementById('addToCartModal').style.display = 'flex';
+        }
+
+        function selectDiscount(btn) {
+            selectedDiscount = btn.dataset.val;
+            document.querySelectorAll('#discountChips .atc-chip').forEach(b => {
+                b.classList.toggle('active-disc', b === btn);
+            });
+        }
+
+        function selectSugar(btn) {
+            selectedSugar = btn.dataset.val;
+            document.querySelectorAll('#sugarChips .atc-chip').forEach(b => {
+                b.classList.toggle('active-sugar', b === btn);
+            });
+        }
+
+        function confirmAddToCart() {
+            if (!pendingCard) return;
+
+            const card      = pendingCard;
+            const productId = card.dataset.id;
+            const stock     = parseInt(card.dataset.stock);
+
+            const usedQty = Object.values(cart)
+                .filter(i => i.productId === productId)
+                .reduce((s, i) => s + i.qty, 0);
+
+            if (usedQty >= stock) {
+                closeAddToCartModal();
+                showToast('Maximum stock reached for this product.', 'error');
+                pendingCard = null;
+                return;
             }
-        }, { passive: true });
 
-        drawer.addEventListener('touchend', function(e) {
-            if (!isDragging) return;
-            isDragging = false;
-            const dy = e.changedTouches[0].clientY - startY;
-            drawer.style.transition = '';
-            if (dy > 90) {
-                drawer.style.transform = '';
-                closeCartDrawer();
+            const cartKey = makeCartKey(productId, selectedDiscount, selectedSugar);
+
+            if (cart[cartKey]) {
+                cart[cartKey].qty++;
             } else {
-                drawer.style.transform = '';
+                cart[cartKey] = {
+                    cartKey, productId,
+                    name:     card.dataset.name,
+                    brand:    card.dataset.brand,
+                    price:    parseFloat(card.dataset.price),
+                    stock,
+                    qty:      1,
+                    image:    card.dataset.image || '',
+                    discount: selectedDiscount,
+                    sugar:    selectedSugar,
+                };
             }
-        });
-    })();
 
-    /* ─────────────────────────────────────────────
-       CUSTOMER DISPLAY — BroadcastChannel
-    ───────────────────────────────────────────── */
-    const cdChannel = new BroadcastChannel('cart-sync');
-
-    function openCustomerDisplay() {
-        closeCartDrawer();
-        window.open('{{ route("pos.display") }}', 'customer-display', 'width=1280,height=720,toolbar=0,menubar=0,location=0');
-    }
-
-    function broadcastCart() {
-        const keys = Object.keys(cart);
-        let subtotal = 0, total = 0;
-        const items = keys.map(key => {
-            const item = cart[key];
-            const lineTotal = calculateItemTotal(item);
-            subtotal += item.price * item.qty;
-            total    += lineTotal;
-            return {
-                name:      item.name,
-                brand:     item.brand,
-                image:     item.image,
-                price:     item.price,
-                qty:       item.qty,
-                discount:  item.discount,
-                sugar:     item.sugar,
-                lineTotal: lineTotal,
-            };
-        });
-        const discount = subtotal - total;
-        const payload  = { items, subtotal, total, discount };
-
-        cdChannel.postMessage({ type: 'cart-update', data: payload });
-        try { localStorage.setItem('cd_cart', JSON.stringify(payload)); } catch(e) {}
-    }
-
-    function broadcastClear() {
-        cdChannel.postMessage({ type: 'cart-clear' });
-        try { localStorage.removeItem('cd_cart'); } catch(e) {}
-    }
-
-    function broadcastSuccess(total) {
-        cdChannel.postMessage({ type: 'checkout-success', data: { total } });
-        try { localStorage.removeItem('cd_cart'); } catch(e) {}
-    }
-
-    function makeCartKey(productId, discount, sugar) {
-        return `${productId}::${discount}::${sugar}`;
-    }
-
-    /* ─────────────────────────────────────────────
-       ADD TO CART MODAL
-    ───────────────────────────────────────────── */
-    function addToCart(card) {
-        pendingCard      = card;
-        selectedDiscount = '0';
-        selectedSugar    = '100%';
-
-        document.querySelectorAll('#discountChips .atc-chip').forEach(b => {
-            b.classList.toggle('active-disc', b.dataset.val === '0');
-        });
-        document.querySelectorAll('#sugarChips .atc-chip').forEach(b => {
-            b.classList.toggle('active-sugar', b.dataset.val === '100%');
-        });
-
-        document.getElementById('atcName').textContent  = card.dataset.name;
-        document.getElementById('atcBrand').textContent = card.dataset.brand;
-        document.getElementById('atcPrice').textContent = '$' + parseFloat(card.dataset.price).toFixed(2);
-
-        document.getElementById('atcThumbWrap').innerHTML = card.dataset.image
-            ? `<img src="${card.dataset.image}" style="width:56px;height:56px;border-radius:12px;object-fit:contain;border:1px solid #ebebeb;flex-shrink:0;padding:4px;">`
-            : `<div style="width:56px;height:56px;border-radius:12px;background:#f7f7f7;border:1px solid #ebebeb;display:flex;align-items:center;justify-content:center;color:#d4d4d4;font-size:20px;flex-shrink:0;"><i class="fas fa-box-open"></i></div>`;
-
-        document.getElementById('addToCartModal').style.display = 'flex';
-    }
-
-    function selectDiscount(btn) {
-        selectedDiscount = btn.dataset.val;
-        document.querySelectorAll('#discountChips .atc-chip').forEach(b => {
-            b.classList.toggle('active-disc', b === btn);
-        });
-    }
-
-    function selectSugar(btn) {
-        selectedSugar = btn.dataset.val;
-        document.querySelectorAll('#sugarChips .atc-chip').forEach(b => {
-            b.classList.toggle('active-sugar', b === btn);
-        });
-    }
-
-    function confirmAddToCart() {
-        if (!pendingCard) return;
-
-        const card      = pendingCard;
-        const productId = card.dataset.id;
-        const stock     = parseInt(card.dataset.stock);
-
-        const usedQty = Object.values(cart)
-            .filter(i => i.productId === productId)
-            .reduce((s, i) => s + i.qty, 0);
-
-        if (usedQty >= stock) {
+            renderCart();
             closeAddToCartModal();
-            showToast('Maximum stock reached for this product.', 'error');
+            showToast(`"${card.dataset.name}" added to cart.`, 'success');
             pendingCard = null;
-            return;
         }
 
-        const cartKey = makeCartKey(productId, selectedDiscount, selectedSugar);
-
-        if (cart[cartKey]) {
-            cart[cartKey].qty++;
-        } else {
-            cart[cartKey] = {
-                cartKey, productId,
-                name:     card.dataset.name,
-                brand:    card.dataset.brand,
-                price:    parseFloat(card.dataset.price),
-                stock,
-                qty:      1,
-                image:    card.dataset.image || '',
-                discount: selectedDiscount,
-                sugar:    selectedSugar,
-            };
+        function closeAddToCartModal() {
+            document.getElementById('addToCartModal').style.display = 'none';
+            pendingCard = null;
         }
 
-        renderCart();
-        closeAddToCartModal();
-        showToast(`"${card.dataset.name}" added to cart.`, 'success');
-        pendingCard = null;
-    }
+        /* ─────────────────────────────────────────────
+           CART RENDER — updates both desktop panel + mobile drawer
+        ───────────────────────────────────────────── */
+        function renderCart() {
+            const keys = Object.keys(cart);
 
-    function closeAddToCartModal() {
-        document.getElementById('addToCartModal').style.display = 'none';
-        pendingCard = null;
-    }
+            // ── EMPTY STATE ──
+            if (!keys.length) {
+                const emptyHtml = '<div class="cart-empty"><i class="fas fa-shopping-cart"></i><span>No items added yet</span></div>';
 
-    /* ─────────────────────────────────────────────
-       CART RENDER — updates both desktop panel + mobile drawer
-    ───────────────────────────────────────────── */
-    function renderCart() {
-        const keys = Object.keys(cart);
+                ['cartItems', 'drawerCartItems'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerHTML = emptyHtml;
+                });
 
-        // ── EMPTY STATE ──
-        if (!keys.length) {
-            const emptyHtml = '<div class="cart-empty"><i class="fas fa-shopping-cart"></i><span>No items added yet</span></div>';
+                ['cartCount','drawerCartCount','fabCartCount'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = '0';
+                });
+                ['subtotal','drawerSubtotal'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = '$0.00';
+                });
+                ['grandTotal','drawerGrandTotal','fabCartTotal'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = '$0.00';
+                });
 
-            ['cartItems', 'drawerCartItems'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.innerHTML = emptyHtml;
-            });
+                ['discountRow','drawerDiscountRow'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
 
-            ['cartCount','drawerCartCount','fabCartCount'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = '0';
-            });
-            ['subtotal','drawerSubtotal'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = '$0.00';
-            });
-            ['grandTotal','drawerGrandTotal','fabCartTotal'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = '$0.00';
-            });
+                ['checkoutBtn','drawerCheckoutBtn'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.disabled = true;
+                });
 
-            ['discountRow','drawerDiscountRow'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.style.display = 'none';
-            });
+                broadcastClear();
+                return;
+            }
 
-            ['checkoutBtn','drawerCheckoutBtn'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.disabled = true;
-            });
+            let subtotal = 0, total = 0, count = 0, html = '';
 
-            broadcastClear();
-            return;
-        }
+            keys.forEach(key => {
+                const item      = cart[key];
+                subtotal       += item.price * item.qty;
+                const lineTotal = calculateItemTotal(item);
+                total          += lineTotal;
+                count          += item.qty;
 
-        let subtotal = 0, total = 0, count = 0, html = '';
+                const thumb = item.image
+                    ? `<img class="cart-item-thumb" src="${item.image}" alt="${item.name}">`
+                    : `<div class="cart-item-thumb-placeholder"><i class="fas fa-box-open"></i></div>`;
 
-        keys.forEach(key => {
-            const item      = cart[key];
-            subtotal       += item.price * item.qty;
-            const lineTotal = calculateItemTotal(item);
-            total          += lineTotal;
-            count          += item.qty;
+                const discBadge = (item.discount && item.discount !== '0')
+                    ? `<span style="display:inline-block;font-size:9.5px;font-weight:600;color:#ef4444;background:#fef2f2;padding:1px 6px;border-radius:20px;margin-left:3px;">${item.discount}</span>`
+                    : '';
 
-            const thumb = item.image
-                ? `<img class="cart-item-thumb" src="${item.image}" alt="${item.name}">`
-                : `<div class="cart-item-thumb-placeholder"><i class="fas fa-box-open"></i></div>`;
+                const sugarBadge = `<span style="display:inline-block;font-size:9.5px;font-weight:600;color:#6366f1;background:#eef2ff;padding:1px 6px;border-radius:20px;margin-left:3px;">${item.sugar}</span>`;
 
-            const discBadge = (item.discount && item.discount !== '0')
-                ? `<span style="display:inline-block;font-size:9.5px;font-weight:600;color:#ef4444;background:#fef2f2;padding:1px 6px;border-radius:20px;margin-left:3px;">${item.discount}</span>`
-                : '';
-
-            const sugarBadge = `<span style="display:inline-block;font-size:9.5px;font-weight:600;color:#6366f1;background:#eef2ff;padding:1px 6px;border-radius:20px;margin-left:3px;">${item.sugar}</span>`;
-
-            html += `
+                html += `
                 <div class="cart-item">
                     ${thumb}
                     <div class="cart-item-info">
@@ -1436,406 +1488,463 @@
                         <i class="fas fa-times"></i>
                     </button>
                 </div>`;
-        });
+            });
 
-        // Render into BOTH containers
-        ['cartItems', 'drawerCartItems'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.innerHTML = html;
-        });
+            // Render into BOTH containers
+            ['cartItems', 'drawerCartItems'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = html;
+            });
 
-        // Update counts
-        ['cartCount','drawerCartCount','fabCartCount'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = count;
-        });
-        ['subtotal','drawerSubtotal'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = `$${subtotal.toFixed(2)}`;
-        });
-        ['grandTotal','drawerGrandTotal'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = `$${total.toFixed(2)}`;
-        });
+            // Update counts
+            ['cartCount','drawerCartCount','fabCartCount'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = count;
+            });
+            ['subtotal','drawerSubtotal'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = `$${subtotal.toFixed(2)}`;
+            });
+            ['grandTotal','drawerGrandTotal'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = `$${total.toFixed(2)}`;
+            });
 
-        const fabTotal = document.getElementById('fabCartTotal');
-        if (fabTotal) fabTotal.textContent = `$${total.toFixed(2)}`;
+            const fabTotal = document.getElementById('fabCartTotal');
+            if (fabTotal) fabTotal.textContent = `$${total.toFixed(2)}`;
 
-        const savings = subtotal - total;
-        ['discountRow','drawerDiscountRow'].forEach(id => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            if (savings > 0.001) {
-                el.style.display = 'flex';
-                const amtEl = document.getElementById(id === 'discountRow' ? 'discountAmount' : 'drawerDiscountAmount');
-                if (amtEl) amtEl.textContent = `-$${savings.toFixed(2)}`;
-            } else {
-                el.style.display = 'none';
+            const savings = subtotal - total;
+            ['discountRow','drawerDiscountRow'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (savings > 0.001) {
+                    el.style.display = 'flex';
+                    const amtEl = document.getElementById(id === 'discountRow' ? 'discountAmount' : 'drawerDiscountAmount');
+                    if (amtEl) amtEl.textContent = `-$${savings.toFixed(2)}`;
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+
+            ['checkoutBtn','drawerCheckoutBtn'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = false;
+            });
+
+            document.getElementById('posItemsInput').value = JSON.stringify(
+                keys.map(key => ({
+                    id:       cart[key].productId,
+                    qty:      cart[key].qty,
+                    price:    cart[key].price,
+                    discount: cart[key].discount,
+                    sugar:    cart[key].sugar,
+                }))
+            );
+            document.getElementById('posTotalInput').value = total.toFixed(2);
+            currentTotal = total;
+
+            if (activePayMethod === 'cash') updateChange();
+            if (drawerPayMethod === 'cash') updateDrawerChange();
+
+            broadcastCart();
+        }
+
+        function calculateItemTotal(item) {
+            let t = item.price * item.qty;
+            if (item.discount && item.discount !== '0') {
+                if (item.discount.includes('%')) {
+                    t -= t * (parseFloat(item.discount) / 100);
+                } else if (item.discount.includes('$')) {
+                    t -= parseFloat(item.discount);
+                }
             }
-        });
-
-        ['checkoutBtn','drawerCheckoutBtn'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.disabled = false;
-        });
-
-        document.getElementById('posItemsInput').value = JSON.stringify(
-            keys.map(key => ({
-                id:       cart[key].productId,
-                qty:      cart[key].qty,
-                price:    cart[key].price,
-                discount: cart[key].discount,
-                sugar:    cart[key].sugar,
-            }))
-        );
-        document.getElementById('posTotalInput').value = total.toFixed(2);
-        currentTotal = total;
-
-        if (activePayMethod === 'cash') updateChange();
-        if (drawerPayMethod === 'cash') updateDrawerChange();
-
-        broadcastCart();
-    }
-
-    function calculateItemTotal(item) {
-        let t = item.price * item.qty;
-        if (item.discount && item.discount !== '0') {
-            if (item.discount.includes('%')) {
-                t -= t * (parseFloat(item.discount) / 100);
-            } else if (item.discount.includes('$')) {
-                t -= parseFloat(item.discount);
-            }
-        }
-        return Math.max(0, t);
-    }
-
-    /* ─────────────────────────────────────────────
-       CART EVENT DELEGATION (both desktop + drawer)
-    ───────────────────────────────────────────── */
-    function handleCartClick(e) {
-        const qtyBtn = e.target.closest('.qty-btn');
-        if (qtyBtn) {
-            const cartKey = qtyBtn.dataset.cartKey;
-            const delta   = parseInt(qtyBtn.dataset.delta);
-            if (cartKey) changeQty(cartKey, delta);
-            return;
-        }
-        const removeBtn = e.target.closest('.cart-item-remove');
-        if (removeBtn) {
-            const cartKey = removeBtn.dataset.cartKey;
-            if (cartKey) removeItem(cartKey);
-        }
-    }
-
-    document.getElementById('cartItems').addEventListener('click', handleCartClick);
-    document.getElementById('drawerCartItems').addEventListener('click', handleCartClick);
-
-    /* ─────────────────────────────────────────────
-       CART ACTIONS
-    ───────────────────────────────────────────── */
-    function changeQty(cartKey, delta) {
-        if (!cart[cartKey]) return;
-
-        if (delta > 0) {
-            const usedQty = Object.values(cart)
-                .filter(i => i.productId === cart[cartKey].productId)
-                .reduce((s, i) => s + i.qty, 0);
-            if (usedQty >= cart[cartKey].stock) return;
+            return Math.max(0, t);
         }
 
-        cart[cartKey].qty += delta;
-        if (cart[cartKey].qty <= 0) delete cart[cartKey];
-        renderCart();
-    }
-
-    function removeItem(cartKey) {
-        pendingRemoveId = cartKey;
-        document.getElementById('removeModalText').textContent =
-            `"${cart[cartKey]?.name || 'this item'}" will be removed from your cart.`;
-        document.getElementById('removeModal').style.display  = 'flex';
-        document.getElementById('removeConfirmBtn').onclick   = confirmRemove;
-    }
-
-    function confirmRemove() {
-        if (pendingRemoveId && cart[pendingRemoveId]) {
-            const name = cart[pendingRemoveId].name;
-            delete cart[pendingRemoveId];
-            renderCart();
-            showToast(`"${name}" removed from cart.`, 'success');
-        }
-        closeRemoveModal();
-    }
-
-    function closeRemoveModal() {
-        document.getElementById('removeModal').style.display = 'none';
-        pendingRemoveId = null;
-    }
-
-    function clearCart() {
-        if (!Object.keys(cart).length) return;
-        document.getElementById('clearModal').style.display = 'flex';
-    }
-
-    function confirmClearCart() {
-        cart = {};
-        renderCart();
-        closeClearModal();
-        showToast('Cart cleared.', 'success');
-        broadcastClear();
-    }
-
-    function closeClearModal() {
-        document.getElementById('clearModal').style.display = 'none';
-    }
-
-    /* ─────────────────────────────────────────────
-       TOAST
-    ───────────────────────────────────────────── */
-    function showToast(msg, type = 'success') {
-        const toast = document.getElementById('toast');
-        document.getElementById('toastText').textContent = msg;
-        toast.querySelector('i').className = type === 'success'
-            ? 'fas fa-check-circle'
-            : 'fas fa-times-circle';
-        toast.className = `toast ${type}`;
-        requestAnimationFrame(() => toast.classList.add('show'));
-        clearTimeout(toast._timer);
-        toast._timer = setTimeout(() => toast.classList.remove('show'), 2800);
-    }
-
-    /* ─────────────────────────────────────────────
-       SEARCH & FILTER
-    ───────────────────────────────────────────── */
-    function setCatFilter(btn, cat) {
-        activeCat = cat;
-        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        filterProducts();
-    }
-
-    function filterProducts() {
-        const q = document.getElementById('posSearch').value.toLowerCase();
-        document.querySelectorAll('.category-group').forEach(group => {
-            if (activeCat && group.dataset.category !== activeCat) {
-                group.classList.add('hidden');
+        /* ─────────────────────────────────────────────
+           CART EVENT DELEGATION (both desktop + drawer)
+        ───────────────────────────────────────────── */
+        function handleCartClick(e) {
+            const qtyBtn = e.target.closest('.qty-btn');
+            if (qtyBtn) {
+                const cartKey = qtyBtn.dataset.cartKey;
+                const delta   = parseInt(qtyBtn.dataset.delta);
+                if (cartKey) changeQty(cartKey, delta);
                 return;
             }
-            let visible = 0;
-            group.querySelectorAll('.product-card').forEach(c => {
-                const match = c.dataset.name.toLowerCase().includes(q) ||
-                              c.dataset.brand.toLowerCase().includes(q);
-                c.style.display = match ? '' : 'none';
-                if (match) visible++;
+            const removeBtn = e.target.closest('.cart-item-remove');
+            if (removeBtn) {
+                const cartKey = removeBtn.dataset.cartKey;
+                if (cartKey) removeItem(cartKey);
+            }
+        }
+
+        document.getElementById('cartItems').addEventListener('click', handleCartClick);
+        document.getElementById('drawerCartItems').addEventListener('click', handleCartClick);
+
+        /* ─────────────────────────────────────────────
+           CART ACTIONS
+        ───────────────────────────────────────────── */
+        function changeQty(cartKey, delta) {
+            if (!cart[cartKey]) return;
+
+            if (delta > 0) {
+                const usedQty = Object.values(cart)
+                    .filter(i => i.productId === cart[cartKey].productId)
+                    .reduce((s, i) => s + i.qty, 0);
+                if (usedQty >= cart[cartKey].stock) return;
+            }
+
+            cart[cartKey].qty += delta;
+            if (cart[cartKey].qty <= 0) delete cart[cartKey];
+            renderCart();
+        }
+
+        function removeItem(cartKey) {
+            pendingRemoveId = cartKey;
+            document.getElementById('removeModalText').textContent =
+                `"${cart[cartKey]?.name || 'this item'}" will be removed from your cart.`;
+            document.getElementById('removeModal').style.display  = 'flex';
+            document.getElementById('removeConfirmBtn').onclick   = confirmRemove;
+        }
+
+        function confirmRemove() {
+            if (pendingRemoveId && cart[pendingRemoveId]) {
+                const name = cart[pendingRemoveId].name;
+                delete cart[pendingRemoveId];
+                renderCart();
+                showToast(`"${name}" removed from cart.`, 'success');
+            }
+            closeRemoveModal();
+        }
+
+        function closeRemoveModal() {
+            document.getElementById('removeModal').style.display = 'none';
+            pendingRemoveId = null;
+        }
+
+        function clearCart() {
+            if (!Object.keys(cart).length) return;
+            document.getElementById('clearModal').style.display = 'flex';
+        }
+
+        function confirmClearCart() {
+            cart = {};
+            renderCart();
+            closeClearModal();
+            showToast('Cart cleared.', 'success');
+            broadcastClear();
+        }
+
+        function closeClearModal() {
+            document.getElementById('clearModal').style.display = 'none';
+        }
+
+        /* ─────────────────────────────────────────────
+           TOAST
+        ───────────────────────────────────────────── */
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').textContent = msg;
+            toast.querySelector('i').className = type === 'success'
+                ? 'fas fa-check-circle'
+                : 'fas fa-times-circle';
+            toast.className = `toast ${type}`;
+            requestAnimationFrame(() => toast.classList.add('show'));
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => toast.classList.remove('show'), 2800);
+        }
+
+        /* ─────────────────────────────────────────────
+           SEARCH & FILTER
+        ───────────────────────────────────────────── */
+        function setCatFilter(btn, cat) {
+            activeCat = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterProducts();
+        }
+
+        function filterProducts() {
+            const q = document.getElementById('posSearch').value.toLowerCase();
+            document.querySelectorAll('.category-group').forEach(group => {
+                if (activeCat && group.dataset.category !== activeCat) {
+                    group.classList.add('hidden');
+                    return;
+                }
+                let visible = 0;
+                group.querySelectorAll('.product-card').forEach(c => {
+                    const match = c.dataset.name.toLowerCase().includes(q) ||
+                        c.dataset.brand.toLowerCase().includes(q);
+                    c.style.display = match ? '' : 'none';
+                    if (match) visible++;
+                });
+                group.classList.toggle('hidden', visible === 0);
             });
-            group.classList.toggle('hidden', visible === 0);
-        });
-    }
+        }
 
-    document.getElementById('posSearch').addEventListener('input', filterProducts);
+        document.getElementById('posSearch').addEventListener('input', filterProducts);
 
-    /* ─────────────────────────────────────────────
-       SUCCESS MODAL
-    ───────────────────────────────────────────── */
-    function closeSuccessModal() {
-        document.getElementById('checkoutSuccessModal').style.display = 'none';
-        cart = {};
-        renderCart();
-    }
+        /* ─────────────────────────────────────────────
+           SUCCESS MODAL
+        ───────────────────────────────────────────── */
+        function closeSuccessModal() {
+            document.getElementById('checkoutSuccessModal').style.display = 'none';
+            cart = {};
+            renderCart();
+        }
 
-    @if(session('pos_success'))
+        @if(session('pos_success'))
         document.getElementById('checkoutSummaryText').textContent = '{{ session('pos_success') }}';
         document.getElementById('checkoutSuccessModal').style.display = 'flex';
-    @endif
+        @endif
 
-    /* ─────────────────────────────────────────────
-       PAYMENT METHOD TOGGLE — DESKTOP
-    ───────────────────────────────────────────── */
-    function setPayMethod(method) {
-        activePayMethod = method;
+        /* ─────────────────────────────────────────────
+           PAYMENT METHOD TOGGLE — DESKTOP
+        ───────────────────────────────────────────── */
+        function setPayMethod(method) {
+            activePayMethod = method;
 
-        document.getElementById('btnPayKhqr').className = 'pay-method-btn' + (method === 'khqr' ? ' active-khqr' : '');
-        document.getElementById('btnPayCash').className = 'pay-method-btn' + (method === 'cash' ? ' active-cash' : '');
+            document.getElementById('btnPayKhqr').className = 'pay-method-btn' + (method === 'khqr' ? ' active-khqr' : '');
+            document.getElementById('btnPayCash').className = 'pay-method-btn' + (method === 'cash' ? ' active-cash' : '');
 
-        const cashWrap = document.getElementById('cashInputWrap');
-        cashWrap.style.display = method === 'cash' ? 'block' : 'none';
+            const cashWrap = document.getElementById('cashInputWrap');
+            cashWrap.style.display = method === 'cash' ? 'block' : 'none';
 
-        const icon = document.getElementById('checkoutBtnIcon');
-        const text = document.getElementById('checkoutBtnText');
+            const icon = document.getElementById('checkoutBtnIcon');
+            const text = document.getElementById('checkoutBtnText');
 
-        if (method === 'cash') {
-            icon.className           = 'fas fa-money-bill-wave';
-            text.textContent         = 'Checkout — Cash';
-            document.getElementById('checkoutBtn').style.background = '#16a34a';
-        } else {
-            icon.className           = 'fas fa-qrcode';
-            text.textContent         = 'Checkout via KHQR';
-            document.getElementById('checkoutBtn').style.background = '#111';
+            if (method === 'cash') {
+                icon.className           = 'fas fa-money-bill-wave';
+                text.textContent         = 'Checkout — Cash';
+                document.getElementById('checkoutBtn').style.background = '#16a34a';
+            } else {
+                icon.className           = 'fas fa-check-circle';
+                text.textContent         = 'Checkout — Bank';
+                document.getElementById('checkoutBtn').style.background = '#111';
+            }
+
+            // "Show QR" is only useful for Bank
+            document.getElementById('showQrBtn').style.display = method === 'khqr' ? 'flex' : 'none';
+
+            document.getElementById('posPaymentMethod').value = method;
+            if (method === 'cash') updateChange();
         }
 
-        document.getElementById('posPaymentMethod').value = method;
-        if (method === 'cash') updateChange();
-    }
+        /* ─────────────────────────────────────────────
+           PAYMENT METHOD TOGGLE — DRAWER (mobile)
+        ───────────────────────────────────────────── */
+        function setPayMethodDrawer(method) {
+            drawerPayMethod = method;
 
-    /* ─────────────────────────────────────────────
-       PAYMENT METHOD TOGGLE — DRAWER (mobile)
-    ───────────────────────────────────────────── */
-    function setPayMethodDrawer(method) {
-        drawerPayMethod = method;
+            document.getElementById('drawerBtnPayKhqr').className = 'pay-method-btn' + (method === 'khqr' ? ' active-khqr' : '');
+            document.getElementById('drawerBtnPayCash').className = 'pay-method-btn' + (method === 'cash' ? ' active-cash' : '');
 
-        document.getElementById('drawerBtnPayKhqr').className = 'pay-method-btn' + (method === 'khqr' ? ' active-khqr' : '');
-        document.getElementById('drawerBtnPayCash').className = 'pay-method-btn' + (method === 'cash' ? ' active-cash' : '');
+            const cashWrap = document.getElementById('drawerCashInputWrap');
+            cashWrap.style.display = method === 'cash' ? 'block' : 'none';
 
-        const cashWrap = document.getElementById('drawerCashInputWrap');
-        cashWrap.style.display = method === 'cash' ? 'block' : 'none';
+            const icon = document.getElementById('drawerCheckoutBtnIcon');
+            const text = document.getElementById('drawerCheckoutBtnText');
 
-        const icon = document.getElementById('drawerCheckoutBtnIcon');
-        const text = document.getElementById('drawerCheckoutBtnText');
+            if (method === 'cash') {
+                icon.className = 'fas fa-money-bill-wave';
+                text.textContent = 'Checkout — Cash';
+                document.getElementById('drawerCheckoutBtn').style.background = '#16a34a';
+            } else {
+                icon.className = 'fas fa-check-circle';
+                text.textContent = 'Checkout — Bank';
+                document.getElementById('drawerCheckoutBtn').style.background = '#111';
+            }
 
-        if (method === 'cash') {
-            icon.className = 'fas fa-money-bill-wave';
-            text.textContent = 'Checkout — Cash';
-            document.getElementById('drawerCheckoutBtn').style.background = '#16a34a';
-        } else {
-            icon.className = 'fas fa-qrcode';
-            text.textContent = 'Checkout via KHQR';
-            document.getElementById('drawerCheckoutBtn').style.background = '#111';
+            // "Show QR" is only useful for Bank
+            document.getElementById('drawerShowQrBtn').style.display = method === 'khqr' ? 'flex' : 'none';
+
+            document.getElementById('posPaymentMethod').value = method;
+            if (method === 'cash') updateDrawerChange();
         }
 
-        document.getElementById('posPaymentMethod').value = method;
-        if (method === 'cash') updateDrawerChange();
-    }
+        /* ─────────────────────────────────────────────
+           CASH CHANGE CALCULATOR — DESKTOP
+        ───────────────────────────────────────────── */
+        function updateChange() {
+            const total  = parseFloat(document.getElementById('posTotalInput').value) || currentTotal;
+            const given  = parseFloat(document.getElementById('cashInput').value)     || 0;
+            const change = given - total;
+            const el     = document.getElementById('cashChangeVal');
 
-    /* ─────────────────────────────────────────────
-       CASH CHANGE CALCULATOR — DESKTOP
-    ───────────────────────────────────────────── */
-    function updateChange() {
-        const total  = parseFloat(document.getElementById('posTotalInput').value) || currentTotal;
-        const given  = parseFloat(document.getElementById('cashInput').value)     || 0;
-        const change = given - total;
-        const el     = document.getElementById('cashChangeVal');
+            document.getElementById('posCashGiven').value = given > 0 ? given.toFixed(2) : '';
 
-        document.getElementById('posCashGiven').value = given > 0 ? given.toFixed(2) : '';
+            if (!given) {
+                el.textContent = '—';
+                el.className   = 'cash-change-val';
+                return;
+            }
 
-        if (!given) {
-            el.textContent = '—';
-            el.className   = 'cash-change-val';
-            return;
+            el.textContent = change >= 0
+                ? `$${change.toFixed(2)}`
+                : `-$${Math.abs(change).toFixed(2)}`;
+            el.className   = 'cash-change-val' + (change < 0 ? ' insufficient' : '');
         }
 
-        el.textContent = change >= 0
-            ? `$${change.toFixed(2)}`
-            : `-$${Math.abs(change).toFixed(2)}`;
-        el.className   = 'cash-change-val' + (change < 0 ? ' insufficient' : '');
-    }
+        /* ─────────────────────────────────────────────
+           CASH CHANGE CALCULATOR — DRAWER
+        ───────────────────────────────────────────── */
+        function updateDrawerChange() {
+            const total  = parseFloat(document.getElementById('posTotalInput').value) || currentTotal;
+            const given  = parseFloat(document.getElementById('drawerCashInput').value) || 0;
+            const change = given - total;
+            const el     = document.getElementById('drawerCashChangeVal');
 
-    /* ─────────────────────────────────────────────
-       CASH CHANGE CALCULATOR — DRAWER
-    ───────────────────────────────────────────── */
-    function updateDrawerChange() {
-        const total  = parseFloat(document.getElementById('posTotalInput').value) || currentTotal;
-        const given  = parseFloat(document.getElementById('drawerCashInput').value) || 0;
-        const change = given - total;
-        const el     = document.getElementById('drawerCashChangeVal');
+            document.getElementById('posCashGiven').value = given > 0 ? given.toFixed(2) : '';
 
-        document.getElementById('posCashGiven').value = given > 0 ? given.toFixed(2) : '';
+            if (!given) {
+                el.textContent = '—';
+                el.className   = 'cash-change-val';
+                return;
+            }
 
-        if (!given) {
-            el.textContent = '—';
-            el.className   = 'cash-change-val';
-            return;
+            el.textContent = change >= 0
+                ? `$${change.toFixed(2)}`
+                : `-$${Math.abs(change).toFixed(2)}`;
+            el.className   = 'cash-change-val' + (change < 0 ? ' insufficient' : '');
         }
 
-        el.textContent = change >= 0
-            ? `$${change.toFixed(2)}`
-            : `-$${Math.abs(change).toFixed(2)}`;
-        el.className   = 'cash-change-val' + (change < 0 ? ' insufficient' : '');
-    }
+        /* ─────────────────────────────────────────────
+           UNIFIED CHECKOUT HANDLER — DESKTOP
+           (opens the confirm popup; submit happens on Confirm)
+        ───────────────────────────────────────────── */
+        function handleCheckout() {
+            const total = parseFloat(document.getElementById('posTotalInput').value) || currentTotal;
 
-    /* ─────────────────────────────────────────────
-       UNIFIED CHECKOUT HANDLER — DESKTOP
-    ───────────────────────────────────────────── */
-    function handleCheckout() {
-        if (activePayMethod === 'khqr') {
-            openKhqrModal();
-            return;
+            if (activePayMethod === 'khqr') {
+                stopPolling();
+                clearTimeout(expiryTimer);
+                openConfirmCheckout('khqr', total, 0);
+                return;
+            }
+
+            const given = parseFloat(document.getElementById('cashInput').value) || 0;
+            if (given < total) {
+                showToast('Cash given is less than the total amount.', 'error');
+                document.getElementById('cashInput').focus();
+                return;
+            }
+            openConfirmCheckout('cash', total, given);
         }
 
-        const total = parseFloat(document.getElementById('posTotalInput').value) || currentTotal;
-        const given = parseFloat(document.getElementById('cashInput').value)     || 0;
+        /* ─────────────────────────────────────────────
+           UNIFIED CHECKOUT HANDLER — DRAWER (mobile)
+        ───────────────────────────────────────────── */
+        function handleDrawerCheckout() {
+            const total = parseFloat(document.getElementById('posTotalInput').value) || currentTotal;
 
-        if (given < total) {
-            showToast('Cash given is less than the total amount.', 'error');
-            document.getElementById('cashInput').focus();
-            return;
+            if (drawerPayMethod === 'khqr') {
+                stopPolling();
+                clearTimeout(expiryTimer);
+                openConfirmCheckout('khqr', total, 0);
+                return;
+            }
+
+            const given = parseFloat(document.getElementById('drawerCashInput').value) || 0;
+            if (given < total) {
+                showToast('Cash given is less than the total amount.', 'error');
+                document.getElementById('drawerCashInput').focus();
+                return;
+            }
+            openConfirmCheckout('cash', total, given);
         }
 
-        document.getElementById('posPaymentMethod').value = 'cash';
-        document.getElementById('posCashGiven').value     = given.toFixed(2);
-        _submitCheckout(total);
-    }
+        /* ─────────────────────────────────────────────
+           CONFIRM CHECKOUT POPUP
+        ───────────────────────────────────────────── */
+        function openConfirmCheckout(method, total, given) {
+            pendingCheckout = { method, total, given };
+            document.getElementById('ccConfirmBtn').disabled = false;
 
-    /* ─────────────────────────────────────────────
-       UNIFIED CHECKOUT HANDLER — DRAWER (mobile)
-    ───────────────────────────────────────────── */
-    function handleDrawerCheckout() {
-        if (drawerPayMethod === 'khqr') {
-            closeCartDrawer();
-            openKhqrModal();
-            return;
+            const itemCount = Object.values(cart).reduce((s, i) => s + i.qty, 0);
+            document.getElementById('ccItems').textContent  = itemCount;
+            document.getElementById('ccMethod').textContent = method === 'cash' ? 'Cash' : 'Bank (KHQR)';
+            document.getElementById('ccTotal').textContent  = `$${total.toFixed(2)}`;
+
+            const givenRow  = document.getElementById('ccGivenRow');
+            const changeRow = document.getElementById('ccChangeRow');
+
+            if (method === 'cash') {
+                const change = given - total;
+                document.getElementById('ccGiven').textContent  = `$${given.toFixed(2)}`;
+                document.getElementById('ccChange').textContent = `$${change.toFixed(2)}`;
+                givenRow.style.display  = 'flex';
+                changeRow.style.display = 'flex';
+                changeRow.classList.toggle('insufficient', change < 0);
+            } else {
+                givenRow.style.display  = 'none';
+                changeRow.style.display = 'none';
+            }
+
+            document.getElementById('confirmCheckoutModal').style.display = 'flex';
         }
 
-        const total = parseFloat(document.getElementById('posTotalInput').value) || currentTotal;
-        const given = parseFloat(document.getElementById('drawerCashInput').value) || 0;
-
-        if (given < total) {
-            showToast('Cash given is less than the total amount.', 'error');
-            document.getElementById('drawerCashInput').focus();
-            return;
+        function closeConfirmCheckout() {
+            document.getElementById('confirmCheckoutModal').style.display = 'none';
+            pendingCheckout = null;
         }
 
-        document.getElementById('posPaymentMethod').value = 'cash';
-        document.getElementById('posCashGiven').value     = given.toFixed(2);
-        _submitCheckout(total);
-    }
+        function confirmCheckoutSubmit() {
+            if (!pendingCheckout) return;
+            const { method, total, given } = pendingCheckout;
 
-    function _submitCheckout(total) {
-        document.getElementById('posItemsInput').value = JSON.stringify(
-            Object.keys(cart).map(key => ({
-                id:       cart[key].productId,
-                qty:      cart[key].qty,
-                price:    cart[key].price,
-                discount: cart[key].discount,
-                sugar:    cart[key].sugar,
-            }))
-        );
-        document.getElementById('posTotalInput').value = total.toFixed(2);
-        broadcastSuccess(total);
-        document.getElementById('posForm').submit();
-    }
+            // prevent double click
+            document.getElementById('ccConfirmBtn').disabled = true;
 
-    /* ─────────────────────────────────────────────
-       KHQR — OPEN / CLOSE
-    ───────────────────────────────────────────── */
-    function openKhqrModal() {
-        const keys = Object.keys(cart);
-        if (!keys.length) return;
+            document.getElementById('posPaymentMethod').value = method;
+            document.getElementById('posCashGiven').value     = method === 'cash' ? given.toFixed(2) : '';
 
-        let subtotal = 0, total = 0, html = '';
+            closeConfirmCheckout();
+            _submitCheckout(total);
+        }
 
-        keys.forEach(key => {
-            const item      = cart[key];
-            subtotal       += item.price * item.qty;
-            const lineTotal = calculateItemTotal(item);
-            total          += lineTotal;
+        document.getElementById('confirmCheckoutModal').addEventListener('click', function (e) {
+            if (e.target === this) closeConfirmCheckout();
+        });
 
-            const thumb = item.image
-                ? `<img class="khqr-thumb" src="${item.image}" alt="${item.name}">`
-                : `<div class="khqr-thumb-ph"><i class="fas fa-box-open"></i></div>`;
+        function _submitCheckout(total) {
+            document.getElementById('posItemsInput').value = JSON.stringify(
+                Object.keys(cart).map(key => ({
+                    id:       cart[key].productId,
+                    qty:      cart[key].qty,
+                    price:    cart[key].price,
+                    discount: cart[key].discount,
+                    sugar:    cart[key].sugar,
+                }))
+            );
+            document.getElementById('posTotalInput').value = total.toFixed(2);
+            broadcastSuccess(total);
+            document.getElementById('posForm').submit();
+        }
 
-            const discBadge = (item.discount && item.discount !== '0')
-                ? `<span class="khqr-disc">${item.discount} off</span>` : '';
+        /* ─────────────────────────────────────────────
+           KHQR — OPEN / CLOSE
+        ───────────────────────────────────────────── */
+        function openKhqrModal() {
+            const keys = Object.keys(cart);
+            if (!keys.length) return;
 
-            html += `
+            let subtotal = 0, total = 0, html = '';
+
+            keys.forEach(key => {
+                const item      = cart[key];
+                subtotal       += item.price * item.qty;
+                const lineTotal = calculateItemTotal(item);
+                total          += lineTotal;
+
+                const thumb = item.image
+                    ? `<img class="khqr-thumb" src="${item.image}" alt="${item.name}">`
+                    : `<div class="khqr-thumb-ph"><i class="fas fa-box-open"></i></div>`;
+
+                const discBadge = (item.discount && item.discount !== '0')
+                    ? `<span class="khqr-disc">${item.discount} off</span>` : '';
+
+                html += `
                 <div class="khqr-item-row">
                     ${thumb}
                     <div class="khqr-item-info">
@@ -1848,302 +1957,302 @@
                     </div>
                     <div class="khqr-item-amt">$${lineTotal.toFixed(2)}</div>
                 </div>`;
-        });
-
-        document.getElementById('khqrItemList').innerHTML        = html;
-        document.getElementById('khqrSubtotal').textContent      = `$${subtotal.toFixed(2)}`;
-        document.getElementById('khqrGrand').textContent         = `$${total.toFixed(2)}`;
-        document.getElementById('khqrAmountDisplay').textContent = `$${total.toFixed(2)}`;
-
-        const savings = subtotal - total;
-        const discRow = document.getElementById('khqrDiscRow');
-        if (savings > 0.001) {
-            document.getElementById('khqrDiscount').textContent = `-$${savings.toFixed(2)}`;
-            discRow.style.display = 'flex';
-        } else {
-            discRow.style.display = 'none';
-        }
-
-        currentTotal = total;
-
-        setKhqrState('loading');
-        document.getElementById('khqrExpiryWarn').style.display = 'none';
-        document.getElementById('khqrPaidBtn').disabled          = true;
-        document.getElementById('khqrOrderRef').textContent      = 'Connecting to Bakong…';
-        document.getElementById('khqrDot').className             = 'khqr-dot';
-        document.getElementById('khqrStatusText').textContent    = 'Connecting to Bakong…';
-        document.getElementById('khqrPollInfo').textContent      = '';
-
-        // document.getElementById('khqrBackdrop').classList.add('open');
-        generateKhqr();
-    }
-
-    function closeKhqrModal() {
-        // document.getElementById('khqrBackdrop').classList.remove('open');
-        stopPolling();
-        clearTimeout(expiryTimer);
-        cdChannel.postMessage({ type: 'checkout-qr-hide' });
-    }
-
-    /* ─────────────────────────────────────────────
-       KHQR — UI STATE
-    ───────────────────────────────────────────── */
-    function setKhqrState(state) {
-        document.getElementById('khqrSkeleton').style.display    = state === 'loading'  ? 'flex'  : 'none';
-        document.getElementById('khqrQrFrame').style.display     = state === 'qr'       ? 'block' : 'none';
-        document.getElementById('khqrError').style.display       = state === 'error'    ? 'flex'  : 'none';
-        document.getElementById('khqrSuccessView').style.display = state === 'success'  ? 'flex'  : 'none';
-        document.getElementById('khqrQrView').style.display      = state === 'success'  ? 'none'  : 'flex';
-    }
-
-    function setDotState(state) {
-        const dot = document.getElementById('khqrDot');
-        dot.className = 'khqr-dot';
-        if (state === 'green') dot.classList.add('green');
-        if (state === 'grey')  dot.classList.add('grey');
-        if (state === 'amber') dot.classList.add('amber');
-    }
-
-    /* ─────────────────────────────────────────────
-       KHQR — GENERATE QR
-    ───────────────────────────────────────────── */
-    function generateKhqr() {
-        stopPolling();
-        clearTimeout(expiryTimer);
-        document.getElementById('khqrExpiryWarn').style.display  = 'none';
-        document.getElementById('khqrSkeletonText').textContent  = 'Generating QR…';
-        setKhqrState('loading');
-
-        fetch('{{ route("pos.khqr.generate") }}', {
-            method:  'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            },
-            body: JSON.stringify({ amount: currentTotal }),
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (!data.success) throw new Error(data.message || 'Failed');
-
-            khqrMd5       = data.md5;
-            khqrOrderRef  = data.order_ref;
-            khqrExpiresAt = new Date(data.expires_at);
-
-            document.getElementById('khqrOrderRef').textContent = `Ref: ${khqrOrderRef}`;
-
-            document.getElementById('khqrCodeEl').innerHTML = '';
-            new QRCode(document.getElementById('khqrCodeEl'), {
-                text:         data.qr,
-                width:        200,
-                height:       200,
-                correctLevel: QRCode.CorrectLevel.M,
             });
 
-            setKhqrState('qr');
-            cdChannel.postMessage({
-                type: 'checkout-qr',
-                data: {
-                    qr:       data.qr,
-                    total:    currentTotal,
-                    subtotal: parseFloat(document.getElementById('khqrSubtotal').textContent.replace('$','')),
-                    discount: parseFloat(document.getElementById('khqrDiscount')?.textContent.replace('-$','') || 0),
-                    items:    Object.values(cart).map(item => ({
-                        name:      item.name,
-                        image:     item.image,
-                        price:     item.price,
-                        qty:       item.qty,
-                        sugar:     item.sugar,
-                        discount:  item.discount,
-                        lineTotal: calculateItemTotal(item),
-                    })),
-                }
-            });
+            document.getElementById('khqrItemList').innerHTML        = html;
+            document.getElementById('khqrSubtotal').textContent      = `$${subtotal.toFixed(2)}`;
+            document.getElementById('khqrGrand').textContent         = `$${total.toFixed(2)}`;
+            document.getElementById('khqrAmountDisplay').textContent = `$${total.toFixed(2)}`;
 
-            setDotState('waiting');
-            document.getElementById('khqrStatusText').textContent = 'Waiting for payment…';
-            document.getElementById('khqrPaidBtn').disabled = false;
-
-            startPolling();
-            scheduleExpiryWarning();
-        })
-        .catch(err => {
-            document.getElementById('khqrErrorText').textContent = err.message || 'Failed to generate QR.';
-            setKhqrState('error');
-            document.getElementById('khqrOrderRef').textContent = 'Generation failed';
-        });
-    }
-
-    function retryGenerate() {
-        generateKhqr();
-    }
-
-    /* ─────────────────────────────────────────────
-       KHQR — EXPIRY
-    ───────────────────────────────────────────── */
-    function scheduleExpiryWarning() {
-        clearTimeout(expiryTimer);
-        if (!khqrExpiresAt) return;
-
-        const warnAt   = khqrExpiresAt.getTime() - Date.now() - (EXPIRY_WARN_SECS * 1000);
-        const expireIn = khqrExpiresAt.getTime() - Date.now();
-
-        if (warnAt <= 0) {
-            showExpiryWarn();
-        } else {
-            expiryTimer = setTimeout(showExpiryWarn, warnAt);
-        }
-
-        setTimeout(() => {
-            if (document.getElementById('khqrBackdrop').classList.contains('open')) {
-                generateKhqr();
-            }
-        }, expireIn);
-    }
-
-    function showExpiryWarn() {
-        document.getElementById('khqrExpiryWarn').style.display  = 'flex';
-        document.getElementById('khqrExpiryWarnText').textContent = 'QR expires soon — regenerating…';
-    }
-
-    /* ─────────────────────────────────────────────
-       KHQR — POLLING
-    ───────────────────────────────────────────── */
-    function startPolling() {
-        pollCount = 0;
-        pollTimer = setInterval(pollPayment, POLL_INTERVAL_MS);
-    }
-
-    function stopPolling() {
-        clearInterval(pollTimer);
-        pollTimer = null;
-    }
-
-    function pollPayment() {
-        if (!khqrMd5) return;
-        pollCount++;
-
-        const remaining = Math.max(0, Math.ceil((khqrExpiresAt - Date.now()) / 1000));
-        document.getElementById('khqrPollInfo').textContent =
-            remaining > 0 ? `QR expires in ${remaining}s · check #${pollCount}` : '';
-
-        if (pollCount >= POLL_MAX_CYCLES) {
-            stopPolling();
-            setDotState('grey');
-            document.getElementById('khqrStatusText').textContent = 'Session timed out. Please retry.';
-            document.getElementById('khqrPaidBtn').disabled = true;
-            return;
-        }
-
-        fetch('{{ route("pos.khqr.check") }}', {
-            method:  'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            },
-            body: JSON.stringify({ md5: khqrMd5 }),
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.paid) {
-                stopPolling();
-                handlePaymentSuccess();
-            }
-        })
-        .catch(() => { /* silent — keep polling */ });
-    }
-
-    /* ─────────────────────────────────────────────
-       KHQR — MANUAL VERIFY
-    ───────────────────────────────────────────── */
-    function confirmKhqrPaid() {
-        if (!khqrMd5) return;
-
-        document.getElementById('khqrPaidBtn').disabled       = true;
-        document.getElementById('khqrStatusText').textContent = 'Verifying…';
-        setDotState('amber');
-
-        fetch('{{ route("pos.khqr.check") }}', {
-            method:  'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            },
-            body: JSON.stringify({ md5: khqrMd5 }),
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.paid) {
-                stopPolling();
-                handlePaymentSuccess();
+            const savings = subtotal - total;
+            const discRow = document.getElementById('khqrDiscRow');
+            if (savings > 0.001) {
+                document.getElementById('khqrDiscount').textContent = `-$${savings.toFixed(2)}`;
+                discRow.style.display = 'flex';
             } else {
-                setDotState('waiting');
-                document.getElementById('khqrStatusText').textContent = 'Not confirmed yet. Try again or wait.';
-                document.getElementById('khqrPaidBtn').disabled = false;
+                discRow.style.display = 'none';
             }
-        })
-        .catch(() => {
-            setDotState('waiting');
-            document.getElementById('khqrStatusText').textContent = 'Check failed. Please retry.';
-            document.getElementById('khqrPaidBtn').disabled = false;
-        });
-    }
 
-    /* ─────────────────────────────────────────────
-       KHQR — PAYMENT SUCCESS
-    ───────────────────────────────────────────── */
-    function handlePaymentSuccess() {
-        stopPolling();
-        setKhqrState('success');
-        setDotState('green');
+            currentTotal = total;
 
-        document.getElementById('khqrSuccessSub').textContent =
-            `Paid $${currentTotal.toFixed(2)} · Ref: ${khqrOrderRef}`;
+            setKhqrState('loading');
+            document.getElementById('khqrExpiryWarn').style.display = 'none';
+            document.getElementById('khqrPaidBtn').disabled          = true;
+            document.getElementById('khqrOrderRef').textContent      = 'Connecting to Bakong…';
+            document.getElementById('khqrDot').className             = 'khqr-dot';
+            document.getElementById('khqrStatusText').textContent    = 'Connecting to Bakong…';
+            document.getElementById('khqrPollInfo').textContent      = '';
 
-        document.getElementById('posItemsInput').value = JSON.stringify(
-            Object.keys(cart).map(key => ({
-                id:       cart[key].productId,
-                qty:      cart[key].qty,
-                price:    cart[key].price,
-                discount: cart[key].discount,
-                sugar:    cart[key].sugar,
-            }))
-        );
-        document.getElementById('posTotalInput').value     = currentTotal.toFixed(2);
-        document.getElementById('posPaymentMethod').value  = 'khqr';
-
-        broadcastSuccess(currentTotal);
-
-        setTimeout(() => document.getElementById('posForm').submit(), 1800);
-    }
-
-    /* ─────────────────────────────────────────────
-       BACKDROP CLICK HANDLERS
-    ───────────────────────────────────────────── */
-    document.getElementById('removeModal').addEventListener('click', function(e) {
-        if (e.target === this) closeRemoveModal();
-    });
-    document.getElementById('clearModal').addEventListener('click', function(e) {
-        if (e.target === this) closeClearModal();
-    });
-    document.getElementById('addToCartModal').addEventListener('click', function(e) {
-        if (e.target === this) closeAddToCartModal();
-    });
-    document.getElementById('khqrBackdrop').addEventListener('click', function(e) {
-        if (e.target === this) closeKhqrModal();
-    });
-
-    /* ─────────────────────────────────────────────
-       HIDE FAB WHEN CART IS EMPTY
-    ───────────────────────────────────────────── */
-    // FAB is always visible on mobile even when empty, but disabled
-    // Optionally show/hide based on breakpoint resize
-    window.addEventListener('resize', function() {
-        // Sync drawer state if switching from mobile back to desktop
-        if (!isMobileTablet()) {
-            closeCartDrawer();
+            // document.getElementById('khqrBackdrop').classList.add('open');
+            generateKhqr();
         }
-    });
+
+        function closeKhqrModal() {
+            // document.getElementById('khqrBackdrop').classList.remove('open');
+            stopPolling();
+            clearTimeout(expiryTimer);
+            cdChannel.postMessage({ type: 'checkout-qr-hide' });
+        }
+
+        /* ─────────────────────────────────────────────
+           KHQR — UI STATE
+        ───────────────────────────────────────────── */
+        function setKhqrState(state) {
+            document.getElementById('khqrSkeleton').style.display    = state === 'loading'  ? 'flex'  : 'none';
+            document.getElementById('khqrQrFrame').style.display     = state === 'qr'       ? 'block' : 'none';
+            document.getElementById('khqrError').style.display       = state === 'error'    ? 'flex'  : 'none';
+            document.getElementById('khqrSuccessView').style.display = state === 'success'  ? 'flex'  : 'none';
+            document.getElementById('khqrQrView').style.display      = state === 'success'  ? 'none'  : 'flex';
+        }
+
+        function setDotState(state) {
+            const dot = document.getElementById('khqrDot');
+            dot.className = 'khqr-dot';
+            if (state === 'green') dot.classList.add('green');
+            if (state === 'grey')  dot.classList.add('grey');
+            if (state === 'amber') dot.classList.add('amber');
+        }
+
+        /* ─────────────────────────────────────────────
+           KHQR — GENERATE QR
+        ───────────────────────────────────────────── */
+        function generateKhqr() {
+            stopPolling();
+            clearTimeout(expiryTimer);
+            document.getElementById('khqrExpiryWarn').style.display  = 'none';
+            document.getElementById('khqrSkeletonText').textContent  = 'Generating QR…';
+            setKhqrState('loading');
+
+            fetch('{{ route("pos.khqr.generate") }}', {
+                method:  'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                body: JSON.stringify({ amount: currentTotal }),
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success) throw new Error(data.message || 'Failed');
+
+                    khqrMd5       = data.md5;
+                    khqrOrderRef  = data.order_ref;
+                    khqrExpiresAt = new Date(data.expires_at);
+
+                    document.getElementById('khqrOrderRef').textContent = `Ref: ${khqrOrderRef}`;
+
+                    document.getElementById('khqrCodeEl').innerHTML = '';
+                    new QRCode(document.getElementById('khqrCodeEl'), {
+                        text:         data.qr,
+                        width:        200,
+                        height:       200,
+                        correctLevel: QRCode.CorrectLevel.M,
+                    });
+
+                    setKhqrState('qr');
+                    cdChannel.postMessage({
+                        type: 'checkout-qr',
+                        data: {
+                            qr:       data.qr,
+                            total:    currentTotal,
+                            subtotal: parseFloat(document.getElementById('khqrSubtotal').textContent.replace('$','')),
+                            discount: parseFloat(document.getElementById('khqrDiscount')?.textContent.replace('-$','') || 0),
+                            items:    Object.values(cart).map(item => ({
+                                name:      item.name,
+                                image:     item.image,
+                                price:     item.price,
+                                qty:       item.qty,
+                                sugar:     item.sugar,
+                                discount:  item.discount,
+                                lineTotal: calculateItemTotal(item),
+                            })),
+                        }
+                    });
+
+                    setDotState('waiting');
+                    document.getElementById('khqrStatusText').textContent = 'Waiting for payment…';
+                    document.getElementById('khqrPaidBtn').disabled = false;
+
+                    startPolling();
+                    scheduleExpiryWarning();
+                })
+                .catch(err => {
+                    document.getElementById('khqrErrorText').textContent = err.message || 'Failed to generate QR.';
+                    setKhqrState('error');
+                    document.getElementById('khqrOrderRef').textContent = 'Generation failed';
+                });
+        }
+
+        function retryGenerate() {
+            generateKhqr();
+        }
+
+        /* ─────────────────────────────────────────────
+           KHQR — EXPIRY
+        ───────────────────────────────────────────── */
+        function scheduleExpiryWarning() {
+            clearTimeout(expiryTimer);
+            if (!khqrExpiresAt) return;
+
+            const warnAt   = khqrExpiresAt.getTime() - Date.now() - (EXPIRY_WARN_SECS * 1000);
+            const expireIn = khqrExpiresAt.getTime() - Date.now();
+
+            if (warnAt <= 0) {
+                showExpiryWarn();
+            } else {
+                expiryTimer = setTimeout(showExpiryWarn, warnAt);
+            }
+
+            setTimeout(() => {
+                if (document.getElementById('khqrBackdrop').classList.contains('open')) {
+                    generateKhqr();
+                }
+            }, expireIn);
+        }
+
+        function showExpiryWarn() {
+            document.getElementById('khqrExpiryWarn').style.display  = 'flex';
+            document.getElementById('khqrExpiryWarnText').textContent = 'QR expires soon — regenerating…';
+        }
+
+        /* ─────────────────────────────────────────────
+           KHQR — POLLING
+        ───────────────────────────────────────────── */
+        function startPolling() {
+            pollCount = 0;
+            pollTimer = setInterval(pollPayment, POLL_INTERVAL_MS);
+        }
+
+        function stopPolling() {
+            clearInterval(pollTimer);
+            pollTimer = null;
+        }
+
+        function pollPayment() {
+            if (!khqrMd5) return;
+            pollCount++;
+
+            const remaining = Math.max(0, Math.ceil((khqrExpiresAt - Date.now()) / 1000));
+            document.getElementById('khqrPollInfo').textContent =
+                remaining > 0 ? `QR expires in ${remaining}s · check #${pollCount}` : '';
+
+            if (pollCount >= POLL_MAX_CYCLES) {
+                stopPolling();
+                setDotState('grey');
+                document.getElementById('khqrStatusText').textContent = 'Session timed out. Please retry.';
+                document.getElementById('khqrPaidBtn').disabled = true;
+                return;
+            }
+
+            fetch('{{ route("pos.khqr.check") }}', {
+                method:  'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                body: JSON.stringify({ md5: khqrMd5 }),
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.paid) {
+                        stopPolling();
+                        handlePaymentSuccess();
+                    }
+                })
+                .catch(() => { /* silent — keep polling */ });
+        }
+
+        /* ─────────────────────────────────────────────
+           KHQR — MANUAL VERIFY
+        ───────────────────────────────────────────── */
+        function confirmKhqrPaid() {
+            if (!khqrMd5) return;
+
+            document.getElementById('khqrPaidBtn').disabled       = true;
+            document.getElementById('khqrStatusText').textContent = 'Verifying…';
+            setDotState('amber');
+
+            fetch('{{ route("pos.khqr.check") }}', {
+                method:  'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                body: JSON.stringify({ md5: khqrMd5 }),
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.paid) {
+                        stopPolling();
+                        handlePaymentSuccess();
+                    } else {
+                        setDotState('waiting');
+                        document.getElementById('khqrStatusText').textContent = 'Not confirmed yet. Try again or wait.';
+                        document.getElementById('khqrPaidBtn').disabled = false;
+                    }
+                })
+                .catch(() => {
+                    setDotState('waiting');
+                    document.getElementById('khqrStatusText').textContent = 'Check failed. Please retry.';
+                    document.getElementById('khqrPaidBtn').disabled = false;
+                });
+        }
+
+        /* ─────────────────────────────────────────────
+           KHQR — PAYMENT SUCCESS
+        ───────────────────────────────────────────── */
+        function handlePaymentSuccess() {
+            stopPolling();
+            setKhqrState('success');
+            setDotState('green');
+
+            document.getElementById('khqrSuccessSub').textContent =
+                `Paid $${currentTotal.toFixed(2)} · Ref: ${khqrOrderRef}`;
+
+            document.getElementById('posItemsInput').value = JSON.stringify(
+                Object.keys(cart).map(key => ({
+                    id:       cart[key].productId,
+                    qty:      cart[key].qty,
+                    price:    cart[key].price,
+                    discount: cart[key].discount,
+                    sugar:    cart[key].sugar,
+                }))
+            );
+            document.getElementById('posTotalInput').value     = currentTotal.toFixed(2);
+            document.getElementById('posPaymentMethod').value  = 'khqr';
+
+            broadcastSuccess(currentTotal);
+
+            setTimeout(() => document.getElementById('posForm').submit(), 1800);
+        }
+
+        /* ─────────────────────────────────────────────
+           BACKDROP CLICK HANDLERS
+        ───────────────────────────────────────────── */
+        document.getElementById('removeModal').addEventListener('click', function(e) {
+            if (e.target === this) closeRemoveModal();
+        });
+        document.getElementById('clearModal').addEventListener('click', function(e) {
+            if (e.target === this) closeClearModal();
+        });
+        document.getElementById('addToCartModal').addEventListener('click', function(e) {
+            if (e.target === this) closeAddToCartModal();
+        });
+        document.getElementById('khqrBackdrop').addEventListener('click', function(e) {
+            if (e.target === this) closeKhqrModal();
+        });
+
+        /* ─────────────────────────────────────────────
+           HIDE FAB WHEN CART IS EMPTY
+        ───────────────────────────────────────────── */
+        // FAB is always visible on mobile even when empty, but disabled
+        // Optionally show/hide based on breakpoint resize
+        window.addEventListener('resize', function() {
+            // Sync drawer state if switching from mobile back to desktop
+            if (!isMobileTablet()) {
+                closeCartDrawer();
+            }
+        });
     </script>
 
 @endsection

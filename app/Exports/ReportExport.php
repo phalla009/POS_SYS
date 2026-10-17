@@ -15,24 +15,28 @@ class ReportExport implements FromCollection, WithHeadings, WithTitle, WithStyle
 
     public function __construct($results, $type)
     {
-        $this->results = $results;
+        $this->results = collect($results);
         $this->type    = $type;
     }
 
     public function collection()
     {
-        return $this->results->map(function ($row) {
+        $rows = $this->results->map(function ($row) {
             return match ($this->type) {
                 'sales' => [
-                    'Date'      => $row->date,
-                    'Total Qty' => $row->qty ?? 0,
-                    'Total USD' => number_format($row->total ?? 0, 2),
-                    'Total KHR' => number_format(($row->total ?? 0) * 4000, 0),
+                    'Date'           => $row->date,
+                    'Payment Method' => $row->payment_method ?? '-',
+                    'Total Qty'      => $row->qty ?? 0,
+                    'Total USD'      => number_format($row->total ?? 0, 2),
+                    'Total KHR'      => number_format(($row->total ?? 0) * 4000, 0),
                 ],
                 'financial' => [
-                    'Date'         => $row->date,
-                    'Sold Qty'     => $row->sold_qty ?? 0,
-                    'Revenue USD'  => number_format($row->revenue ?? 0, 2),
+                    'Date'            => $row->date,
+                    'Sold Qty'        => $row->sold_qty ?? 0,
+                    'Total Sales'     => round($row->total_sales ?? 0, 2),
+                    'Inventory Items' => $row->inventory_items ?? 0,
+                    'Total Inventory' => round($row->total_inventory ?? 0, 2),
+                    'Net'             => round($row->net ?? 0, 2),
                 ],
                 'inventory' => [
                     'Product'   => $row->name,
@@ -50,13 +54,27 @@ class ReportExport implements FromCollection, WithHeadings, WithTitle, WithStyle
                 default => (array) $row,
             };
         });
+
+        // Financial: add a Grand Total row at the bottom
+        if ($this->type === 'financial') {
+            $rows = $rows->concat([[
+                'Date'            => 'Grand Total',
+                'Sold Qty'        => $this->results->sum('sold_qty'),
+                'Total Sales'     => round($this->results->sum('total_sales'), 2),
+                'Inventory Items' => $this->results->sum('inventory_items'),
+                'Total Inventory' => round($this->results->sum('total_inventory'), 2),
+                'Net'             => round($this->results->sum('net'), 2),
+            ]]);
+        }
+
+        return $rows->values();
     }
 
     public function headings(): array
     {
         return match ($this->type) {
-            'sales'     => ['Date', 'Total Qty', 'Total (USD)', 'Total (KHR)'],
-            'financial' => ['Date', 'Sold Quantity', 'Revenue (USD)'],
+            'sales'     => ['Date', 'Payment Method', 'Total Qty', 'Total (USD)', 'Total (KHR)'],
+            'financial' => ['Date', 'Sold Qty', 'Total Sales (USD)', 'Inventory Items', 'Total Inventory (USD)', 'Net (USD)'],
             'inventory' => ['Product', 'Quantity', 'Price (USD)', 'Total (USD)'],
             'customer'  => ['Name', 'Gender', 'Total Qty', 'Total Price', 'Joined'],
             default     => [],
@@ -70,11 +88,19 @@ class ReportExport implements FromCollection, WithHeadings, WithTitle, WithStyle
 
     public function styles(Worksheet $sheet)
     {
-        return [
+        $styles = [
             1 => [
                 'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
                 'fill' => ['fillType' => 'solid', 'startColor' => ['argb' => 'FF1A73E8']],
             ],
         ];
+
+        // Financial: make the Grand Total row bold (header + rows + total)
+        if ($this->type === 'financial') {
+            $lastRow = $this->results->count() + 2;
+            $styles[$lastRow] = ['font' => ['bold' => true]];
+        }
+
+        return $styles;
     }
 }

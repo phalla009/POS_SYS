@@ -265,6 +265,10 @@
                 <li><a href="{{ route('inventory-items.index') }}"><span class="icon"><i class="fas fa-boxes"></i></span> <span>Inventory</span></a></li>
             @endif
 
+                @if(Auth::user()->hasPermission('transactions'))
+                    <li><a href="{{ route('transactions.index') }}"><span class="icon"><i class="fas fa-receipt"></i></span> <span>Transactions</span></a></li>
+                @endif
+
             @if(Auth::user()->hasPermission('reports'))
                 <li><a href="{{ route('reports.index') }}"><span class="icon"><i class="fas fa-chart-line"></i></span> <span>Reports</span></a></li>
             @endif
@@ -319,7 +323,7 @@
                 padding: 4px 12px;
                 border-radius: 999px;
                 border: 1px solid rgba(255,255,255,0.15);
-            ">V2.0.0</span>
+            ">V2.1.0</span>
         </div>
 
     </div>

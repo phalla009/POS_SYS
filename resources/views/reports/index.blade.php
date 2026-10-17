@@ -109,6 +109,7 @@
                     <label>Report Type:</label>
                     <select name="type" required class="form-control">
                         <option value="sales">Sales Report</option>
+                        <option value="financial">Financial Report</option>
                     </select>
                 </div>
                 <div class="form-group">

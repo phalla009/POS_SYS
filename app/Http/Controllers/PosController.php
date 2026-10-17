@@ -29,8 +29,9 @@ class PosController extends Controller
     public function checkout(Request $request)
     {
         $request->validate([
-            'items' => 'required|string',
-            'total' => 'required|numeric|min:0',
+            'items'          => 'required|string',
+            'total'          => 'required|numeric|min:0',
+            'payment_method' => 'nullable|in:cash,khqr',
         ]);
 
         $items = json_decode($request->input('items'), true);
@@ -39,6 +40,9 @@ class PosController extends Controller
             return redirect()->route('pos.index')->withErrors(['items' => 'Cart is empty.']);
         }
 
+        // ✅ 'cash' or 'khqr' (shown as "Bank" in reports) — chosen in the POS
+        $paymentMethod = $request->input('payment_method');
+
         $posRef = 'POS-' . strtoupper(substr(uniqid(), -6)) . '-' . now()->format('His');
 
         $savedCount = 0;
@@ -46,7 +50,7 @@ class PosController extends Controller
         $errors     = [];
         $orderIds   = [];
 
-        DB::transaction(function () use ($items, $posRef, &$savedCount, &$totalSaved, &$errors, &$orderIds) {
+        DB::transaction(function () use ($items, $posRef, $paymentMethod, &$savedCount, &$totalSaved, &$errors, &$orderIds) {
 
             foreach ($items as $item) {
 
@@ -93,25 +97,27 @@ class PosController extends Controller
 
                 // Generate order number
                 $lastOrder   = Order::where('order_number', 'like', 'ORD-KR%')
-                                    ->orderBy('id', 'desc')
-                                    ->lockForUpdate()
-                                    ->first();
+                    ->orderBy('id', 'desc')
+                    ->lockForUpdate()
+                    ->first();
                 $newNumber   = $lastOrder ? intval(substr($lastOrder->order_number, 6)) + 1 : 1;
                 $orderNumber = 'ORD-KR' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
 
                 $order = Order::create([
-                    'order_number' => $orderNumber,
-                    'customer_id'  => null,
-                    'product_id'   => $product->id,
-                    'quantity'     => $qty,
-                    'total_amount' => round($lineTotal, 2),
-                    'status'       => 'completed',
-                    'order_date'   => now()->toDateString(),
-                    'note'         => "POS sale · ref: {$posRef}" . ($discount !== '0' ? " · discount: {$discount}" : ''),
+                    'order_number'   => $orderNumber,
+                    'customer_id'    => null,
+                    'product_id'     => $product->id,
+                    'quantity'       => $qty,
+                    'total_amount'   => round($lineTotal, 2),
+                    'status'         => 'completed',
+                    'order_date'     => now()->toDateString(),
+                    // ✅ Saved so reports / transactions can show Cash or Bank
+                    'payment_method' => $paymentMethod,
+                    'note'           => "POS sale · ref: {$posRef}" . ($discount !== '0' ? " · discount: {$discount}" : ''),
                     // ✅ Dedicated column (not just embedded in the note text) so all
                     // line items from this one checkout can be grouped/counted as a
                     // single sale — used by OrderController's "Total Invoice" stat.
-                    'pos_ref'      => $posRef,
+                    'pos_ref'        => $posRef,
                 ]);
 
                 $orderIds[] = $order->id;

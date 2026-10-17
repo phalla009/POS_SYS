@@ -18,6 +18,7 @@ use App\Http\Controllers\InventoryItemController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\TypeController;
+use App\Http\Controllers\TransactionController;
 
 // Public auth routes
 Route::get('/', [LoginController::class, 'showLoginForm']);
@@ -102,5 +103,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/pos/display', function () {
         return view('pos.customer-display');
     })->name('pos.display');
+    Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
 
 });
