@@ -114,6 +114,19 @@
         .status-pending   { background: none; color: #a16207; border: none;}
         .status-completed { background: none; color: #16a34a; border: none; }
         .status-cancelled { background: none; color: #dc2626; border: none; }
+
+        /* Payment method badges */
+        .pay-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .pay-badge.cash  { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .pay-badge.bank  { background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; }
+        .pay-badge.other { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
     </style>
 @endsection
 
@@ -131,6 +144,20 @@
             {{ session('success') }}
         </div>
     @endif
+
+    @php
+        // POS saves 'cash' / 'khqr'. Show them as Cash / Bank.
+        $payLabel = match (strtolower($order->payment_method ?? '')) {
+            'cash'  => 'Cash',
+            'khqr'  => 'Bank',
+            default => '-',
+        };
+        $payClass = match ($payLabel) {
+            'Cash'  => 'cash',
+            'Bank'  => 'bank',
+            default => 'other',
+        };
+    @endphp
 
     <div class="modal-content" role="main" aria-label="Order Details">
         <a href="{{ route('orders.index') }}" id="backBtn" class="btn btn-back">
@@ -171,12 +198,12 @@
             </div>
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-calendar-alt"></i> Order Date</div>
-                <div class="info-value">{{ \Carbon\Carbon::parse($order->order_date)->format('M d, Y') }}</div>
+                <div class="info-value">{{ \Carbon\Carbon::parse($order->order_date)->format('d-M-Y \a\t g:i A') }}</div>
             </div>
         </div>
 
-        {{-- Row 3: Cost Amount, Selling Amount, Note --}}
-        <div class="info-row">
+        {{-- Row 3: Cost Amount, Selling Amount, Payment Method --}}
+        <div class="info-row-2">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-dollar-sign"></i> Cost Amount</div>
                 <div class="info-value">${{ number_format(($order->product->price ?? 0) * $order->quantity, 2) }}</div>
@@ -185,21 +212,28 @@
                 <div class="info-label"><i class="fas fa-cash-register"></i> Selling Amount</div>
                 <div class="info-value">${{ number_format($order->total_amount ?? 0, 2) }}</div>
             </div>
+        </div>
+        <div class="info-row-2">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-sticky-note"></i> Note</div>
                 <div class="info-value">{{ $order->note ?? 'N/A' }}</div>
             </div>
+            <div class="info-box">
+                <div class="info-label"><i class="fas fa-credit-card"></i> Payment Method</div>
+                <div class="info-value">
+                    <span class="pay-badge {{ $payClass }}">{{ $payLabel }}</span>
+                </div>
+            </div>
         </div>
-
-        {{-- Row 4: Created & Updated --}}
+        {{-- Row 4: Note, Created, Updated --}}
         <div class="info-row-2">
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-calendar-plus"></i> Created</div>
-                <div class="info-value">{{ $order->created_at->setTimezone('Asia/Phnom_Penh')->format('M d, Y \a\t g:i A') }}</div>
+                <div class="info-value">{{ $order->created_at->format('d-M-Y \a\t g:i A') }}</div>
             </div>
             <div class="info-box">
                 <div class="info-label"><i class="fas fa-clock"></i> Last Updated</div>
-                <div class="info-value">{{ $order->updated_at->setTimezone('Asia/Phnom_Penh')->format('M d, Y \a\t g:i A') }}</div>
+                <div class="info-value">{{ $order->updated_at->format('d-M-Y \a\t g:i A') }}</div>
             </div>
         </div>
 

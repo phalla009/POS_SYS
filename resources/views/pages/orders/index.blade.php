@@ -338,7 +338,7 @@
                             <td data-label="Product">{{ $order->product->name ?? 'N/A' }}</td>
                             <td data-label="Quantity">{{ $order->quantity }}</td>
                             <td data-label="Order Date">
-                                {{ $order->created_at?->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') ?? 'N/A' }}
+                                {{ $order->created_at?->timezone('Asia/Phnom_Penh')->format('d-M-Y h:i A') ?? 'N/A' }}
                             </td>
                             <td data-label="Paid Amount" style="color: #2e7d32; font-weight: 600;">${{ number_format($order->total_amount ?? 0, 2) }}</td>
                             <td data-label="Actions">

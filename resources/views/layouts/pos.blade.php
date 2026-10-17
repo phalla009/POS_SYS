@@ -391,18 +391,23 @@
     });
 </script>
 
-{{-- ── AUTO-DOWNLOAD INVOICE PDF AFTER A SUCCESSFUL POS CHECKOUT ── --}}
+{{-- ── AUTO-DOWNLOAD RECEIPT PDF AFTER A SUCCESSFUL POS CHECKOUT ── --}}
 @if(session('pos_success') && session('pos_order_ids'))
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const orderIds = @json(session('pos_order_ids'));
+            const orderIds  = @json(session('pos_order_ids'));
+            const cashGiven = @json((float) session('pos_cash_given', 0));
             if (!Array.isArray(orderIds) || orderIds.length === 0) return;
 
-            const qs = orderIds.map(function (id) { return 'ids[]=' + id; }).join('&');
-            const pdfUrl = "{{ route('orders.invoiceCombinedPdf') }}?" + qs;
+            // New 80mm receipt: ids as comma list, cash received, force download
+            const pdfUrl = "{{ route('pos.receipt') }}"
+                + "?ids=" + orderIds.join(',')
+                + "&cash=" + cashGiven
+                + "&download=1";
 
             const link = document.createElement('a');
             link.href = pdfUrl;
+            link.download = '';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);

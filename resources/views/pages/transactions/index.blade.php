@@ -108,7 +108,7 @@
                     <tr>
                         <td data-label="No">#{{ $loop->iteration + ($transactions->currentPage() - 1) * $transactions->perPage() }}</td>
                         <td data-label="Date" style="color: black; font-weight: 600;">
-                            {{ \Carbon\Carbon::parse($d['date'])->format('d M, Y') }}
+                            {{ \Carbon\Carbon::parse($d['date'])->format('d-M-Y') }}
                         </td>
                         <td data-label="Orders">{{ $d['orders'] }}</td>
                         <td data-label="Inventory Items">{{ $d['items'] }}</td>

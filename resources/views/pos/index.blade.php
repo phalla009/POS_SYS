@@ -172,7 +172,7 @@
         .checkout-success-box i { font-size: 48px; color: #10b981; margin-bottom: 16px; }
         .checkout-success-box h3 { font-size: 20px; font-weight: 700; color: #1f2937; margin-bottom: 8px; }
         .checkout-success-box p { font-size: 14px; color: #6b7280; margin-bottom: 20px; }
-        .checkout-success-box button { padding: 10px 28px; background: #111; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+        .checkout-success-box button { padding: 10px 35px; background: #111; color: #fff; border: none; border-radius: 24px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 
         /* ── REMOVE / CLEAR MODALS ── */
         .remove-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 99999; justify-content: center; align-items: center; }

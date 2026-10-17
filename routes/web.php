@@ -34,6 +34,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
     Route::post('/pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
+    // ✅ 80mm PDF receipt for one POS checkout: /pos/receipt?ids=12,13&cash=5.00&download=1
+    Route::get('/pos/receipt', [PosController::class, 'receipt'])->name('pos.receipt');
     // routes/web.php
     Route::delete('orders/bulk-destroy', [OrderController::class, 'bulkDestroy'])->name('orders.bulkDestroy');
     Route::get('/orders/{order}/invoice_partial', [OrderController::class, 'invoicePartial'])->name('orders.invoicePartial');
@@ -67,18 +69,18 @@ Route::middleware('auth')->group(function () {
     Route::resource('products', ProductController::class)->names('products');
     Route::resource('orders', OrderController::class)->names('orders');
     Route::delete('/orders/bulk-destroy', [OrderController::class, 'bulkDestroy'])
-    ->name('orders.bulkDestroy');
+        ->name('orders.bulkDestroy');
 
     // Category bulk-destroy — same ordering rule: must come before the categories
     // resource route or DELETE /categories/bulk-destroy 404s the same way.
     Route::delete('/categories/bulk-destroy', [CategoryController::class, 'bulkDestroy'])
-    ->name('categories.bulkDestroy');
+        ->name('categories.bulkDestroy');
     Route::resource('categories', CategoryController::class)->names('categories');
 
     Route::resource('customers', CustomerController::class)->names('customers');
     Route::resource('inventorys', InventoryController::class)->names('inventorys');
     Route::delete('/inventory-items/bulk-destroy', [InventoryItemController::class, 'bulkDestroy'])
-    ->name('inventory-items.bulkDestroy');
+        ->name('inventory-items.bulkDestroy');
 
     Route::resource('inventory-items', InventoryItemController::class);
     Route::resource('inventory', InventoryController::class);
