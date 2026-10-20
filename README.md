@@ -12,7 +12,7 @@ A Point of Sale (POS) system for managing store inventory, sales, and customers 
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About PhonestoreSystem
+## About POS System
 
 POS_SYS is a Point of Sale application designed for retail stores. It handles the day-to-day operations of a store — selling products, tracking stock, managing customers and staff — through a simple, fast interface built on Laravel's ecosystem.
 
