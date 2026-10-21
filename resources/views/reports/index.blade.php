@@ -41,6 +41,21 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
 
+        /* Form Row: 1 row, 3 columns (Report Type | From Date | To Date) */
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .form-row-3 .form-group {
+            min-width: 0;
+        }
+        .form-row-3 .form-control {
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 50px;
+        }
+
         /* ── Mobile & Tablet 2-Column Responsive Rules ── */
         @media (max-width: 768px) {
             .stats-grid {
@@ -68,11 +83,19 @@
                 font-size: 11px;
             }
 
-            /* Responsive Form Layout */
-            .form-row {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
+            /* Responsive Form Layout (stays 3 columns, tighter spacing) */
+            .form-row-3 {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+
+            .form-row-3 label {
+                font-size: 12px;
+            }
+
+            .form-row-3 .form-control {
+                font-size: 12px;
+                padding: 6px 4px;
             }
         }
     </style>
@@ -85,7 +108,7 @@
         {{-- Stat Cards Grid (2-Column Grid on Mobile) --}}
         <div class="stats-grid" id="sortableCards">
             <div class="stat-card">
-                <p>This Month Sales</p>
+                <p>Total Monthly Sales</p>
                 <h3>${{ number_format($salesThisMonth ?? 0, 2) }}</h3>
             </div>
             <div class="stat-card">
@@ -93,18 +116,20 @@
                 <h3>{{ $ordersThisMonth ?? 0 }}</h3>
             </div>
             <div class="stat-card">
-                <p>New Customers</p>
-                <h3>{{ $newCustomers ?? 0 }}</h3>
+                <p>Total Inventory</p>
+                <h3>${{ number_format($totalInventory ?? 0, 2) }}</h3>
             </div>
             <div class="stat-card">
-                <p>Customer Satisfaction</p>
-                <h3>{{ $customerSatisfaction ?? 0 }}%</h3>
+                <p>Net</p>
+                <h3 style="color: {{ ($net ?? 0) >= 0 ? '#ffffff' : '#dc2626' }}">
+                    ${{ number_format($net ?? 0, 2) }}
+                </h3>
             </div>
         </div>
 
         <form id="reportForm" method="POST" action="{{ route('reports.generate') }}" style="margin-top: 20px;">
             @csrf
-            <div class="form-row">
+            <div class="form-row-3">
                 <div class="form-group">
                     <label>Report Type:</label>
                     <select name="type" required class="form-control">
@@ -113,16 +138,27 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Date Range:</label>
-                    <select name="range">
-                        <option value="today">Today</option>
-                        <option value="7days">Last 7 Days</option>
-                        <option value="30days">Last 30 Days</option>
-                        <option value="3months">Last 3 Months</option>
-                        <option value="1year">Last Year</option>
-                    </select>
+                    <label>From Date:</label>
+                    <input type="date" name="from_date" id="from_date" class="form-control"
+                           value="{{ old('from_date', now()->startOfMonth()->toDateString()) }}"
+                           max="{{ now()->toDateString() }}" required>
+                </div>
+                <div class="form-group">
+                    <label>To Date:</label>
+                    <input type="date" name="to_date" id="to_date" class="form-control"
+                           value="{{ old('to_date', now()->toDateString()) }}"
+                           max="{{ now()->toDateString() }}" required>
                 </div>
             </div>
+
+            @if ($errors->any())
+                <div style="color: #c0392b; margin-top: 8px;">
+                    @foreach ($errors->all() as $error)
+                        <div>{{ $error }}</div>
+                    @endforeach
+                </div>
+            @endif
+
             <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
                 <i class="fas fa-chart-pie"></i> Generate Report
             </button>
@@ -154,6 +190,22 @@
                     }
                 });
             }
+        });
+
+        // ===== From / To date: "To" can never be earlier than "From" =====
+        document.addEventListener('DOMContentLoaded', () => {
+            const fromDate = document.getElementById('from_date');
+            const toDate   = document.getElementById('to_date');
+            if (!fromDate || !toDate) return;
+
+            toDate.min = fromDate.value;
+
+            fromDate.addEventListener('change', () => {
+                toDate.min = fromDate.value;
+                if (toDate.value && toDate.value < fromDate.value) {
+                    toDate.value = fromDate.value;
+                }
+            });
         });
 
         // ✅ Overlay reusable ពី Master Layout

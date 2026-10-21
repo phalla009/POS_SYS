@@ -188,7 +188,7 @@
 
             <div>
                 <button class="btn btn-update" type="submit" style="float: none; ">
-                    <i class="fas fa-sync-alt"></i> Update Product
+                    <i class="fas fa-sync-alt"></i> Update
                 </button>
             </div>
         </form>

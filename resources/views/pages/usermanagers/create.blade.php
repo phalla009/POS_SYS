@@ -149,7 +149,7 @@
             {{-- Buttons --}}
             <div>
                 <button type="submit" class="btn btn-success">
-                    <i class="fas fa-save"></i> Add User
+                    <i class="fas fa-save"></i> Save
                 </button>
                 <button type="button" id="cancel" class="btn btn-cancel">
                     <i class="fas fa-times"></i> Cancel

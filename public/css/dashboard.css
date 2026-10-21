@@ -21,12 +21,10 @@
     z-index: 1000;
     background: repeating-linear-gradient(
         -45deg,
-        #0f1117,
-        #0f1117 2px,
-        #000000d1 2px,
-        #000000b1 3px,
-        rgb(9, 9, 9) 4px,
-        rgb(9, 9, 9) 4px
+        #3d6c3d,
+        #2e652e,
+        #3d6c3d 3px,
+        #2e652e 3px
     );
     color: whitesmoke;
     border-left: 5px solid #2ecc71;

@@ -201,7 +201,7 @@
 
             <div>
                 <button type="submit" class="btn btn-update">
-                    <i class="fas fa-sync-alt"></i> Update Role
+                    <i class="fas fa-sync-alt"></i> Update
                 </button>
             </div>
         </form>

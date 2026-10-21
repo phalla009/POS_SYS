@@ -177,7 +177,7 @@
         </a>
 
         {{-- Export to Excel Button --}}
-        <a href="{{ route('reports.export', ['type' => $type, 'range' => $range]) }}"
+        <a href="{{ route('reports.export', ['type' => $type, 'from_date' => $from, 'to_date' => $to]) }}"
            class="btn-export">
             <i class="fas fa-file-excel"></i> Export to Excel
         </a>
@@ -201,7 +201,7 @@
                     <tbody>
                     @foreach($results as $row)
                         <tr>
-                            <td>{{ $row->date }}</td>
+                            <td>{{ \Carbon\Carbon::parse($row->date)->format('d-M-Y') }}</td>
                             <td><span class="pay-badge {{ $payClass($row->payment_method) }}">{{ $row->payment_method }}</span></td>
                             <td>{{ number_format($row->qty ?? 0) }}</td>
                             <td>${{ number_format($row->total ?? 0, 2) }}</td>
@@ -276,7 +276,7 @@
                     <tbody>
                     @forelse($results as $row)
                         <tr>
-                            <td>{{ \Carbon\Carbon::parse($row->date)->format('M d, Y') }}</td>
+                            <td>{{ \Carbon\Carbon::parse($row->date)->format('d-M-Y') }}</td>
                             <td>{{ number_format($row->sold_qty ?? 0) }}</td>
                             <td>${{ number_format($row->total_sales ?? 0, 2) }}</td>
                             <td>{{ number_format($row->inventory_items ?? 0) }}</td>

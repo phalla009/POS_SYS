@@ -153,7 +153,7 @@
 
             <div>
                 <button class="btn btn-success" type="submit" aria-label="Add Product">
-                    <i class="fas fa-save"></i> Add Product
+                    <i class="fas fa-save"></i> Save
                 </button>
                 <button id="cancel" type="button" class="btn btn-cancel" aria-label="Cancel and reset form">
                     <i class="fas fa-times"></i> Cancel

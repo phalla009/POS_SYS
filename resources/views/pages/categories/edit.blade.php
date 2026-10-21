@@ -99,7 +99,7 @@
             </div>
             <div>
                 <button class="btn btn-update" type="submit">
-                    <i class="fas fa-sync-alt"></i> Update Category
+                    <i class="fas fa-sync-alt"></i> Update
                 </button>
             </div>
         </form>

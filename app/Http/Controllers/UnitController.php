@@ -58,7 +58,7 @@ class UnitController extends Controller
         Unit::create($validated);
 
         return redirect()
-            ->route('units.index')
+            ->route('units.create')
             ->with('success', 'Unit "' . $validated['name'] . '" added successfully.');
     }
 

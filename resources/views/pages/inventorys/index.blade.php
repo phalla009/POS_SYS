@@ -141,10 +141,10 @@
                 <tr>
                     <th>#</th>
                     <th>Name</th>
-                    <th>Type</th>
-                    <th>Unit</th>
                     <th>Qty</th>
                     <th>Total Price</th>
+                    <th>Type</th>
+                    <th>Unit</th>
                     <th>Status</th>
 {{--                    <th>Last Updated</th>--}}
                     <th>Actions</th>
@@ -155,10 +155,10 @@
                     <tr>
                         <td data-label="No">#{{ $loop->iteration + ($items->currentPage() - 1) * $items->perPage() }}</td>
                         <td data-label="Name" style="color: black; font-weight: 600;">{{ $item->name }}</td>
-                        <td data-label="Type">{{ $item->type ?? '-' }}</td>
-                        <td data-label="Unit">{{ $item->unit ?? '-' }}</td>
                         <td data-label="Qty" style="color: black; font-weight: 600;">{{ $item->qty }}</td>
                         <td data-label="Price" style="color: #2e7d32; font-weight: 600;">${{ number_format($item->price, 2) }}</td>
+                        <td data-label="Type">{{ $item->type ?? '-' }}</td>
+                        <td data-label="Unit">{{ $item->unit ?? '-' }}</td>
                         <td data-label="Status">
                             @if($item->status === 'out')
                                 <span class="stock-badge stock-out">Out of Stock</span>

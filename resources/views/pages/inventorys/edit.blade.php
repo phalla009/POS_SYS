@@ -57,25 +57,26 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="price"><i class="fas fa-dollar-sign"></i> Price</label>
+                    <label for="qty"><i class="fas fa-cubes"></i> Total Quantity</label>
+                    <input type="number" min="0" name="qty" id="qty" value="{{ old('qty', $item->qty) }}">
+                    @error('qty')
+                        <p class="text-danger mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="form-group">
+                    <label for="price"><i class="fas fa-dollar-sign"></i> Total Price</label>
                     <input type="number" step="0.01" min="0" name="price" id="price" value="{{ old('price', $item->price) }}">
                     @error('price')
-                    <p class="text-danger mt-1">{{ $message }}</p>
+                        <p class="text-danger mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <div class="form-group">
-                    <label for="qty"><i class="fas fa-cubes"></i> Quantity</label>
-                    <input type="number" min="0" name="qty" id="qty" value="{{ old('qty', $item->qty) }}">
-                    @error('qty')
-                    <p class="text-danger mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+
             </div>
 
             <div>
                 <button type="submit" class="btn btn-update">
-                    <i class="fas fa-sync-alt"></i> Update Item
+                    <i class="fas fa-sync-alt"></i> Update
                 </button>
             </div>
         </form>

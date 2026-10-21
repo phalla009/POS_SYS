@@ -46,7 +46,7 @@ class TypeController extends Controller
 
         Type::create($validated);
 
-        return redirect()->route('types.index')->with('success', 'Type added successfully.');
+        return redirect()->route('types.create')->with('success', 'Type added successfully.');
     }
 
     public function show(string $id)

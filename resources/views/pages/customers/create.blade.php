@@ -147,7 +147,7 @@
 
             <div>
                 <button type="submit" class="btn btn-success">
-                    <i class="fas fa-save"></i> Add Customer
+                    <i class="fas fa-save"></i> Save
                 </button>
                 <button id="cancelBtn" type="button" class="btn btn-cancel">
                     <i class="fas fa-times"></i> Cancel

@@ -41,8 +41,11 @@
 
     @if(session('success'))
         <div id="successMessage" class="custom-success">
-            <i class="fas fa-check-circle" style="color: green; margin-right: 8px;"></i>
-            {{ session('success') }}
+            <div class="success-content">
+                <span class="success-icon">✔</span>
+                <span class="success-text">{{ session('success') }}</span>
+            </div>
+            <div class="progress-bar"></div>
         </div>
     @endif
 
@@ -82,7 +85,7 @@
             </div>
             <div>
                 <button type="submit" class="btn btn-success">
-                    <i class="fas fa-save"></i> Save Unit
+                    <i class="fas fa-save"></i> Save
                 </button>
                 <button id="cancelBtn" type="button" class="btn btn-cancel">
                     <i class="fas fa-times"></i> Cancel

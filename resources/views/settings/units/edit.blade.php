@@ -85,7 +85,7 @@
 
             <div>
                 <button type="submit" class="btn btn-success">
-                    <i class="fas fa-save"></i> Update Unit
+                    <i class="fas fa-save"></i> Update
                 </button>
             </div>
         </form>

@@ -161,7 +161,7 @@
                 <tr>
                     <th>#</th>
                     <th>Name</th>
-                    <th>Abbreviation</th>
+{{--                    <th>Abbreviation</th>--}}
                     <th>Description</th>
                     <th>Updated Date</th>
                     <th>Actions</th>
@@ -172,13 +172,13 @@
                     <tr>
                         <td data-label="No">#{{ $loop->iteration + ($units->currentPage() - 1) * $units->perPage() }}</td>
                         <td data-label="Name" style="color: black; font-weight: 600;">{{ $unit->name }}</td>
-                        <td data-label="Abbreviation">
-                            @if(!empty($unit->abbreviation))
-                                <span class="abbr-badge">{{ $unit->abbreviation }}</span>
-                            @else
-                                <span style="color: #9ca3af;">N/A</span>
-                            @endif
-                        </td>
+{{--                        <td data-label="Abbreviation">--}}
+{{--                            @if(!empty($unit->abbreviation))--}}
+{{--                                <span class="abbr-badge">{{ $unit->abbreviation }}</span>--}}
+{{--                            @else--}}
+{{--                                <span style="color: #9ca3af;">N/A</span>--}}
+{{--                            @endif--}}
+{{--                        </td>--}}
                         <td data-label="Description">{{ $unit->description ?? 'N/A' }}</td>
                         <td data-label="Updated Date">{{ $unit->updated_at->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') }}</td>
                         <td data-label="Actions">

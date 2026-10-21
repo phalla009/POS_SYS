@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use App\Models\Order;
 use App\Models\Customer;
 use App\Models\Report;
@@ -16,14 +17,25 @@ class ReportController extends Controller
 {
     public function index()
     {
-        $salesThisMonth = Order::whereMonth('created_at', date('m'))
+        $now   = Carbon::now();
+        $start = $now->copy()->startOfMonth();
+        $end   = $now->copy()->endOfMonth();
+
+        $salesThisMonth  = Order::whereBetween('created_at', [$start, $end])
             ->sum('total_amount');
-        $ordersThisMonth = Order::whereMonth('created_at', date('m'))->count();
-        $newCustomers = Customer::whereMonth('created_at', date('m'))->count();
-        $customerSatisfaction = 92;
+
+        $ordersThisMonth = Order::whereBetween('created_at', [$start, $end])
+            ->count();
+
+        // Total Inventory = value of stock bought this month (same as Financial report)
+        $totalInventory  = InventoryItem::whereBetween('created_at', [$start, $end])
+            ->sum('price');
+
+        // Net = Sales - Inventory
+        $net = $salesThisMonth - $totalInventory;
+
         $salesByDay = Order::selectRaw('DAY(created_at) as day, SUM(total_amount) as total_amount, SUM(quantity) as total_qty')
-            ->whereMonth('created_at', date('m'))
-            ->whereYear('created_at', date('Y'))
+            ->whereBetween('created_at', [$start, $end])
             ->groupBy('day')
             ->orderBy('day')
             ->get();
@@ -35,8 +47,8 @@ class ReportController extends Controller
         return view('reports.index', compact(
             'salesThisMonth',
             'ordersThisMonth',
-            'newCustomers',
-            'customerSatisfaction',
+            'totalInventory',
+            'net',
             'chartLabels',
             'chartAmount',
             'chartQty'
@@ -50,23 +62,35 @@ class ReportController extends Controller
     }
 
     // ─── Shared query logic ───────────────────────────────────────────────────
-    private function getDateRange($range)
+    /**
+     * Build the [start, end] range from the From / To dates.
+     * Start = 00:00:00 of From date, End = 23:59:59 of To date.
+     */
+    private function getDateRange($from, $to)
     {
-        $end   = Carbon::now();
-        $start = match ($range) {
-            'today'   => $end->copy()->startOfDay(),
-            '7days'   => $end->copy()->subDays(7),
-            '30days'  => $end->copy()->subDays(30),
-            '3months' => $end->copy()->subMonths(3),
-            '1year'   => $end->copy()->subYear(),
-            default   => $end->copy()->subDays(30),
-        };
+        $start = $from
+            ? Carbon::parse($from)->startOfDay()
+            : Carbon::now()->subDays(30)->startOfDay();
 
-        if ($range === 'today') {
-            $end = $end->copy()->endOfDay();
-        }
+        $end = $to
+            ? Carbon::parse($to)->endOfDay()
+            : Carbon::now()->endOfDay();
 
         return [$start, $end];
+    }
+
+    /**
+     * Validate type + From/To dates. On failure the caller redirects to the
+     * report form (reports.index) instead of "back", because "back" can be
+     * /reports/generate, which only accepts POST.
+     */
+    private function rangeValidator(Request $request)
+    {
+        return Validator::make($request->all(), [
+            'type'      => 'required|in:sales,financial,inventory,customer',
+            'from_date' => 'required|date',
+            'to_date'   => 'required|date|after_or_equal:from_date',
+        ]);
     }
 
     /**
@@ -174,10 +198,18 @@ class ReportController extends Controller
     // ─── Generate (view) ──────────────────────────────────────────────────────
     public function generate(Request $request)
     {
-        $type  = $request->input('type');
-        $range = $request->input('range');
+        $validator = $this->rangeValidator($request);
+        if ($validator->fails()) {
+            return redirect()->route('reports.index')
+                ->withErrors($validator)
+                ->withInput();
+        }
 
-        [$start, $end] = $this->getDateRange($range);
+        $type = $request->input('type');
+        $from = $request->input('from_date');
+        $to   = $request->input('to_date');
+
+        [$start, $end] = $this->getDateRange($from, $to);
 
         $results    = $this->getResults($type, $start, $end);
         $grandTotal = $type === 'sales' ? $results->sum('total') : 0;
@@ -195,21 +227,33 @@ class ReportController extends Controller
             ];
         }
 
+        // Display label for views that still print $range (e.g. "2026-10-01 to 2026-10-21")
+        $range = $start->format('Y-m-d') . ' to ' . $end->format('Y-m-d');
+
         return view('reports.generated', compact(
-            'type', 'range', 'results', 'start', 'end', 'grandTotal', 'summary'
+            'type', 'range', 'from', 'to', 'results', 'start', 'end', 'grandTotal', 'summary'
         ));
     }
 
     // ─── Export to Excel ──────────────────────────────────────────────────────
     public function export(Request $request)
     {
-        $type  = $request->input('type');
-        $range = $request->input('range');
+        $validator = $this->rangeValidator($request);
+        if ($validator->fails()) {
+            return redirect()->route('reports.index')
+                ->withErrors($validator)
+                ->withInput();
+        }
 
-        [$start, $end] = $this->getDateRange($range);
+        $type = $request->input('type');
+
+        [$start, $end] = $this->getDateRange(
+            $request->input('from_date'),
+            $request->input('to_date')
+        );
 
         $results  = $this->getResults($type, $start, $end);
-        $filename = ucfirst($type) . '_Report_' . now()->format('Y-m-d') . '.xlsx';
+        $filename = ucfirst($type) . '_Report_' . $start->format('Y-m-d') . '_to_' . $end->format('Y-m-d') . '.xlsx';
 
         return Excel::download(new ReportExport($results, $type), $filename);
     }
