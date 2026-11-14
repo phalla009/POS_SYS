@@ -10,8 +10,39 @@
     <script src="{{ URL::asset('js/form.js') }}"></script>
     <script src="{{ URL::asset('js/delete_form.js') }}" defer></script>
     <style>
+        /* Page-specific colors (shared palette lives in main.css :root) */
+        :root {
+            --sand: #f6ede2;
+            --sand-hover: #efe1d1;
+            --sand-border: #d4bfa8;
+            --sand-icon: #a8896b;
+            --sand-search: #b39b85;
+            --brown-muted: #7a6554;
+            --brown-close: #6e5543;
+
+            --error-bg: #fdecea;
+            --error-border: #f5c2c0;
+            --error-text: #a12622;
+
+            --bulk-bg: #fff5f2;
+            --bulk-border: #ecc9bd;
+            --red-disabled: #e3a89f;
+            --red-soft-bg: #fff1ed;
+            --red-soft-border: #f3d2c7;
+            --red-close-bg: #fee2e2;
+
+            --terracotta: #a0522d;
+            --terracotta-d: #8a4524;
+            --terracotta-edge: #c8795a;
+            --caramel-btn: #b8824a;
+            --caramel-edge: #e0b27a;
+
+            --price-green: #2e7d32;
+            --excel-green: #217346;
+        }
+
         .status-active   { color: green; background-color: transparent !important; }
-        .status-inactive { color: red;   background-color: transparent !important; }
+        .status-inactive { color: var(--red); background-color: transparent !important; }
         .form-group select { border-radius: 24px; }
 
         /* Product Thumbnail Styling */
@@ -27,20 +58,20 @@
             height: 100%;
             object-fit: cover;
             border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-input);
+            box-shadow: 0 2px 4px rgba(74, 51, 38, 0.08);
         }
 
         .product-thumb-placeholder {
             width: 100%;
             height: 100%;
-            background-color: #f1f5f9;
+            background-color: var(--sand);
             border-radius: 8px;
-            border: 1px dashed #cbd5e1;
+            border: 1px dashed var(--sand-border);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #94a3b8;
+            color: var(--sand-icon);
             font-size: 16px;
         }
 
@@ -49,29 +80,30 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,.5);
+            background: rgba(43, 27, 18, .55);
             align-items: center;
             justify-content: center;
             z-index: 1000;
         }
         .modal-overlay.active { display: flex; }
         .modal-box {
-            background: #fff;
+            background: var(--white);
             padding: 24px;
             border-radius: 10px;
             width: 420px;
             max-width: 90%;
-            box-shadow: 0 10px 30px rgba(0,0,0,.2);
+            box-shadow: 0 10px 30px rgba(54, 36, 26, .25);
         }
         .modal-box h3 {
             margin: 0 0 16px 0;
             display: flex;
             align-items: center;
             gap: 8px;
+            color: var(--brown-700);
         }
         .modal-box .hint {
             font-size: 13px;
-            color: #777;
+            color: var(--brown-muted);
             margin: 10px 0 0 0;
             line-height: 1.5;
         }
@@ -83,48 +115,59 @@
         .import-file-input {
             width: 100%;
             padding: 8px;
-            border: 1px dashed #ccc;
+            border: 1px dashed var(--sand-border);
             border-radius: 8px;
         }
         .import-errors {
-            background: #fdecea;
-            border: 1px solid #f5c2c0;
-            color: #a12622;
+            background: var(--error-bg);
+            border: 1px solid var(--error-border);
+            color: var(--error-text);
             padding: 12px 16px;
             border-radius: 8px;
             margin-bottom: 16px;
             font-size: 14px;
         }
-        .btn-secondary-export{
-            color: white;
+
+        /* Export = terracotta */
+        .btn.btn-secondary-export {
+            color: var(--white);
             transition: all 0.2s ease;
+            border: none !important;
+            border-left: 5px solid var(--terracotta-edge) !important;
+            border-right: 5px solid var(--terracotta-edge) !important;
             background: repeating-linear-gradient(
                 -45deg,
-                #ff2020,
-                #d40f0f,
-                #ff2020 3px,
-                #d40f0f 3px
+                var(--terracotta),
+                var(--terracotta-d),
+                var(--terracotta) 3px,
+                var(--terracotta-d) 3px
             );
         }
         .btn-secondary-export:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px #ff0000;
+            box-shadow: 0 6px 14px rgba(138, 69, 36, 0.4);
         }
-        .btn-secondary-import{
-            color: white;
+
+        /* Import = caramel */
+        .btn-secondary-import {
+            color: var(--white);
             transition: all 0.2s ease;
+            border: none !important;
+            border-left: 5px solid var(--caramel-edge) !important;
+            border-right: 5px solid var(--caramel-edge) !important;
             background: repeating-linear-gradient(
                 -45deg,
-                #0008ff,
-                #0007ca,
-                #0008ff 3px,
-                #0007ca 3px
+                var(--caramel-btn),
+                var(--caramel-d),
+                var(--caramel-btn) 3px,
+                var(--caramel-d) 3px
             );
         }
         .btn-secondary-import:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px #0008ff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(168, 118, 63, 0.4);
         }
+
         .import-errors ul {
             margin: 8px 0 0 18px;
             padding: 0;
@@ -141,16 +184,26 @@
         }
 
         @media (max-width: 768px) {
+            /* Make the form full width */
+            .filter-section {
+                align-items: stretch;
+            }
+            .filter-section form {
+                width: 100%;
+            }
+
             .filter-controls {
                 flex-direction: column;
                 align-items: stretch;
+                width: 100%;
             }
 
             .filter-controls .btn,
             .filter-controls .form-group {
                 width: 100%;
-                max-width: 100%;
+                max-width: 100% !important; /* override inline max-width:200px */
                 margin-left: 0 !important;
+                margin-right: 0;
             }
 
             .filter-controls a.btn,
@@ -189,23 +242,23 @@
         /* Bulk delete */
         .bulk-actions-bar {
             display: none; align-items: center; gap: 10px; margin-bottom: 10px;
-            background: #fff5f5; border: 1.5px solid #f5c2c2; border-radius: 10px; padding: 10px 14px;
+            background: var(--bulk-bg); border: 1.5px solid var(--bulk-border); border-radius: 10px; padding: 10px 14px;
         }
         .bulk-actions-bar.active { display: flex; }
-        .bulk-actions-bar .selected-count { font-size: 13.5px; color: #c0392b; font-weight: 600; }
+        .bulk-actions-bar .selected-count { font-size: 13.5px; color: var(--error-text); font-weight: 600; }
         .bulk-delete-btn {
-            display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: #e74c3c; color: #fff;
+            display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--red); color: var(--white);
             border: none; border-radius: 20px; font-size: 13.5px; cursor: pointer; transition: background 0.2s;
         }
-        .bulk-delete-btn:hover { background: #c0392b; }
-        .bulk-delete-btn:disabled { background: #f1a9a0; cursor: not-allowed; }
+        .bulk-delete-btn:hover { background: var(--red-d); }
+        .bulk-delete-btn:disabled { background: var(--red-disabled); cursor: not-allowed; }
         .bulk-clear-btn {
-            display: flex; align-items: center; gap: 5px; padding: 8px 14px; background: #f0f2f5; color: #666;
-            border: 1.5px solid #dde3ec; border-radius: 20px; font-size: 13px; cursor: pointer; text-decoration: none;
+            display: flex; align-items: center; gap: 5px; padding: 8px 14px; background: var(--sand); color: var(--brown-text);
+            border: 1.5px solid var(--border); border-radius: 20px; font-size: 13px; cursor: pointer; text-decoration: none;
         }
-        .bulk-clear-btn:hover { background: #e8eaf0; }
-        .row-checkbox, #selectAllCheckbox { width: 16px; height: 16px; cursor: pointer; accent-color: #e74c3c; }
-        tr.row-selected { background: #fff7f7; }
+        .bulk-clear-btn:hover { background: var(--sand-hover); }
+        .row-checkbox, #selectAllCheckbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--caramel-d); }
+        tr.row-selected { background: var(--cream); }
 
         /* ── Delete Confirm Modal ── */
         .delete-confirm-modal {
@@ -213,7 +266,7 @@
             position: fixed;
             inset: 0;
             z-index: 1100;
-            background: rgba(15, 23, 42, 0.45);
+            background: rgba(43, 27, 18, 0.5);
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
             align-items: center;
@@ -226,12 +279,12 @@
         }
 
         .delete-modal-box {
-            background: #ffffff;
+            background: var(--white);
             border-radius: 20px;
             max-width: 440px;
             width: 100%;
             padding: 40px 36px 32px;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+            box-shadow: 0 24px 60px rgba(54, 36, 26, 0.25);
             position: relative;
             text-align: center;
             animation: deleteModalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -241,8 +294,8 @@
         .delete-modal-icon {
             width: 70px;
             height: 70px;
-            background: #fff1f0;
-            border: 2px solid #ffd6d4;
+            background: var(--red-soft-bg);
+            border: 2px solid var(--red-soft-border);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -252,20 +305,20 @@
 
         .delete-modal-icon i {
             font-size: 28px;
-            color: #e74c3c;
+            color: var(--red);
         }
 
         .delete-modal-close {
             position: absolute;
             top: 16px;
             right: 18px;
-            background: #f1f5f9;
+            background: var(--sand);
             border: none;
             border-radius: 50%;
             width: 32px;
             height: 32px;
             font-size: 18px;
-            color: #64748b;
+            color: var(--brown-close);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -275,27 +328,27 @@
         }
 
         .delete-modal-close:hover {
-            background: #fee2e2;
-            color: #e74c3c;
+            background: var(--red-close-bg);
+            color: var(--red);
             transform: rotate(90deg);
         }
 
         .delete-modal-box h3 {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #1e293b;
+            color: var(--brown-700);
             margin-bottom: 10px;
         }
 
         .delete-modal-box p {
             font-size: 0.95rem;
-            color: #64748b;
+            color: var(--brown-muted);
             margin-bottom: 28px;
             line-height: 1.6;
         }
 
         .delete-modal-box p strong {
-            color: #e74c3c;
+            color: var(--red);
         }
 
         .delete-modal-actions {
@@ -307,9 +360,9 @@
         .delete-btn-cancel {
             padding: 10px 24px;
             border-radius: 24px;
-            border: 1.5px solid #e2e8f0;
-            background: #f8fafc;
-            color: #475569;
+            border: 1.5px solid var(--border);
+            background: var(--cream);
+            color: var(--brown-text);
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -320,8 +373,8 @@
         }
 
         .delete-btn-cancel:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
+            background: var(--cream-th);
+            border-color: var(--caramel);
             transform: translateY(-1px);
         }
 
@@ -329,8 +382,8 @@
             padding: 10px 24px;
             border-radius: 24px;
             border: none;
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: #fff;
+            background: linear-gradient(135deg, var(--red), var(--red-d));
+            color: var(--white);
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -338,13 +391,13 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.35);
+            box-shadow: 0 4px 12px rgba(204, 35, 9, 0.35);
         }
 
         .delete-btn-confirm:hover {
             opacity: 0.9;
             transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(231, 76, 60, 0.45);
+            box-shadow: 0 6px 18px rgba(204, 35, 9, 0.45);
         }
 
         @keyframes deleteModalIn {
@@ -431,7 +484,7 @@
                     </div>
 
                     <div class="form-group" style="position:relative; min-width:300px;">
-                        <i class="fas fa-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#aaa;font-size:14px;pointer-events:none;"></i>
+                        <i class="fas fa-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--sand-search);font-size:14px;pointer-events:none;"></i>
                         <input type="text" name="search"
                                value="{{ request('search') }}"
                                placeholder="Search Products..."
@@ -456,16 +509,16 @@
         <div class="table-container">
             <table>
                 <thead>
-                    <tr>
-                        <th style="width:40px;">#</th>
-                        <th style="width:36px;"><input type="checkbox" id="selectAllCheckbox" title="Select all"></th>
-                        <th style="width:50px; text-align:center;">Image</th>
-                        <th>Products</th>
-                        <th>Categories</th>
-                        <th>Price</th>
-{{--                        <th>Last Update</th>--}}
-                        <th>Actions</th>
-                    </tr>
+                <tr>
+                    <th style="width:40px;">#</th>
+                    <th style="width:36px;"><input type="checkbox" id="selectAllCheckbox" title="Select all"></th>
+                    <th style="width:50px; text-align:center;">Image</th>
+                    <th>Products</th>
+                    <th>Categories</th>
+                    <th>Price</th>
+                    {{--                        <th>Last Update</th>--}}
+                    <th>Actions</th>
+                </tr>
                 </thead>
                 <tbody id="productsTable">
                 @forelse ($products as $product)
@@ -488,14 +541,14 @@
                                 @endif
                             </div>
                         </td>
-                        <td data-label="Name" style="color: black; font-weight: 600;">{{ $product->name }}</td>
+                        <td data-label="Name" style="color: var(--brown-700); font-weight: 600;">{{ $product->name }}</td>
                         <td data-label="Brand">{{ $product->category->name ?? 'N/A' }}</td>
-                        <td data-label="Price" style="color: #2e7d32; font-weight: 600;">
+                        <td data-label="Price" style="color: var(--price-green); font-weight: 600;">
                             ${{ number_format($product->price, 2) }}
                         </td>
-{{--                        <td data-label="Create Date">--}}
-{{--                            {{ $product->updated_at?->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') ?? 'N/A' }}--}}
-{{--                        </td>--}}
+                        {{--                        <td data-label="Create Date">--}}
+                        {{--                            {{ $product->updated_at?->timezone('Asia/Phnom_Penh')->format('d M, Y h:i A') ?? 'N/A' }}--}}
+                        {{--                        </td>--}}
                         <td data-label="Actions">
                             <div class="action-buttons">
                                 <a href="{{ route('products.show', $product->id) }}"
@@ -589,7 +642,7 @@
     {{-- Import Excel Modal --}}
     <div id="importModal" class="modal-overlay">
         <div class="modal-box">
-            <h3><i class="fas fa-file-excel" style="color:#217346;"></i> Import Products</h3>
+            <h3><i class="fas fa-file-excel" style="color:var(--excel-green);"></i> Import Products</h3>
 
             <form action="{{ route('products.import') }}" method="POST" enctype="multipart/form-data">
                 @csrf

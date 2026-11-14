@@ -5,12 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Cafe Menu</title>
     <link rel="icon" type="image/x-icon" href="/image/logokr.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* ==========================================================
+           Agrave Pro (self-hosted)
+           Put your web font files in: public/fonts/
+             AgravePro-Light.woff2
+             AgravePro-Regular.woff2
+             AgravePro-Bold.woff2
+           ========================================================== */
+        @font-face {
+            font-family: 'Agrave Pro';
+            src: url('{{ asset("fonts/AgravePro-Light.woff2") }}') format('woff2');
+            font-weight: 300;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Agrave Pro';
+            src: url('{{ asset("fonts/AgravePro-Regular.woff2") }}') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Agrave Pro';
+            src: url('{{ asset("fonts/AgravePro-Bold.woff2") }}') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+
         :root {
-            --bg: #FAF7F2;           /* Warm oat milk */
+            /* Change these two lines to swap fonts anywhere on the page */
+            --font-display: 'Agrave Pro', 'Segoe Script', cursive, serif;
+            --font-text: 'Agrave Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+            --bg: #4A3326;           /* Coffee brown */
+            --on-bg: #FAF7F2;        /* Text on coffee background */
+            --on-bg-muted: #D8C5B4;  /* Muted text on coffee background */
+            --accent-light: #E3A56F; /* Caramel, readable on coffee */
+            --line-on-bg: rgba(250, 247, 242, 0.14);
+            --card: #6B4C3A;         /* Mocha card */
+            --card-img-from: #7B5A47; /* Mocha glow (photo area, center) */
+            --card-img-to: #4A3326;   /* Deep coffee (photo area, edge) */
             --surface: #FFFFFF;      /* Crisp porcelain */
             --surface-alt: #F3EDE4;  /* Steamed foam */
             --ink: #231812;          /* Dark espresso roast */
@@ -23,15 +61,16 @@
         html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: var(--font-text);
+            font-weight: 400;
             background-color: var(--bg);
-            color: var(--ink);
+            color: var(--on-bg);
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Editorial Serif Headings */
+        /* Display headings */
         .brand, .hero h1, .cat-title {
-            font-family: 'Fraunces', serif;
+            font-family: var(--font-display);
         }
 
         /* Sticky Glass Navbar */
@@ -39,16 +78,16 @@
             position: sticky;
             top: 0;
             z-index: 20;
-            background: rgba(250, 247, 242, 0.85);
+            background: rgba(74, 51, 38, 0.88);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--line-on-bg);
         }
         .brand {
             font-weight: 700;
-            font-size: 1.45rem;
-            letter-spacing: -0.02em;
-            color: var(--ink);
+            font-size: 1.55rem;
+            letter-spacing: 0;
+            color: var(--on-bg);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
@@ -58,33 +97,34 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: var(--accent);
+            background: var(--accent-light);
             display: inline-block;
         }
+        .topbar .fw-medium { font-weight: 400 !important; }
 
         /* Hero Section */
         .hero {
             padding: 36px 0 16px;
         }
         .hero-eyebrow {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.12em;
-            color: var(--accent);
+            color: var(--accent-light);
             margin-bottom: 6px;
         }
         .hero h1 {
             font-weight: 700;
-            font-size: clamp(2rem, 4.5vw, 2.85rem);
-            letter-spacing: -0.02em;
+            font-size: clamp(2.2rem, 5vw, 3.1rem);
+            letter-spacing: 0;
             line-height: 1.1;
             margin: 0;
-            color: var(--ink);
+            color: var(--on-bg);
         }
         .hero p {
-            color: var(--muted);
-            font-size: 1rem;
+            color: var(--on-bg-muted);
+            font-size: 1.05rem;
             margin: 10px 0 0;
             max-width: 480px;
         }
@@ -92,14 +132,14 @@
         /* Category Quick-Jump Pills */
         .cat-nav-wrap {
             position: sticky;
-            top: 68px; /* ត្រូវនឹងកម្ពស់ពិតប្រាកដរបស់ Topbar ដើម្បីមិនឱ្យជាន់គ្នា */
+            top: 68px; /* matches the real height of the topbar so they don't overlap */
             z-index: 15;
-            background: rgba(250, 247, 242, 0.95);
+            background: rgba(74, 51, 38, 0.95);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             padding: 12px 0;
             margin-bottom: 10px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--line-on-bg);
         }
         .cat-nav {
             display: flex;
@@ -112,45 +152,45 @@
             flex: 0 0 auto;
             padding: 8px 18px;
             border-radius: 999px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--ink);
-            font-size: 0.85rem;
-            font-weight: 600;
+            background: var(--card);
+            border: 1px solid var(--line-on-bg);
+            color: var(--on-bg);
+            font-size: 0.95rem;
+            font-weight: 700;
             text-decoration: none;
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 2px 6px rgba(35, 24, 18, 0.03);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
         }
         .cat-chip:hover, .cat-chip:focus {
-            background: var(--ink);
-            color: var(--bg);
-            border-color: var(--ink);
+            background: var(--accent);
+            color: #FFFFFF;
+            border-color: var(--accent);
             transform: translateY(-1px);
         }
 
         /* Category Sections */
         .cat-section {
             padding-top: 28px;
-            scroll-margin-top: 135px; /* ទុកគម្លាតពេល scroll ចំចំណងជើង category */
+            scroll-margin-top: 135px; /* gap when scrolling to a category title */
         }
         .cat-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--line-on-bg);
             padding-bottom: 12px;
             margin-bottom: 22px;
         }
         .cat-title {
             font-weight: 700;
-            font-size: 1.5rem;
-            letter-spacing: -0.01em;
+            font-size: 1.7rem;
+            letter-spacing: 0;
             margin: 0;
-            color: var(--ink);
+            color: var(--on-bg);
         }
         .cat-count {
-            font-size: 0.8rem;
-            font-weight: 600;
+            font-size: 0.85rem;
+            font-weight: 700;
             color: var(--accent);
             background: var(--accent-soft);
             padding: 4px 12px;
@@ -159,8 +199,8 @@
 
         /* Menu Item Card */
         .product-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
+            background: var(--card);
+            border: 1px solid var(--line-on-bg);
             border-radius: 14px;
             overflow: hidden;
             height: 100%;
@@ -170,11 +210,11 @@
         }
         .product-card:hover {
             transform: translateY(-5px);
-            border-color: rgba(184, 107, 53, 0.35);
-            box-shadow: 0 18px 36px -10px rgba(35, 24, 18, 0.10);
+            border-color: var(--accent-light);
+            box-shadow: 0 18px 36px -10px rgba(0, 0, 0, 0.35);
         }
         .img-wrap {
-            background: radial-gradient(circle at center, #F9F6F1 0%, var(--surface-alt) 100%);
+            background: radial-gradient(circle at center, var(--card-img-from) 0%, var(--card-img-to) 100%);
             aspect-ratio: 4 / 3.4;
             display: flex;
             align-items: center;
@@ -202,10 +242,10 @@
             flex-grow: 1;
         }
         .product-name {
-            font-weight: 600;
-            font-size: 1.02rem;
+            font-weight: 700;
+            font-size: 1.1rem;
             line-height: 1.35;
-            color: var(--ink);
+            color: var(--on-bg);
             margin: 0 0 12px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -218,29 +258,29 @@
             align-items: center;
             justify-content: space-between;
             padding-top: 10px;
-            border-top: 1px dashed var(--border);
+            border-top: 1px dashed var(--line-on-bg);
         }
         .price {
             font-weight: 700;
-            font-size: 1.15rem;
-            color: var(--accent);
+            font-size: 1.25rem;
+            color: #FFFFFF;
             font-variant-numeric: tabular-nums;
-            letter-spacing: -0.01em;
+            letter-spacing: 0;
         }
         .price-currency {
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.9rem;
+            font-weight: 700;
             margin-right: 1px;
         }
 
         /* Empty State */
         .empty {
-            background: var(--surface);
-            border: 1px dashed var(--border);
+            background: var(--card);
+            border: 1px dashed var(--line-on-bg);
             border-radius: 24px;
             padding: 64px 20px;
             text-align: center;
-            color: var(--muted);
+            color: var(--on-bg-muted);
         }
     </style>
 </head>
@@ -251,7 +291,7 @@
         <a href="{{ route('shop.index') }}" class="brand">
             KR Cafe Shop<span class="brand-dot"></span>
         </a>
-        <span class="small fw-medium" style="color: var(--muted);">Freshly Crafted Daily</span>
+        <span class="small fw-medium" style="color: var(--on-bg-muted);">Freshly Crafted Daily</span>
     </div>
 </header>
 
@@ -285,12 +325,6 @@
 
                 <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-2">
                     @foreach ($items as $product)
-                        @php
-                            $firstImage = $product->images->first();
-                            $imageUrl = $firstImage
-                                ? asset('images/products/' . $firstImage->image)
-                                : 'https://placehold.co/600x450/F3EDE4/7C6E65?text=No+Image';
-                        @endphp
                         <div class="col">
                             <article class="product-card">
                                 <div class="img-wrap">
@@ -302,16 +336,16 @@
                                     @if ($firstImage && file_exists($imagePath))
                                         <img src="{{ asset('images/products/' . $firstImage->image) }}" alt="{{ $product->name }}" loading="lazy">
                                     @else
-                                        {{-- បង្ហាញ Icon កាហ្វេជំនួស "No Image" ឱ្យមើលទៅស្អាតបែប Modern --}}
+                                        {{-- Coffee cup icon instead of a "No Image" placeholder --}}
                                         <div class="d-flex flex-column align-items-center justify-content-center text-center">
-                                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6; margin-bottom: 4px;">
+                                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 4px;">
                                                 <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
                                                 <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
                                                 <line x1="6" y1="1" x2="6" y2="4"></line>
                                                 <line x1="10" y1="1" x2="10" y2="4"></line>
                                                 <line x1="14" y1="1" x2="14" y2="4"></line>
                                             </svg>
-                                            <span style="font-size: 0.75rem; color: var(--muted); font-weight: 500;">Cafe Menu</span>
+                                            <span style="font-size: 0.8rem; color: #FFFFFF;">Cafe Menu</span>
                                         </div>
                                     @endif
                                 </div>

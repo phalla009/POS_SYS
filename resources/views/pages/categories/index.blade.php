@@ -11,33 +11,73 @@
     <script src="{{ URL::asset('js/delete_form.js') }}" defer></script>
 
     <style>
-        /* Search Bar */
-        .search-wrapper { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
-        .search-input-group { position: relative; display: flex; align-items: center; }
-        .search-input-group .search-icon { position: absolute; left: 11px; color: #aaa; font-size: 13px; pointer-events: none; z-index: 1; }
-        .search-input-group input[type="text"] {
-            padding: 10px 36px 10px 32px; border: 1.5px solid #dde3ec; border-radius: 24px;
-            font-size: 14px; color: #333; background: #f9fafc; width: 500px;
-            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; outline: none;
-        }
-        .search-input-group input[type="text"]:focus { border-color: #3498db; background: #fff; box-shadow: 0 0 0 3px rgba(52,152,219,0.13); }
-        .search-input-group input[type="text"]::placeholder { color: #bbb; }
-        .search-clear-btn { position: absolute; right: 9px; background: none; border: none; cursor: pointer; color: #bbb; font-size: 13px; padding: 0; display: flex; align-items: center; transition: color 0.15s; }
-        .search-clear-btn:hover { color: #e74c3c; }
-        .search-submit-btn { display: flex; align-items: center; gap: 5px; padding: 10px 20px; background: #282828; color: #fff; border: none; border-radius: 24px; font-size: 14px; cursor: pointer; transition: background 0.2s, transform 0.1s; text-decoration: none; white-space: nowrap; }
-        .search-submit-btn:hover { background: #333; transform: translateY(-1px); }
-        .search-reset-btn { display: flex; align-items: center; gap: 5px; padding: 10px 20px; background: #f0f2f5; color: #666; border: 1.5px solid #dde3ec; border-radius: 24px; font-size: 13px; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s; white-space: nowrap; }
-        .search-reset-btn:hover { background: #e8eaf0; color: #e74c3c; border-color: #e74c3c; }
-        .search-results-badge { display: inline-flex; align-items: center; gap: 5px; background: #eaf4fd; color: #2980b9; border: 1px solid #b6d9f5; border-radius: 20px; padding: 3px 11px; font-size: 12.5px; font-weight: 500; white-space: nowrap; }
-        .search-results-badge i { font-size: 11px; }
+        /* =============================================
+           PAGE COLORS (edit here to re-theme this page)
+        ============================================= */
+        :root {
+            /* Neutrals */
+            --c-white: #fff;
+            --c-text: #333;
+            --c-text-mid: #666;
+            --c-placeholder: #bbb;
+            --c-icon: #aaa;
+            --c-empty-icon: #ccc;
+            --c-black: black;
+            --c-search-icon: #b39b85;
 
-        /* Status filter select */
-        .status-filter-select {
-            padding: 10px 16px; border: 1.5px solid #dde3ec; border-radius: 24px;
-            font-size: 14px; color: #333; background: #f9fafc; cursor: pointer; outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            /* Inputs / surfaces */
+            --c-input-bg: #f9fafc;
+            --c-input-border: #dde3ec;
+            --c-btn-dark: #282828;
+            --c-btn-dark-hover: #333;
+            --c-reset-bg: #f0f2f5;
+            --c-reset-hover: #e8eaf0;
+
+            /* Blue (focus) */
+            --c-blue: #3498db;
+            --c-blue-text: #2980b9;
+            --c-blue-bg: #eaf4fd;
+            --c-blue-border: #b6d9f5;
+
+            /* Green (active) */
+            --c-green: #27ae60;
+            --c-green-bg: #eafaf1;
+            --c-green-border: #b7ecc9;
+
+            /* Red (inactive / delete) */
+            --c-red: #e74c3c;
+            --c-red-d: #c0392b;
+            --c-red-bg: #fdf1f0;
+            --c-red-border: #f5c2c2;
+            --c-red-disabled: #f1a9a0;
+            --c-bulk-bg: #fff5f5;
+            --c-row-selected: #fff7f7;
+            --c-red-soft-bg: #fff1f0;
+            --c-red-soft-border: #ffd6d4;
+            --c-red-close-bg: #fee2e2;
+
+            /* Slate (modal / mobile cards) */
+            --c-slate-900: #1e293b;
+            --c-slate-600: #475569;
+            --c-slate-500: #64748b;
+            --c-slate-300: #cbd5e1;
+            --c-slate-200: #e2e8f0;
+            --c-slate-100: #f1f5f9;
+            --c-slate-50: #f8fafc;
+            --c-dash: #edf2f7;
         }
-        .status-filter-select:focus { border-color: #3498db; background: #fff; box-shadow: 0 0 0 3px rgba(52,152,219,0.13); }
+
+        /* Filter row (same layout as products page) */
+        .filter-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-controls .btn {
+            flex-shrink: 0;
+        }
 
         /* Status badge in table */
         .status-badge {
@@ -45,30 +85,30 @@
             padding: 4px 12px; border-radius: 20px; font-size: 12.5px; font-weight: 600;
             text-transform: capitalize;
         }
-        .status-badge.status-active { background: #eafaf1; color: #27ae60; border: 1px solid #b7ecc9; }
-        .status-badge.status-inactive { background: #fdf1f0; color: #e74c3c; border: 1px solid #f5c2c2; }
+        .status-badge.status-active { background: var(--c-green-bg); color: var(--c-green); border: 1px solid var(--c-green-border); }
+        .status-badge.status-inactive { background: var(--c-red-bg); color: var(--c-red); border: 1px solid var(--c-red-border); }
         .status-badge i { font-size: 8px; }
 
         /* Bulk delete */
         .bulk-actions-bar {
             display: none; align-items: center; gap: 10px; margin-bottom: 10px;
-            background: #fff5f5; border: 1.5px solid #f5c2c2; border-radius: 10px; padding: 10px 14px;
+            background: var(--c-bulk-bg); border: 1.5px solid var(--c-red-border); border-radius: 10px; padding: 10px 14px;
         }
         .bulk-actions-bar.active { display: flex; }
-        .bulk-actions-bar .selected-count { font-size: 13.5px; color: #c0392b; font-weight: 600; }
+        .bulk-actions-bar .selected-count { font-size: 13.5px; color: var(--c-red-d); font-weight: 600; }
         .bulk-delete-btn {
-            display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: #e74c3c; color: #fff;
+            display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--c-red); color: var(--c-white);
             border: none; border-radius: 20px; font-size: 13.5px; cursor: pointer; transition: background 0.2s;
         }
-        .bulk-delete-btn:hover { background: #c0392b; }
-        .bulk-delete-btn:disabled { background: #f1a9a0; cursor: not-allowed; }
+        .bulk-delete-btn:hover { background: var(--c-red-d); }
+        .bulk-delete-btn:disabled { background: var(--c-red-disabled); cursor: not-allowed; }
         .bulk-clear-btn {
-            display: flex; align-items: center; gap: 5px; padding: 8px 14px; background: #f0f2f5; color: #666;
-            border: 1.5px solid #dde3ec; border-radius: 20px; font-size: 13px; cursor: pointer; text-decoration: none;
+            display: flex; align-items: center; gap: 5px; padding: 8px 14px; background: var(--c-reset-bg); color: var(--c-text-mid);
+            border: 1.5px solid var(--c-input-border); border-radius: 20px; font-size: 13px; cursor: pointer; text-decoration: none;
         }
-        .bulk-clear-btn:hover { background: #e8eaf0; }
-        .row-checkbox, #selectAllCheckbox { width: 16px; height: 16px; cursor: pointer; accent-color: #e74c3c; }
-        tr.row-selected { background: #fff7f7; }
+        .bulk-clear-btn:hover { background: var(--c-reset-hover); }
+        .row-checkbox, #selectAllCheckbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--c-red); }
+        tr.row-selected { background: var(--c-row-selected); }
 
         /* ── Delete Confirm Modal ── */
         /* ── Backdrop ── */
@@ -91,7 +131,7 @@
 
         /* ── Modal Box ── */
         .delete-modal-box {
-            background: #ffffff;
+            background: var(--c-white);
             border-radius: 20px;
             max-width: 440px;
             width: 100%;
@@ -107,8 +147,8 @@
         .delete-modal-icon {
             width: 70px;
             height: 70px;
-            background: #fff1f0;
-            border: 2px solid #ffd6d4;
+            background: var(--c-red-soft-bg);
+            border: 2px solid var(--c-red-soft-border);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -118,7 +158,7 @@
 
         .delete-modal-icon i {
             font-size: 28px;
-            color: #e74c3c;
+            color: var(--c-red);
         }
 
         /* ── Close Button ── */
@@ -126,13 +166,13 @@
             position: absolute;
             top: 16px;
             right: 18px;
-            background: #f1f5f9;
+            background: var(--c-slate-100);
             border: none;
             border-radius: 50%;
             width: 32px;
             height: 32px;
             font-size: 18px;
-            color: #64748b;
+            color: var(--c-slate-500);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -142,8 +182,8 @@
         }
 
         .delete-modal-close:hover {
-            background: #fee2e2;
-            color: #e74c3c;
+            background: var(--c-red-close-bg);
+            color: var(--c-red);
             transform: rotate(90deg);
         }
 
@@ -151,20 +191,20 @@
         .delete-modal-box h3 {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #1e293b;
+            color: var(--c-slate-900);
             margin-bottom: 10px;
         }
 
         /* ── Body Text ── */
         .delete-modal-box p {
             font-size: 0.95rem;
-            color: #64748b;
+            color: var(--c-slate-500);
             margin-bottom: 28px;
             line-height: 1.6;
         }
 
         .delete-modal-box p strong {
-            color: #e74c3c;
+            color: var(--c-red);
         }
 
         /* ── Actions ── */
@@ -178,9 +218,9 @@
         .delete-btn-cancel {
             padding: 10px 24px;
             border-radius: 24px;
-            border: 1.5px solid #e2e8f0;
-            background: #f8fafc;
-            color: #475569;
+            border: 1.5px solid var(--c-slate-200);
+            background: var(--c-slate-50);
+            color: var(--c-slate-600);
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -191,8 +231,8 @@
         }
 
         .delete-btn-cancel:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
+            background: var(--c-slate-100);
+            border-color: var(--c-slate-300);
             transform: translateY(-1px);
         }
 
@@ -201,8 +241,8 @@
             padding: 10px 24px;
             border-radius: 24px;
             border: none;
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: #fff;
+            background: linear-gradient(135deg, var(--c-red), var(--c-red-d));
+            color: var(--c-white);
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -253,28 +293,10 @@
                 text-align: center;
             }
 
-            .search-wrapper {
-                flex-direction: column;
+            .filter-controls form,
+            .filter-controls .form-group {
                 width: 100%;
-                gap: 8px;
-            }
-
-            .search-input-group {
-                width: 100%;
-            }
-
-            .search-input-group input[type="text"] {
-                width: 100% !important;
-            }
-
-            .search-submit-btn,
-            .search-reset-btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .search-results-badge {
-                align-self: flex-start;
+                min-width: 100% !important;
             }
 
             .bulk-actions-bar.active {
@@ -313,8 +335,8 @@
             }
 
             .table-container tr {
-                background: #fff;
-                border: 1px solid #e2e8f0;
+                background: var(--c-white);
+                border: 1px solid var(--c-slate-200);
                 border-radius: 12px;
                 margin-bottom: 12px;
                 padding: 12px;
@@ -322,7 +344,7 @@
             }
 
             .table-container tr.row-selected {
-                border-color: #f5c2c2;
+                border-color: var(--c-red-border);
             }
 
             .table-container td {
@@ -345,7 +367,7 @@
                 white-space: nowrap;
                 text-align: left;
                 font-weight: 600;
-                color: #64748b;
+                color: var(--c-slate-500);
                 font-size: 13px;
             }
 
@@ -362,7 +384,7 @@
                 padding-left: 0 !important;
                 justify-content: flex-end;
                 margin-top: 6px;
-                border-top: 1px dashed #edf2f7;
+                border-top: 1px dashed var(--c-dash);
                 padding-top: 10px !important;
             }
 
@@ -413,47 +435,28 @@
         <h2><i class="fas fa-tags"></i> Categories Management</h2>
 
         <div class="filter-section">
-            <div class="filter-controls" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <div class="filter-controls">
 
                 {{-- Add --}}
                 <a href="{{ route('categories.create') }}"
                    class="btn btn-primary page-link-loading"
-                   data-loading-text="Loading form...">
+                   data-loading-text="Loading form..."
+                   style="white-space:nowrap;">
                     <i class="fas fa-circle-plus"></i> Add New Category
                 </a>
 
-                {{-- Search --}}
-                <form method="GET" action="{{ route('categories.index') }}" class="search-wrapper" id="searchForm">
-                    <div class="search-input-group">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" name="search" id="searchInput"
+                {{-- Search (same style as products page) --}}
+                <form method="GET" action="{{ route('categories.index') }}" id="searchForm" style="margin:0;">
+                    <div class="form-group" style="position:relative; min-width:800px; margin:0;">
+                        <i class="fas fa-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--c-search-icon);font-size:14px;pointer-events:none;"></i>
+                        <input type="text" name="search"
                                value="{{ $search ?? '' }}"
-                               placeholder="Search categories...">
-                        @if(!empty($search))
-                            <button type="button" class="search-clear-btn" id="clearSearchBtn" title="Clear">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        @endif
+                               placeholder="Search Categories..."
+                               id="searchInput"
+                               style="border-radius:24px; padding-left:38px;">
                     </div>
-
-                    <button type="submit" class="search-submit-btn">
-                        <i class="fas fa-search"></i> Search
-                    </button>
-                    @if(!empty($search) || !empty($status))
-                        <a href="{{ route('categories.index') }}" class="search-reset-btn">
-                            <i class="fas fa-rotate-left"></i> Reset
-                        </a>
-                    @endif
                 </form>
 
-                {{-- Results badge --}}
-                @if(!empty($search))
-                    <span class="search-results-badge">
-                    <i class="fas fa-filter"></i>
-                    {{ $categories->total() }} result{{ $categories->total() !== 1 ? 's' : '' }}
-                    for &ldquo;{{ $search }}&rdquo;
-                </span>
-                @endif
             </div>
         </div>
 
@@ -487,7 +490,7 @@
                             <td data-label="Select">
                                 <input type="checkbox" class="row-checkbox" value="{{ $category->id }}">
                             </td>
-                            <td data-label="Category Name" style="color: black; font-weight: 600;">{{ $category->name }}</td>
+                            <td data-label="Category Name" style="color: var(--c-black); font-weight: 600;">{{ $category->name }}</td>
                             <td data-label="Status">
                                 <span class="status-badge status-{{ $category->status }}">
                                     <i class="fas fa-circle"></i> {{ $category->status }}
@@ -521,10 +524,10 @@
                         <tr>
                             <td colspan="6" style="text-align:center; padding:30px;" id="found">
                                 @if(!empty($search))
-                                    <i class="fas fa-search" style="font-size:24px;color:#ccc;display:block;margin-bottom:8px;"></i>
+                                    <i class="fas fa-search" style="font-size:24px;color:var(--c-empty-icon);display:block;margin-bottom:8px;"></i>
                                     No categories found matching &ldquo;<strong>{{ $search }}</strong>&rdquo;.
                                 @else
-                                    <i class="fas fa-tags" style="font-size:24px;color:#ccc;display:block;margin-bottom:8px;"></i>
+                                    <i class="fas fa-tags" style="font-size:24px;color:var(--c-empty-icon);display:block;margin-bottom:8px;"></i>
                                     No categories found.
                                 @endif
                             </td>
@@ -597,35 +600,10 @@
     </form>
 
     <script>
-        // ---- Auto Search with Debounce ----
-        const searchInput = document.getElementById('searchInput');
-        const searchForm = document.getElementById('searchForm');
-        let searchTimer = null;
-
-        if (searchInput && searchForm) {
-            // Retain focus and keep cursor at the end after page reload
-            if (searchInput.value) {
-                searchInput.focus();
-                const valLength = searchInput.value.length;
-                searchInput.setSelectionRange(valLength, valLength);
-            }
-
-            // Trigger submit 400ms after user stops typing
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimer);
-                searchTimer = setTimeout(() => {
-                    searchForm.submit();
-                }, 400);
-            });
-        }
-
-        // Clear search button
-        const clearBtn = document.getElementById('clearSearchBtn');
-        if (clearBtn) {
-            clearBtn.addEventListener('click', function() {
-                window.location.href = "{{ route('categories.index') }}";
-            });
-        }
+        // Search on Enter (same as products page)
+        document.getElementById('searchInput').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') showLoading('Searching...');
+        });
 
         // ---- Bulk select / delete ----
         const selectAllCheckbox = document.getElementById('selectAllCheckbox');

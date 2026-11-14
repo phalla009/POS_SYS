@@ -19,7 +19,7 @@
             margin: 16px 0 12px 0; align-items: center;
         }
         .filter-bar input, .filter-bar select {
-            padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 8px;
+            padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 24px;
             font-size: 14px; background: #fff;
         }
         .filter-bar input[type="text"] { min-width: 220px; }

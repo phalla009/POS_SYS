@@ -18,40 +18,18 @@
         thead tr { background-color: #f7f7f7; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; vertical-align: middle; word-wrap: break-word; }
 
-        /* Filter section layout */
+        /* Filter section layout (same as products page) */
         .filter-controls {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
-        /* Search field */
-        .search-wrapper {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
+        .filter-controls .btn {
+            flex-shrink: 0;
         }
-        .search-wrapper .search-icon {
-            position: absolute;
-            left: 12px;
-            color: #aaa;
-            pointer-events: none;
-        }
-        #customerSearch {
-            padding: 10px 12px 10px 34px;
-            border: 1px solid #ddd;
-            border-radius: 24px;
-            font-size: 14px;
-            width: 600px;
-            max-width: 100%;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        #customerSearch:focus {
-            border-color: #132f4f;
-            box-shadow: 0 0 0 3px rgba(74,144,226,0.15);
-        }
+
         #noResultsRow { display: none; }
 
         /* ── Responsive Enhancements ── */
@@ -75,12 +53,9 @@
                 text-align: center;
             }
 
-            .search-wrapper {
+            .filter-controls .form-group {
                 width: 100%;
-            }
-
-            #customerSearch {
-                width: 100% !important;
+                min-width: 100% !important;
             }
         }
 
@@ -180,17 +155,19 @@
             <div class="filter-controls">
                 <a href="{{ route('customers.create') }}"
                    class="btn btn-primary page-link-loading"
-                   data-loading-text="Loading add...">
+                   data-loading-text="Loading add..."
+                   style="white-space:nowrap;">
                     <i class="fas fa-circle-plus"></i> Add New Customer
                 </a>
 
-                {{-- 🔍 Search field --}}
-                <div class="search-wrapper">
-                    <i class="fas fa-search search-icon"></i>
+                {{-- Search (same style as products page, filters live in the browser) --}}
+                <div class="form-group" style="position:relative; min-width:800px; margin:0;">
+                    <i class="fas fa-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#b39b85;font-size:14px;pointer-events:none;"></i>
                     <input type="text"
                            id="customerSearch"
-                           placeholder="Search by name, phone..."
-                           autocomplete="off">
+                           placeholder="Search Customers..."
+                           autocomplete="off"
+                           style="border-radius:24px; padding-left:38px;">
                 </div>
             </div>
         </div>
@@ -263,10 +240,10 @@
     <x-delete-modal />
 
     <script>
-        // 🔍 Live search — filters by Name and Phone
+        // Live search: filters by Name and Phone
         document.getElementById('customerSearch').addEventListener('input', function() {
             const query = this.value.trim().toLowerCase();
-            const rows  = document.querySelectorAll('#customersTable tr:not(#noResultsRow)');
+            const rows  = document.querySelectorAll('#customersTable tr:not(#noResultsRow):not(:has(#found))');
             let visibleCount = 0;
 
             rows.forEach(function(row) {
@@ -280,6 +257,11 @@
 
             document.getElementById('noResultsRow').style.display =
                 (visibleCount === 0 && query !== '') ? '' : 'none';
+        });
+
+        // Prevent Enter from doing anything odd (there is no form here)
+        document.getElementById('customerSearch').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') e.preventDefault();
         });
     </script>
 

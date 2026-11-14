@@ -10,41 +10,18 @@
     <script src="{{ URL::asset('js/form.js') }}"></script>
     <script src="{{ URL::asset('js/delete_form.js') }}"></script>
     <style>
+        /* Filter row (same layout as products page) */
         .filter-controls {
             display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
             align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
-        .search-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            flex: 1;
-            min-width: 250px;
+        .filter-controls .btn {
+            flex-shrink: 0;
         }
-        .search-wrapper .search-icon {
-            position: absolute;
-            left: 12px;
-            color: #9ca3af;
-            pointer-events: none;
-            font-size: 14px;
-        }
-        .search-wrapper input[type="text"] {
-            padding: 10px 12px 10px 36px;
-            border: 1px solid #d1d5db;
-            border-radius: 24px;
-            font-size: 14px;
-            width: 100%;
-            max-width: 600px;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .search-wrapper input[type="text"]:focus {
-            border-color: #132f4f;
-            box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
-        }
+
         #noResultsRow { display: none; }
 
         @media (max-width: 768px) {
@@ -52,12 +29,16 @@
                 flex-direction: column;
                 align-items: stretch;
             }
-            .search-wrapper {
+
+            .filter-controls .btn-primary {
                 width: 100%;
+                justify-content: center;
+                text-align: center;
             }
-            .search-wrapper input[type="text"] {
-                max-width: 100%;
-                margin-top: 0;
+
+            .filter-controls .form-group {
+                width: 100%;
+                min-width: 100% !important;
             }
         }
     </style>
@@ -82,17 +63,20 @@
             <div class="filter-controls">
                 <a href="{{ route('userroles.create') }}"
                    class="btn btn-primary page-link-loading"
-                   data-loading-text="Loading form...">
+                   data-loading-text="Loading form..."
+                   style="white-space:nowrap;">
                     <i class="fas fa-circle-plus"></i> Add New Role
                 </a>
-            </div>
-            {{-- Search Field --}}
-            <div class="search-wrapper">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text"
-                       id="roleSearch"
-                       placeholder="Search name or description..."
-                       autocomplete="off">
+
+                {{-- Search (same style as products page, filters live in the browser) --}}
+                <div class="form-group" style="position:relative; min-width:800px; margin:0;">
+                    <i class="fas fa-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#b39b85;font-size:14px;pointer-events:none;"></i>
+                    <input type="text"
+                           id="roleSearch"
+                           placeholder="Search Roles..."
+                           autocomplete="off"
+                           style="border-radius:24px; padding-left:38px;">
+                </div>
             </div>
         </div>
 
@@ -174,8 +158,10 @@
     <x-delete-modal />
 
     <script>
-        // 🔍 Live search — filters by role name and description
-        document.getElementById('roleSearch').addEventListener('input', function () {
+        // Live search: filters by role name and description
+        const roleSearch = document.getElementById('roleSearch');
+
+        roleSearch.addEventListener('input', function () {
             const term = this.value.toLowerCase().trim();
             const rows = document.querySelectorAll('#rolesTable .role-row');
             let visibleCount = 0;
@@ -189,7 +175,13 @@
                 if (matches) visibleCount++;
             });
 
-            document.getElementById('noResultsRow').style.display = (visibleCount === 0) ? '' : 'none';
+            document.getElementById('noResultsRow').style.display =
+                (visibleCount === 0 && term !== '' && rows.length > 0) ? '' : 'none';
+        });
+
+        // No form here, so Enter should do nothing
+        roleSearch.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') e.preventDefault();
         });
     </script>
 

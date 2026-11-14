@@ -28,19 +28,29 @@
         #loading-text { margin-top: 15px; font-size: 16px; color: #333; }
 
         .btn-export {
-            background: repeating-linear-gradient(-45deg, #1d6f42,#105730,#1d6f42 3px,#105730 3px);
-            color: #ffffff;
+            background: repeating-linear-gradient(
+                -45deg,
+                #3d6c3d,
+                #2e652e,
+                #3d6c3d 3px,
+                #2e652e 3px
+            );
+            color: white;
+            padding: 10px 20px;
             border: none;
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
+            border-left: 5px solid #2e652e !important;
+            border-right: 5px solid #2e652e !important;
+            border-radius: 24px;
+            font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
+            transition: all 0.2s ease;
             text-decoration: none;
-            display: inline-block;
-            margin-bottom: 16px;
-            margin-left: 8px;
-            transition: background 0.2s, transform 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+            margin-bottom: 5px;
         }
         .btn-export:hover {
             transform: translateY(-1px);
