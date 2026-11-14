@@ -23,6 +23,23 @@
         .sidebar-header .user-info { margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: -10px; }
         .sidebar-header .user-info i { font-size: 18px; color: #ffffff; }
 
+        /* Active menu item */
+        .sidebar-menu a { border-left: 4px solid transparent; transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
+        .sidebar-menu a.active {
+            background: rgba(255, 90, 5, 0.15);
+            border-left-color: #ff5a05;
+            color: #ff5a05;
+            font-weight: 600;
+        }
+        .sidebar-menu a.active .icon i { color: #ff5a05; }
+
+        /* Tighter vertical padding for top-level menu items */
+        .sidebar-menu > li > a { padding-top: 10px; padding-bottom: 10px; }
+        .sidebar.collapsed .sidebar-menu > li > a { padding-top: 10px; padding-bottom: 10px; }
+
+        /* Parent (Products / Settings) when a child is active */
+        .sidebar-menu .submenu-toggle.active { background: rgba(255, 255, 255, 0.08); }
+
         /* Collapsed Sidebar Styles (Icon-Only Mode) */
         .sidebar {
             width: 300px;
@@ -295,6 +312,9 @@
                         @if(Auth::user()->hasPermission('barcodes'))
                             <a href="{{ route('barcodes.index') }}"><span class="icon"><i class="fas fa-barcode"></i></span> Setup Barcodes</a>
                         @endif
+                        @if(Auth::user()->hasPermission('backupsdb'))
+                            <a href="{{ route('backup.index') }}"><span class="icon"><i class="fas fa-database"></i></span> Backup Database</a>
+                        @endif
                     </div>
                 </li>
             @endif
@@ -425,7 +445,20 @@
         });
     });
 
-    // Sidebar nav links → close sidebar + loading overlay
+    // Mark one link as the active menu item (and its parent toggle)
+    function setActive(link) {
+        document.querySelectorAll('.sidebar-menu a.active').forEach(function(a) {
+            a.classList.remove('active');
+        });
+        link.classList.add('active');
+        const parent = link.closest('.menu-container');
+        if (parent) {
+            const toggle = parent.querySelector('.submenu-toggle');
+            if (toggle) toggle.classList.add('active');
+        }
+    }
+
+    // Sidebar nav links → highlight + close sidebar + loading overlay
     document.querySelectorAll('.sidebar-menu a').forEach(function(link) {
         link.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
@@ -433,10 +466,8 @@
                 this.id === 'logout-link' || this.classList.contains('submenu-toggle')) return;
 
             e.preventDefault();
+            setActive(this);
             closeSidebar();
-            document.querySelectorAll('.menu-container.open').forEach(function(container) {
-                container.classList.remove('open');
-            });
             overlay.style.display = 'flex';
             setTimeout(function() {
                 window.location.href = href;
@@ -454,15 +485,33 @@
     confirmYes.addEventListener('click', function() { logoutForm.submit(); });
     confirmNo.addEventListener('click',  function() { logoutConfirm.style.display = 'none'; });
 
-    // Auto-open active submenu
-    const currentPath = window.location.pathname;
-    document.querySelectorAll('.submenu a').forEach(function(link) {
-        const href = link.getAttribute('href');
-        if (href && currentPath.startsWith(href.replace(window.location.origin, ''))) {
-            const parent = link.closest('.menu-container');
+    // Highlight active menu on page load + auto-open its submenu (longest URL match wins)
+    function normalizePath(p) { return (p.replace(/\/+$/, '') || '/'); }
+    (function() {
+        const currentPath = normalizePath(window.location.pathname);
+        let bestLink = null;
+        let bestLength = -1;
+
+        document.querySelectorAll('.sidebar-menu a[href]').forEach(function(link) {
+            const href = link.getAttribute('href');
+            if (!href || href.startsWith('javascript') || href === '#') return;
+
+            const linkPath = normalizePath(new URL(href, window.location.origin).pathname);
+            const matches = currentPath === linkPath ||
+                            (linkPath !== '/' && currentPath.startsWith(linkPath + '/'));
+
+            if (matches && linkPath.length > bestLength) {
+                bestLink = link;
+                bestLength = linkPath.length;
+            }
+        });
+
+        if (bestLink) {
+            setActive(bestLink);
+            const parent = bestLink.closest('.menu-container');
             if (parent) parent.classList.add('open');
         }
-    });
+    })();
 </script>
 
 </body>

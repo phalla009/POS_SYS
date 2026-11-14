@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\BackupController;
+use App\Http\Controllers\ShopController;
 
 // Public auth routes
 Route::get('/', [LoginController::class, 'showLoginForm']);
@@ -108,5 +110,16 @@ Route::middleware('auth')->group(function () {
         return view('pos.customer-display');
     })->name('pos.display');
     Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
+
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
+        Route::post('/backup', [BackupController::class, 'store'])->name('backup.store');
+        Route::get('/backup/download/{file}', [BackupController::class, 'download'])->name('backup.download');
+        Route::delete('/backup/clear', [BackupController::class, 'clear'])->name('backup.clear');
+        Route::delete('/backup/delete', [BackupController::class, 'deleteSelected'])->name('backup.delete');
+    });
+
+    Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+    Route::get('/shop/{id}', [ShopController::class, 'show'])->name('shop.show');
 
 });

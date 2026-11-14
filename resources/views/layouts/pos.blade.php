@@ -289,6 +289,10 @@
     </div>
 
     <div class="pos-topbar-right">
+        <a href="{{ route('shop.index') }}" class="btn btn-back " target="_blank" rel="noopener noreferrer"
+           style="background-color: #e63946; border-color: #e63946; color: #fff;">
+            <i class="fas fa-arrow-left"></i> Menu
+        </a>
         <div class="pos-topbar-user">
             <i class="fas fa-circle-user"></i>
             {{ Auth::user()->name }} — {{ Auth::user()->role->role_name ?? 'No Role' }}

@@ -26,16 +26,27 @@ class RolePermissionSeeder extends Seeder
             ['permission_name' => 'Barcodes', 'slug' => 'barcodes'],
             ['permission_name' => 'UserRoles', 'slug' => 'userroles'],
             ['permission_name' => 'Transactions', 'slug' => 'transactions'],
+            ['permission_name' => 'BackupsDB', 'slug' => 'backupsdb'],
         ];
 
         foreach ($permissions as $perm) {
             Permission::updateOrCreate(['slug' => $perm['slug']], $perm);
         }
 
+        // Remove the old "backups" permission (detach from roles, then delete)
+        $oldIds = Permission::where('slug', 'backups')->pluck('id');
+
+        if ($oldIds->isNotEmpty()) {
+            foreach (Role::all() as $role) {
+                $role->permissions()->detach($oldIds->all());
+            }
+            Permission::whereIn('id', $oldIds)->delete();
+        }
+
         $roles = [
             ['role_name' => 'Admin', 'description' => 'Full access'],
             ['role_name' => 'Staff', 'description' => 'Dashboard, Pos, Barcodes, Orders, Customers, Payments, Units, Types'],
-            ['role_name' => 'Salse', 'description' => 'Dashboard, Pos, Orders, Customers, Payments, Reports, Units, Types'], // Fixed comma issue here
+            ['role_name' => 'Salse', 'description' => 'Dashboard, Pos, Orders, Customers, Payments, Reports, Units, Types'],
             ['role_name' => 'Stock', 'description' => 'Dashboard, Products, Categories, Inventory, Reports, Units, Types'],
         ];
 
