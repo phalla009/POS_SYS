@@ -52,6 +52,9 @@
             <div class="progress-bar"></div>
         </div>
     @endif
+    @if(session('error'))
+        <div style="color:#dc2626; margin:10px 0; font-weight:600;">{{ session('error') }}</div>
+    @endif
 
     <div class="content-section" id="transactions">
         <h2><i class="fas fa-receipt"></i> Transactions</h2>
@@ -87,6 +90,17 @@
             <input type="date" name="date_to"   value="{{ $dateTo }}"   title="To date">
             <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filter</button>
             <a href="{{ route('transactions.index') }}" class="btn"><i class="fas fa-rotate-left"></i> Today</a>
+            {{-- Sits in the same row, but submits the separate form below --}}
+            <button type="submit" form="telegramForm" class="btn btn-success">
+                <i class="fas fa-lock"></i> Close
+            </button>
+        </form>
+        {{-- Separate form (not nested) --}}
+        <form id="telegramForm" method="POST" action="{{ route('transactions.telegram') }}"
+              onsubmit="showLoading('Sending to Telegram...');">
+            @csrf
+            <input type="hidden" name="date_from" value="{{ $dateFrom }}">
+            <input type="hidden" name="date_to"   value="{{ $dateTo }}">
         </form>
 
         {{-- Daily summary table --}}

@@ -7,6 +7,7 @@ use App\Models\Product;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\TelegramNotifier;
 
 class PosController extends Controller
 {
@@ -150,6 +151,74 @@ class PosController extends Controller
                 ->withErrors($errors)
                 ->withInput();
         }
+        // ---- Telegram alert ----
+        $orders = Order::with('product')->whereIn('id', $orderIds)->orderBy('id')->get();
+
+// Today's checkout sequence (this checkout is already saved, so it counts itself)
+        $seq = Order::whereDate('order_date', now()->toDateString())
+            ->whereNotNull('pos_ref')
+            ->distinct()
+            ->count('pos_ref');
+
+        $invoice = 'N' . now()->format('Ymd') . '-' . str_pad($seq, 3, '0', STR_PAD_LEFT);
+        $line    = '━━━━━━━━━━━━━━━━━━';
+
+        $subtotal = 0;
+        $itemsText = '';
+
+        foreach ($orders as $o) {
+            $unit = (float) optional($o->product)->price;
+            $subtotal += $unit * $o->quantity;
+
+            $itemsText .= "• " . e(optional($o->product)->name ?? 'Item') . " x{$o->quantity}\n";
+
+            if (preg_match('/sugar:\s*(\d+%)/u', (string) $o->note, $m)) {
+                $itemsText .= "🍬 ស្ករ: {$m[1]}\n";
+            }
+
+            $itemsText .= "💵 តម្លៃ: $" . number_format($unit, 2) . "\n";
+            $itemsText .= "💰 សរុប: $" . number_format($o->total_amount, 2) . "\n\n";
+        }
+
+        $total    = (float) $orders->sum('total_amount');
+        $discount = max(0, round($subtotal - $total, 2));
+        $totalKhr = round(($total * 4000) / 100) * 100;
+
+        $payLabel = match ($paymentMethod) {
+            'cash'  => 'Cash',
+            'khqr'  => 'Bank',
+            default => '-',
+        };
+        $paidLabel = $paymentMethod === 'cash' ? 'Cash' : 'Non-cash';
+
+        $msg  = "🧾 <b>NEW ORDER RECEIVED</b>\n";
+        $msg .= "{$line}\n";
+        $msg .= "<b>INVOICE: {$invoice}</b>\n";
+        $msg .= "{$line}\n";
+        $msg .= "🔢 <b>Order No: {$seq}</b>\n";
+        $msg .= "{$line}\n";
+        $msg .= $itemsText;
+        $msg .= "{$line}\n";
+        $msg .= "💵 Subtotal: $" . number_format($subtotal, 2) . "\n";
+        $msg .= "🏷️ Discount: $" . number_format($discount, 2) . "\n";
+        $msg .= "💰 Grand Total: $" . number_format($total, 2) . "\n";
+        $msg .= "🇰🇭 Grand Total (KHR): ៛" . number_format($totalKhr) . "\n";
+        $msg .= "💳 Payment: {$payLabel}\n";
+        $msg .= "💳 Paid: {$paidLabel}\n";
+
+        if ($paymentMethod === 'cash' && $cashGiven > 0) {
+            $msg .= "💵 Cash given: $" . number_format($cashGiven, 2) . "\n";
+            $msg .= "🔁 Change: $" . number_format(max(0, $cashGiven - $total), 2) . "\n";
+        }
+
+        $msg .= "{$line}\n";
+        $msg .= "🕒 " . now()->format('d/m/Y h:i A');
+
+        if (!empty($errors)) {
+            $msg .= "\n⚠️ Skipped: " . e(implode('; ', $errors));
+        }
+
+        TelegramNotifier::send($msg);
 
         $message = "{$savedCount} item(s) saved · Total: $" . number_format($totalSaved, 2);
 

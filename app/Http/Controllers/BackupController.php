@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\TelegramNotifier;
 use Symfony\Component\Process\Process;
 
 class BackupController extends Controller
@@ -62,9 +63,42 @@ class BackupController extends Controller
         $process->setTimeout(300);
         $process->run();
 
+        $user = auth()->user()->name ?? 'unknown';
+        $time = now()->format('Y-m-d H:i:s A');
+
         if (!$process->isSuccessful()) {
-            return back()->with('error', 'Backup failed: ' . $process->getErrorOutput());
+            // remove empty/partial file left by a failed dump
+            if (file_exists($path)) {
+                @unlink($path);
+            }
+
+            // never leak the DB password into Telegram or the page
+            $error = $process->getErrorOutput();
+            if (!empty($db['password'])) {
+                $error = str_replace($db['password'], '******', $error);
+            }
+
+            TelegramNotifier::send(
+                "❌ <b>Database backup FAILED</b>\n" .
+                "Database Name: <code>" . e($db['database']) . "</code>\n" .
+                "Backup By: " . e($user) . "\n" .
+                "Error: " . e(\Illuminate\Support\Str::limit($error, 500)) . "\n" .
+                "Date/Time: {$time}"
+            );
+
+            return back()->with('error', 'Backup failed: ' . $error);
         }
+
+        $size = round(filesize($path) / 1024, 1) . ' KB';
+
+        TelegramNotifier::send(
+            "✅ <b>Database backup completed</b>\n" .
+            "Database Name: <code>" . e($db['database']) . "</code>\n" .
+            "File Name: <code>" . e($filename) . "</code>\n" .
+            "File Size: {$size}\n" .
+            "Backup By: " . e($user) . "\n" .
+            "Date/Time: {$time}"
+        );
 
         return redirect()->route('backup.index')
             ->with('success', 'Backup saved to ' . $dir . '\\' . $filename);
@@ -74,12 +108,22 @@ class BackupController extends Controller
     {
         $path = $this->backupDir() . '/' . basename($file);
         abort_unless(file_exists($path), 404);
+
+        TelegramNotifier::send(
+            "⬇️ <b>Backup downloaded</b>\n" .
+            "File Name: <code>" . e(basename($file)) . "</code>\n" .
+            "Download By: " . e(auth()->user()->name ?? 'unknown') . "\n" .
+            "Date/Time: " . now()->format('Y-m-d H:i:s A')
+        );
+
         return response()->download($path);
     }
+
     public function deleteSelected(\Illuminate\Http\Request $request)
     {
         $names = $request->input('files', []);
         $count = 0;
+        $deleted = [];
 
         foreach ($names as $name) {
             $path = $this->backupDir() . '/' . basename($name);
@@ -88,18 +132,37 @@ class BackupController extends Controller
                 && str_ends_with($name, '.sql')
                 && file_exists($path)) {
                 @unlink($path);
+                $deleted[] = basename($name);
                 $count++;
             }
         }
 
+        if ($count > 0) {
+            TelegramNotifier::send(
+                "🗑 <b>{$count} backup file(s) deleted</b>\n" .
+                e(implode("\n", $deleted)) . "\n" .
+                "Deleted By: " . e(auth()->user()->name ?? 'unknown') . "\n" .
+                "Date/Time: " . now()->format('Y-m-d H:i:s A')
+            );
+        }
+
         return back()->with('success', $count . ' backup file(s) deleted.');
     }
+
     public function clear()
     {
         $files = glob($this->backupDir() . '/backup-*.sql');
 
         foreach ($files as $file) {
             @unlink($file);
+        }
+
+        if (count($files) > 0) {
+            TelegramNotifier::send(
+                "🗑 <b>All backups cleared (" . count($files) . " files)</b>\n" .
+                "Clear By: " . e(auth()->user()->name ?? 'unknown') . "\n" .
+                "Date/Time: " . now()->format('Y-m-d H:i:s')
+            );
         }
 
         return back()->with('success', count($files) . ' backup file(s) deleted.');

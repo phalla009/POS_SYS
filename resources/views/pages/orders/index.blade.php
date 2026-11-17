@@ -319,7 +319,7 @@
                             <th style="width:40px;text-align:center;"><input type="checkbox" id="selectAll" title="Select All"></th>
                         @endif
                         <th>#</th>
-                        <th>Order ID</th>
+                        <th>Invoice</th>
                         <th>Product</th>
                         <th>Quantity</th>
                         <th>Order Date</th>
@@ -329,18 +329,38 @@
                     </thead>
                     <tbody id="ordersTable">
                     @forelse ($orders as $order)
+                        @php
+                            // items ទាំងអស់ក្នុង invoice នេះ (pos_ref ដូចគ្នា) ឬ order តែមួយ
+                            $rowItems = $order->pos_ref
+                                ? ($invoiceGroups[$order->pos_ref] ?? collect([$order]))
+                                : collect([$order]);
+                            $invoiceTotal = $rowItems->sum('total_amount');
+                            $invoiceQty   = $rowItems->sum('quantity');
+                            $firstName    = $rowItems->first()->product->name ?? 'N/A';
+                        @endphp
                         <tr>
                             @if(auth()->check() && auth()->user()->role && auth()->user()->role->role_name === 'Admin')
-                                <td style="text-align:center;"><input type="checkbox" class="row-checkbox" value="{{ $order->id }}"></td>
+                                <td style="text-align:center;">
+                                    <input type="checkbox" class="row-checkbox" value="{{ $order->id }}">
+                                </td>
                             @endif
                             <td data-label="No">#{{ $loop->iteration + ($orders->currentPage() - 1) * $orders->perPage() }}</td>
-                            <td data-label="Order ID" style="color: black; font-weight: 600;">{{ $order->order_number }}</td>
-                            <td data-label="Product">{{ $order->product->name ?? 'N/A' }}</td>
-                            <td data-label="Quantity">{{ $order->quantity }}</td>
+                            <td data-label="Invoice" style="color: black; font-weight: 600;">
+                                {{ $order->pos_ref ?? $order->order_number }}
+                            </td>
+                            <td data-label="Product">
+                                {{ $firstName }}
+                                @if ($rowItems->count() > 1)
+                                    <small style="color:#6b7280;">+{{ $rowItems->count() - 1 }} more</small>
+                                @endif
+                            </td>
+                            <td data-label="Quantity">{{ $invoiceQty }}</td>
                             <td data-label="Order Date">
                                 {{ $order->created_at?->timezone('Asia/Phnom_Penh')->format('d-M-Y h:i A') ?? 'N/A' }}
                             </td>
-                            <td data-label="Paid Amount" style="color: #2e7d32; font-weight: 600;">${{ number_format($order->total_amount ?? 0, 2) }}</td>
+                            <td data-label="Paid Amount" style="color: #2e7d32; font-weight: 600;">
+                                ${{ number_format($invoiceTotal, 2) }}
+                            </td>
                             <td data-label="Actions">
                                 <div class="action-buttons">
                                     <a href="{{ route('orders.show', $order->id) }}"
@@ -407,7 +427,7 @@
                 <div class="delete-modal-icon"><i class="fas fa-trash-alt"></i></div>
                 <button class="delete-modal-close" id="bulkDeleteModalClose" aria-label="Close">&times;</button>
                 <h3>Delete Selected Orders?</h3>
-                <p>You are about to delete <strong id="bulkDeleteCount">0</strong> order(s). This action <strong>cannot be undone.</strong></p>
+                <p>You are about to delete <strong id="bulkDeleteCount">0</strong> invoice(s). This action <strong>cannot be undone.</strong></p>
                 <form id="bulkDeleteForm" method="POST" action="{{ route('orders.bulkDestroy') }}">
                     @csrf @method('DELETE')
                     <div id="bulkDeleteInputs"></div>

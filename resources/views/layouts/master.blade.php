@@ -219,6 +219,32 @@
                 transform: scale(1);
             }
         }
+        .order-badge {
+            background: #ff5a05;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+        }
+
+        /* keep the badge visible when the sidebar is collapsed */
+        .sidebar.collapsed .sidebar-menu a span.order-badge {
+            display: inline-flex !important;
+            position: absolute;
+            top: 4px;
+            right: 14px;
+            margin-left: 0;
+            min-width: 18px;
+            height: 18px;
+            font-size: 10px;
+        }
     </style>
 </head>
 <body>
@@ -274,10 +300,20 @@
                 <li><a href="{{ route('customers.index') }}"><span class="icon"><i class="fas fa-users"></i></span> <span>Customers</span></a></li>
             @endif
 
-            @if(Auth::user()->hasPermission('orders'))
-                <li><a href="{{ route('orders.index') }}"><span class="icon"><i class="fas fa-shopping-cart"></i></span> <span>Orders</span></a></li>
-            @endif
-
+{{--            @if(Auth::user()->hasPermission('orders'))--}}
+{{--                <li><a href="{{ route('orders.index') }}"><span class="icon"><i class="fas fa-shopping-cart"></i></span> <span>Orders</span></a></li>--}}
+{{--            @endif--}}
+                @if(Auth::user()->hasPermission('orders'))
+                    <li>
+                        <a href="{{ route('orders.index') }}">
+                            <span class="icon"><i class="fas fa-shopping-cart"></i></span>
+                            <span>Orders</span>
+                            @if($todayOrderCount > 0)
+                                <span class="order-badge">{{ $todayOrderCount > 99 ? '99+' : $todayOrderCount }}</span>
+                            @endif
+                        </a>
+                    </li>
+                @endif
             @if(Auth::user()->hasPermission('inventory'))
                 <li><a href="{{ route('inventory-items.index') }}"><span class="icon"><i class="fas fa-boxes"></i></span> <span>Inventory</span></a></li>
             @endif

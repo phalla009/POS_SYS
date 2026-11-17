@@ -122,4 +122,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
     Route::get('/shop/{id}', [ShopController::class, 'show'])->name('shop.show');
 
+    Route::post('/transactions/telegram-report', [TransactionController::class, 'sendTelegram'])
+        ->name('transactions.telegram');
+
 });

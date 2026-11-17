@@ -14,14 +14,91 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      */
+//    public function index(Request $request)
+//    {
+//        $query = Order::with(['customer', 'product'])
+//            ->withSum('payments', 'amount');
+//
+//        // customer_id/status/search remain supported as query params (e.g. the
+//        // "View Pending" banner link below still filters by status) even
+//        // though their standalone filter inputs were removed from the UI.
+//        if ($request->filled('customer_id')) {
+//            $query->where('customer_id', $request->customer_id);
+//        }
+//
+//        if ($request->filled('status')) {
+//            $query->where('status', $request->status);
+//        }
+//
+//        if ($request->filled('search')) {
+//            $search = $request->search;
+//            $query->where(function ($q) use ($search) {
+//                $q->where('order_number', 'like', "%{$search}%")
+//                  ->orWhereHas('customer', function ($q2) use ($search) {
+//                      $q2->where('name', 'like', "%{$search}%");
+//                  });
+//            });
+//        }
+//
+//        // Date range filter: defaults to "today → today" whenever the URL
+//        // doesn't explicitly carry date_from/date_to (fresh page load, sidebar
+//        // links, etc). If the user submits the filter form with both date
+//        // fields cleared, we show orders across all dates. Either end can be
+//        // left open to make it a "from X onward" or "up to X" filter.
+//        if ($request->has('date_from') || $request->has('date_to')) {
+//            $dateFrom = $request->filled('date_from') ? $request->date_from : null;
+//            $dateTo   = $request->filled('date_to') ? $request->date_to : null;
+//
+//            if ($dateFrom) {
+//                $query->whereDate('order_date', '>=', $dateFrom);
+//            }
+//            if ($dateTo) {
+//                $query->whereDate('order_date', '<=', $dateTo);
+//            }
+//        } else {
+//            $today    = now()->format('Y-m-d');
+//            $dateFrom = $today;
+//            $dateTo   = $today;
+//            $query->whereDate('order_date', $today);
+//        }
+//
+//        // Count pending orders, and sum quantity/price, across ALL matching
+//        // results (not just current page) before pagination limits the query.
+//        $pendingCount = (clone $query)->where('status', 'pending')->count();
+//
+//        // "Total Invoice" = number of SALES, not number of order rows. A POS
+//        // checkout with 3 cart items creates 3 `orders` rows sharing one
+//        // `pos_ref`, and those should count as 1 invoice, not 3. Orders
+//        // created via the normal "Add New Order" flow have pos_ref = null,
+//        // so each one is its own invoice (grouped by its own id).
+//        // Only id/pos_ref are pulled to keep this cheap even with eager
+//        // loads (with/withSum) already attached to $query.
+//        $totalInvoice = (clone $query)
+//            ->get(['id', 'pos_ref'])
+//            ->unique(fn ($order) => $order->pos_ref ?? $order->id)
+//            ->count();
+//
+//        $totalQty = (clone $query)->sum('quantity');
+//
+//        // These three are independent of the date-range filter above — they
+//        // always reflect today, the current calendar month, and all time.
+//        $dailyTotal   = Order::whereDate('order_date', now()->format('Y-m-d'))->sum('total_amount');
+//        $monthlyTotal = Order::whereYear('order_date', now()->year)
+//                              ->whereMonth('order_date', now()->month)
+//                              ->sum('total_amount');
+//        $grandTotal   = Order::sum('total_amount');
+//
+//        $orders = $query->latest()->paginate(10)->withQueryString();
+//
+//        return view('pages/orders.index', compact(
+//            'orders', 'pendingCount', 'dateFrom', 'dateTo',
+//            'totalInvoice', 'totalQty', 'dailyTotal', 'monthlyTotal', 'grandTotal'
+//        ));
+//    }
     public function index(Request $request)
     {
-        $query = Order::with(['customer', 'product'])
-            ->withSum('payments', 'amount');
+        $query = Order::query();
 
-        // customer_id/status/search remain supported as query params (e.g. the
-        // "View Pending" banner link below still filters by status) even
-        // though their standalone filter inputs were removed from the UI.
         if ($request->filled('customer_id')) {
             $query->where('customer_id', $request->customer_id);
         }
@@ -34,17 +111,13 @@ class OrderController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('order_number', 'like', "%{$search}%")
-                  ->orWhereHas('customer', function ($q2) use ($search) {
-                      $q2->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('customer', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
-        // Date range filter: defaults to "today → today" whenever the URL
-        // doesn't explicitly carry date_from/date_to (fresh page load, sidebar
-        // links, etc). If the user submits the filter form with both date
-        // fields cleared, we show orders across all dates. Either end can be
-        // left open to make it a "from X onward" or "up to X" filter.
+        // Date range filter (default: today → today)
         if ($request->has('date_from') || $request->has('date_to')) {
             $dateFrom = $request->filled('date_from') ? $request->date_from : null;
             $dateTo   = $request->filled('date_to') ? $request->date_to : null;
@@ -62,17 +135,8 @@ class OrderController extends Controller
             $query->whereDate('order_date', $today);
         }
 
-        // Count pending orders, and sum quantity/price, across ALL matching
-        // results (not just current page) before pagination limits the query.
         $pendingCount = (clone $query)->where('status', 'pending')->count();
 
-        // "Total Invoice" = number of SALES, not number of order rows. A POS
-        // checkout with 3 cart items creates 3 `orders` rows sharing one
-        // `pos_ref`, and those should count as 1 invoice, not 3. Orders
-        // created via the normal "Add New Order" flow have pos_ref = null,
-        // so each one is its own invoice (grouped by its own id).
-        // Only id/pos_ref are pulled to keep this cheap even with eager
-        // loads (with/withSum) already attached to $query.
         $totalInvoice = (clone $query)
             ->get(['id', 'pos_ref'])
             ->unique(fn ($order) => $order->pos_ref ?? $order->id)
@@ -80,22 +144,41 @@ class OrderController extends Controller
 
         $totalQty = (clone $query)->sum('quantity');
 
-        // These three are independent of the date-range filter above — they
-        // always reflect today, the current calendar month, and all time.
         $dailyTotal   = Order::whereDate('order_date', now()->format('Y-m-d'))->sum('total_amount');
         $monthlyTotal = Order::whereYear('order_date', now()->year)
-                              ->whereMonth('order_date', now()->month)
-                              ->sum('total_amount');
+            ->whereMonth('order_date', now()->month)
+            ->sum('total_amount');
         $grandTotal   = Order::sum('total_amount');
 
-        $orders = $query->latest()->paginate(10)->withQueryString();
+        // 1 order តំណាងក្នុងមួយ invoice (id ទាបបំផុត)
+        $representativeIds = (clone $query)->toBase()
+            ->selectRaw('MIN(id)')
+            ->groupByRaw("COALESCE(pos_ref, CONCAT('single-', id))");
+
+        $orders = Order::with(['customer', 'product'])
+            ->withSum('payments', 'amount')
+            ->whereIn('id', $representativeIds)
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        // items ទាំងអស់នៃ invoice ក្នុង page នេះ
+        $refs = $orders->getCollection()->pluck('pos_ref')->filter()->unique();
+        $invoiceGroups = $refs->isEmpty()
+            ? collect()
+            : Order::with('product')
+                ->withSum('payments', 'amount')
+                ->whereIn('pos_ref', $refs)
+                ->orderBy('id')
+                ->get()
+                ->groupBy('pos_ref');
 
         return view('pages/orders.index', compact(
             'orders', 'pendingCount', 'dateFrom', 'dateTo',
-            'totalInvoice', 'totalQty', 'dailyTotal', 'monthlyTotal', 'grandTotal'
+            'totalInvoice', 'totalQty', 'dailyTotal', 'monthlyTotal', 'grandTotal',
+            'invoiceGroups'
         ));
     }
-
     /**
      * Show the form for creating a new resource.
      */
@@ -162,13 +245,27 @@ class OrderController extends Controller
     /**
      * Display the specified resource.
      */
+//    public function show(string $id)
+//    {
+//        $order = Order::with(['customer', 'product'])
+//                    ->withSum('payments', 'amount')
+//                    ->findOrFail($id);
+//
+//        return view('pages/orders.show', compact('order'));
+//    }
     public function show(string $id)
     {
         $order = Order::with(['customer', 'product'])
-                    ->withSum('payments', 'amount')
-                    ->findOrFail($id);
+            ->withSum('payments', 'amount')
+            ->findOrFail($id);
 
-        return view('pages/orders.show', compact('order'));
+        // ✅ orders ទាំងអស់ក្នុង invoice តែមួយ
+        $items = $order->pos_ref
+            ? Order::with('product')->withSum('payments', 'amount')
+                ->where('pos_ref', $order->pos_ref)->orderBy('id')->get()
+            : collect([$order]);
+
+        return view('pages/orders.show', compact('order', 'items'));
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Models\Order;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Services\TelegramNotifier;
 
 class TransactionController extends Controller
 {
@@ -125,5 +126,83 @@ class TransactionController extends Controller
             'transactions', 'methods', 'dateFrom', 'dateTo',
             'totalTransactions', 'totalIncome', 'totalExpense', 'netBalance'
         ));
+    }
+    public function sendTelegram(Request $request)
+    {
+        $from = $request->filled('date_from') ? $request->date_from : null;
+        $to   = $request->filled('date_to')   ? $request->date_to   : null;
+
+        $toKhr = fn ($usd) => round(($usd * 4000) / 100) * 100;
+
+        // ── Income ──
+        $orders = Order::with('product')
+            ->where('status', 'completed')
+            ->when($from, fn ($q) => $q->whereDate('order_date', '>=', $from))
+            ->when($to,   fn ($q) => $q->whereDate('order_date', '<=', $to))
+            ->get();
+
+        $revenue  = (float) $orders->sum('total_amount');
+        $qty      = (int) $orders->sum('quantity');
+        $invoices = $orders->map(fn ($o) => $o->pos_ref ?? $o->order_number)->unique()->count();
+
+        $subtotal = $orders->sum(fn ($o) => (float) optional($o->product)->price * $o->quantity);
+        $discount = max(0, round($subtotal - $revenue, 2));
+
+        $cashUsd = (float) $orders->where('payment_method', 'cash')->sum('total_amount');
+        $bankUsd = (float) $orders->where('payment_method', 'khqr')->sum('total_amount');
+
+        // ── Expense ──
+        $expense = (float) InventoryItem::query()
+            ->when($from, fn ($q) => $q->whereDate('created_at', '>=', $from))
+            ->when($to,   fn ($q) => $q->whereDate('created_at', '<=', $to))
+            ->sum('price');
+
+        $net = $revenue - $expense;
+
+        // ── Top items ──
+        $top = $orders
+            ->groupBy(fn ($o) => optional($o->product)->name ?? 'Item')
+            ->map(fn ($g) => $g->sum('quantity'))
+            ->sortDesc()
+            ->take(5);
+
+        $topText = $top->isEmpty()
+            ? "-\n"
+            : $top->map(fn ($q, $name) => '• ' . e($name) . " x{$q}")->implode("\n") . "\n";
+
+        // ── Message ──
+        $line  = '━━━━━━━━━━━━━━━━━━';
+        $line2 = '──────────────────';
+        $fmtD  = fn ($d) => $d ? \Carbon\Carbon::parse($d)->format('d-m-Y') : 'All';
+
+        $msg  = "📊 <b>DAILY SUMMARY REPORT</b>\n";
+        $msg .= "{$line}\n";
+        $msg .= "📅 From: {$fmtD($from)} To: {$fmtD($to)}\n";
+        $msg .= "{$line}\n";
+        $msg .= "🧾 Total Invoice: {$invoices}\n";
+        $msg .= "📦 Total Qty: {$qty}\n";
+        $msg .= "🏷️ Total Discount: $" . number_format($discount, 2) . "\n";
+        $msg .= "💰 Total Revenue (USD): $" . number_format($revenue, 2) . "\n";
+        $msg .= "🇰🇭 Total Revenue (KHR): ៛" . number_format($toKhr($revenue)) . "\n";
+        $msg .= "{$line2}\n";
+        $msg .= "💵 Pay by Cash: ៛" . number_format($toKhr($cashUsd)) . "\n";
+        $msg .= "🏦 Pay by Bank / KHQR: $" . number_format($bankUsd, 2) . "\n";
+        $msg .= "{$line2}\n";
+        $msg .= "📉 Total Expense (USD): $" . number_format($expense, 2) . "\n";
+        $msg .= "🇰🇭 Total Expense (KHR): ៛" . number_format($toKhr($expense)) . "\n";
+        $msg .= "📈 Net Profit (USD): " . ($net < 0 ? '-' : '') . "$" . number_format(abs($net), 2) . "\n";
+        $msg .= "🇰🇭 Net Profit (KHR): " . ($net < 0 ? '-' : '') . "៛" . number_format(abs($toKhr($net))) . "\n";
+        $msg .= "{$line}\n";
+        $msg .= "🏆 <b>TOP ITEMS:</b>\n";
+        $msg .= $topText;
+        $msg .= "{$line}\n";
+        $msg .= "🕒 " . now()->format('d-m-Y h:i A');
+
+        $ok = TelegramNotifier::send($msg);
+
+        return back()->with(
+            $ok ? 'success' : 'error',
+            $ok ? 'Summary report sent to Telegram.' : 'Failed to send to Telegram. Check storage/logs/laravel.log.'
+        );
     }
 }
